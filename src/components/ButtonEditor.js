@@ -1,5 +1,6 @@
 // components/ButtonEditor.js
 import React from 'react';
+import styles from './ButtonEditor.module.css';
 
 const ButtonEditor = ({ index, buttonIndex, button, cards, setCards, totalButtons }) => {
   const updateButtonField = (field, value) => {
@@ -18,13 +19,13 @@ const ButtonEditor = ({ index, buttonIndex, button, cards, setCards, totalButton
   };
 
   return (
-    <div className="p-3 border rounded mb-2 bg-white">
-      <div className="flex justify-between mb-2">
-        <span className="font-medium">Botão {buttonIndex + 1}</span>
+    <div className={styles.buttonContainer}>
+      <div className={styles.buttonHeader}>
+        <span className={styles.buttonTitle}>Botão {buttonIndex + 1}</span>
         {totalButtons > 1 && (
           <button 
             onClick={removeButton}
-            className="text-red-500 text-sm"
+            className={styles.removeButton}
             aria-label="Remover botão"
           >
             Remover
@@ -32,10 +33,10 @@ const ButtonEditor = ({ index, buttonIndex, button, cards, setCards, totalButton
         )}
       </div>
       
-      <div className="mb-2">
-        <label className="block text-sm font-medium mb-1">Tipo de Botão</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Tipo de Botão</label>
         <select 
-          className="w-full p-2 border rounded"
+          className={styles.select}
           value={button.type}
           onChange={(e) => updateButtonField('type', e.target.value)}
         >
@@ -45,11 +46,11 @@ const ButtonEditor = ({ index, buttonIndex, button, cards, setCards, totalButton
         </select>
       </div>
       
-      <div className="mb-2">
-        <label className="block text-sm font-medium mb-1">Texto do Botão</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Texto do Botão</label>
         <input 
           type="text"
-          className="w-full p-2 border rounded"
+          className={styles.input}
           value={button.text}
           onChange={(e) => updateButtonField('text', e.target.value)}
           placeholder="Texto (máximo 20 caracteres)"
@@ -58,11 +59,11 @@ const ButtonEditor = ({ index, buttonIndex, button, cards, setCards, totalButton
       </div>
       
       {button.type === 'URL' && (
-        <div className="mb-2">
-          <label className="block text-sm font-medium mb-1">URL</label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>URL</label>
           <input 
             type="text"
-            className="w-full p-2 border rounded"
+            className={styles.input}
             value={button.url || ''}
             onChange={(e) => updateButtonField('url', e.target.value)}
             placeholder="https://example.com"
@@ -71,25 +72,25 @@ const ButtonEditor = ({ index, buttonIndex, button, cards, setCards, totalButton
       )}
       
       {button.type === 'QUICK_REPLY' && (
-        <div className="mb-2">
-          <label className="block text-sm font-medium mb-1">Payload (opcional)</label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Payload (opcional)</label>
           <input 
             type="text"
-            className="w-full p-2 border rounded"
+            className={styles.input}
             value={button.payload || ''}
             onChange={(e) => updateButtonField('payload', e.target.value)}
             placeholder="Texto que será enviado quando o botão for clicado"
           />
-          <p className="text-xs text-gray-500 mt-1">Se vazio, o texto do botão será usado como payload</p>
+          <p className={styles.helpText}>Se vazio, o texto do botão será usado como payload</p>
         </div>
       )}
       
       {button.type === 'PHONE_NUMBER' && (
-        <div className="mb-2">
-          <label className="block text-sm font-medium mb-1">Número de Telefone</label>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Número de Telefone</label>
           <input 
             type="text"
-            className="w-full p-2 border rounded"
+            className={styles.input}
             value={button.phoneNumber || ''}
             onChange={(e) => updateButtonField('phoneNumber', e.target.value)}
             placeholder="+5521999999999"

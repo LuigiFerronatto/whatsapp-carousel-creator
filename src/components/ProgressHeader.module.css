@@ -1,0 +1,23 @@
+/* ProgressHeader.module.css */
+.progressContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .step {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .activeStep {
+    color: var(--blip-action);
+    font-weight: var(--fw-bold);
+  }
+  
+  .separator {
+    width: 2.5rem;
+    height: 0.25rem;
+    background-color: var(--cloud);
+  }

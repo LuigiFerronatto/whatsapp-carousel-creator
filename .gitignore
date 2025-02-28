@@ -1,3 +1,4 @@
+# Anteriores
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -21,3 +22,98 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Novos itens adicionados
+
+# Credenciais e arquivos sensíveis
+.env
+.env.development
+.env.staging
+.env.production
+*.env
+*.key
+*.pem
+
+# Arquivos de configuração de IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.history/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependências em cache
+.npm
+.eslintcache
+.yarn-cache/
+
+# Configurações de sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Pacotes e compilações
+*.tgz
+*.zip
+*.tar.gz
+*.tar
+
+# Arquivos de backup
+*.bak
+*.backup
+*.swp
+*~
+
+# Azure e Terraform específicos
+.azure/
+*.tfstate
+*.tfstate.*
+.terraform/
+.terragrunt-cache/
+
+# Arquivos temporários
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Configurações específicas de frameworks
+.next/
+.nuxt/
+.svelte-kit/
+.gatsby/
+
+# Arquivos de desenvolvimento local
+*.local.json
+*.local.yml
+*.local.yaml
+
+# Chaves SSH
+id_rsa
+id_ed25519
+*.pub
+
+# Arquivos de configuração de deploy
+.vercel
+.netlify
+.firebase/
+.cloud-build/
+
+# Arquivos de cache do compilador
+*.tsbuildinfo
+*.cache
+
+# Backups do NPM
+npm-shrinkwrap.json
+package-lock.json
+yarn.lock

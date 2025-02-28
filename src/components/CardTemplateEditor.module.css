@@ -1,0 +1,60 @@
+/* CardTemplateEditor.module.css */
+.cardContainer {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--mercury);
+    border-radius: 4px;
+    background-color: var(--box);
+  }
+  
+  .cardTitle {
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.5rem;
+  }
+  
+  .fileHandleInfo {
+    font-size: var(--fs-p3);
+    color: var(--dove-gray-2);
+    margin-bottom: 0.5rem;
+  }
+  
+  .formGroup {
+    margin-bottom: 0.75rem;
+  }
+  
+  .label {
+    display: block;
+    font-size: var(--fs-p2);
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.25rem;
+  }
+  
+  .textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--mercury);
+    border-radius: 4px;
+  }
+  
+  .characterCount {
+    font-size: var(--fs-p3);
+    color: var(--dove-gray-2);
+    margin-top: 0.25rem;
+  }
+  
+  .buttonsSection {
+    margin-bottom: 0.75rem;
+  }
+  
+  .addButton {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px dashed var(--mercury);
+    border-radius: 4px;
+    color: var(--blip-action);
+    background-color: transparent;
+  }
+  
+  .addButton:hover {
+    background-color: var(--hover-light);
+  }

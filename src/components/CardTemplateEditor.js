@@ -1,19 +1,20 @@
 // components/CardTemplateEditor.js
 import React from 'react';
 import ButtonEditor from './ButtonEditor';
+import styles from './CardTemplateEditor.module.css';
 
 const CardTemplateEditor = ({ index, card, cards, setCards }) => {
   return (
-    <div className="mb-6 p-4 border rounded bg-gray-50">
-      <h3 className="font-bold mb-2">Card {index + 1}</h3>
+    <div className={styles.cardContainer}>
+      <h3 className={styles.cardTitle}>Card {index + 1}</h3>
       {card.fileHandle && (
-        <div className="text-xs text-gray-500 mb-2">File Handle: {card.fileHandle}</div>
+        <div className={styles.fileHandleInfo}>File Handle: {card.fileHandle}</div>
       )}
       
-      <div className="mb-3">
-        <label className="block text-sm font-medium mb-1">Texto do Card</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Texto do Card</label>
         <textarea 
-          className="w-full p-2 border rounded"
+          className={styles.textarea}
           rows="2"
           value={card.bodyText}
           onChange={(e) => {
@@ -24,11 +25,11 @@ const CardTemplateEditor = ({ index, card, cards, setCards }) => {
           placeholder="Texto que aparecerá no card (máximo 160 caracteres)"
           maxLength={160}
         ></textarea>
-        <div className="text-xs text-gray-500 mt-1">{card.bodyText.length}/160 caracteres</div>
+        <div className={styles.characterCount}>{card.bodyText.length}/160 caracteres</div>
       </div>
       
-      <div className="mb-3">
-        <label className="block text-sm font-medium mb-1">Botões (máximo 2)</label>
+      <div className={styles.buttonsSection}>
+        <label className={styles.label}>Botões (máximo 2)</label>
         
         {card.buttons.map((button, buttonIndex) => (
           <ButtonEditor 
@@ -52,7 +53,7 @@ const CardTemplateEditor = ({ index, card, cards, setCards }) => {
               });
               setCards(newCards);
             }}
-            className="w-full p-2 border border-dashed rounded text-blue-500 hover:bg-blue-50"
+            className={styles.addButton}
           >
             + Adicionar Botão
           </button>

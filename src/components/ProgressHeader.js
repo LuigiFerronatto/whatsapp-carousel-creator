@@ -1,18 +1,19 @@
 // components/ProgressHeader.js
 import React from 'react';
+import styles from './ProgressHeader.module.css';
 
 const ProgressHeader = ({ step }) => {
   return (
-    <div className="flex justify-between items-center mt-4">
-      <div className={`flex-1 text-center ${step >= 1 ? 'text-blue-600 font-bold' : ''}`}>
+    <div className={styles.progressContainer}>
+      <div className={`${styles.step} ${step >= 1 ? styles.activeStep : ''}`}>
         1. Upload de Arquivos
       </div>
-      <div className="w-10 h-1 bg-gray-300"></div>
-      <div className={`flex-1 text-center ${step >= 2 ? 'text-blue-600 font-bold' : ''}`}>
+      <div className={styles.separator}></div>
+      <div className={`${styles.step} ${step >= 2 ? styles.activeStep : ''}`}>
         2. Criação do Template
       </div>
-      <div className="w-10 h-1 bg-gray-300"></div>
-      <div className={`flex-1 text-center ${step >= 3 ? 'text-blue-600 font-bold' : ''}`}>
+      <div className={styles.separator}></div>
+      <div className={`${styles.step} ${step >= 3 ? styles.activeStep : ''}`}>
         3. Finalização
       </div>
     </div>

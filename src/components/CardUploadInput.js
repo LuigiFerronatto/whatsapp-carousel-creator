@@ -1,24 +1,25 @@
 // components/CardUploadInput.js
 import React from 'react';
+import styles from './CardUploadInput.module.css';
 
 const CardUploadInput = ({ index, card, updateCard }) => {
   return (
-    <div className="mb-6 p-4 border rounded bg-gray-50">
-      <h3 className="font-bold mb-2">Card {index + 1}</h3>
+    <div className={styles.cardContainer}>
+      <h3 className={styles.cardTitle}>Card {index + 1}</h3>
       
-      <div className="mb-3">
-        <label className="block text-sm font-medium mb-1">URL do Arquivo</label>
-        <div className="flex">
+      <div className={styles.formGroup}>
+        <label className={styles.label}>URL do Arquivo</label>
+        <div className={styles.inputGroup}>
           <input 
             type="text" 
-            className="flex-1 p-2 border rounded-l"
+            className={styles.input}
             value={card.fileUrl}
             onChange={(e) => updateCard(index, 'fileUrl', e.target.value)}
             placeholder="https://example.com/image.jpg"
           />
           <button 
             type="button"
-            className="bg-gray-200 text-gray-700 p-2 rounded-r text-sm"
+            className={styles.testButton}
             onClick={() => {
               const testUrls = [
                 "https://www.yamaha-motor.com.br/ccstore/v1/images/?source=/file/v4553622368473064581/products/30115.301151.png",
@@ -32,13 +33,13 @@ const CardUploadInput = ({ index, card, updateCard }) => {
             Testar URL
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-1">URL pública da imagem/vídeo que será exibida no carrossel</p>
+        <p className={styles.helpText}>URL pública da imagem/vídeo que será exibida no carrossel</p>
       </div>
       
-      <div className="mb-3">
-        <label className="block text-sm font-medium mb-1">Tipo do Arquivo</label>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Tipo do Arquivo</label>
         <select 
-          className="w-full p-2 border rounded"
+          className={styles.select}
           value={card.fileType}
           onChange={(e) => updateCard(index, 'fileType', e.target.value)}
         >

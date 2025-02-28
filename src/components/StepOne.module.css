@@ -1,0 +1,143 @@
+/* StepOne.module.css */
+.container {
+    padding: 1.5rem;
+    background-color: var(--snow);
+    border-radius: 0.5rem;
+    box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+  }
+  
+  .stepTitle {
+    font-size: var(--fs-h4);
+    font-weight: var(--fw-bold);
+    margin-bottom: 1rem;
+  }
+  
+  .formGroup {
+    margin-bottom: 1rem;
+  }
+  
+  .label {
+    display: block;
+    font-size: var(--fs-p2);
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.25rem;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--mercury);
+    border-radius: 4px;
+  }
+  
+  .helpText {
+    font-size: var(--fs-p3);
+    color: var(--dove-gray-2);
+    margin-top: 0.25rem;
+  }
+  
+  .cardControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .buttonGroup {
+    display: flex;
+  }
+  
+  .removeButton {
+    padding: 0.25rem 0.5rem;
+    background-color: var(--pomegranate);
+    color: var(--alabaster);
+    border-radius: 4px;
+    margin-right: 0.5rem;
+  }
+  
+  .removeButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .addButton {
+    padding: 0.25rem 0.5rem;
+    background-color: var(--mountain-meadow);
+    color: var(--alabaster);
+    border-radius: 4px;
+  }
+  
+  .addButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .submitButton {
+    margin-top: 1.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--blip-action);
+    color: var(--alabaster);
+    border-radius: 4px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .submitButton:hover {
+    background-color: var(--blip-dark);
+  }
+  
+  .submitButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .loadingIcon {
+    animation: spin 1s linear infinite;
+    margin-right: 0.75rem;
+    margin-left: -0.25rem;
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .uploadSummary {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--select-bg);
+    border-radius: 4px;
+    border: 1px solid var(--hover-light);
+  }
+  
+  .summaryTitle {
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.5rem;
+  }
+  
+  .summaryList {
+    list-style-type: disc;
+    margin-left: 1.25rem;
+  }
+  
+  .summaryItem {
+    font-size: var(--fs-p2);
+  }
+  
+  .successStatus {
+    color: var(--jewel);
+    font-weight: var(--fw-bold);
+  }
+  
+  .simulatedStatus {
+    color: var(--chilean-fire);
+    font-weight: var(--fw-bold);
+  }

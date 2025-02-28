@@ -1,0 +1,47 @@
+/* ButtonEditor.module.css */
+.buttonContainer {
+    padding: 0.75rem;
+    border: 1px solid var(--mercury);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    background-color: var(--snow);
+  }
+  
+  .buttonHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .buttonTitle {
+    font-weight: var(--fw-bold);
+  }
+  
+  .removeButton {
+    color: var(--milano-red);
+    font-size: var(--fs-p3);
+  }
+  
+  .formGroup {
+    margin-bottom: 0.5rem;
+  }
+  
+  .label {
+    display: block;
+    font-size: var(--fs-p2);
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.25rem;
+  }
+  
+  .input, .select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--mercury);
+    border-radius: 4px;
+  }
+  
+  .helpText {
+    font-size: var(--fs-p3);
+    color: var(--dove-gray-2);
+    margin-top: 0.25rem;
+  }

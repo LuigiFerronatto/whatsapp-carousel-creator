@@ -1,9 +1,10 @@
-// Main Component
+// WhatsAppCarouselCreator.js
 import React, { useState } from 'react';
 import StepOne from './components/StepOne';
 import StepTwo from './components/StepTwo';
 import StepThree from './components/StepThree';
 import ProgressHeader from './components/ProgressHeader';
+import styles from './WhatsAppCarouselCreator.module.css';
 
 const WhatsAppCarouselCreator = () => {
   const [step, setStep] = useState(1);
@@ -571,9 +572,9 @@ const WhatsAppCarouselCreator = () => {
   };
   
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-center">Criador de Carrossel para WhatsApp</h1>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Criador de Carrossel para WhatsApp</h1>
         <ProgressHeader step={step} />
       </div>
       

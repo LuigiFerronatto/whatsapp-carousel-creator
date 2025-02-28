@@ -1,0 +1,22 @@
+/* StatusMessage.module.css */
+.errorContainer {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--cinderella);
+    color: var(--milano-red);
+    border-radius: 4px;
+    border: 1px solid var(--geraldine);
+  }
+  
+  .successContainer {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--magic-mint);
+    color: var(--jewel);
+    border-radius: 4px;
+    border: 1px solid var(--shamrock);
+  }
+  
+  .messageTitle {
+    font-weight: var(--fw-bold);
+  }

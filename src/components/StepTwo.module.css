@@ -1,0 +1,95 @@
+/* StepTwo.module.css */
+.container {
+    padding: 1.5rem;
+    background-color: var(--snow);
+    border-radius: 0.5rem;
+    box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+  }
+  
+  .stepTitle {
+    font-size: var(--fs-h4);
+    font-weight: var(--fw-bold);
+    margin-bottom: 1rem;
+  }
+  
+  .formGroup {
+    margin-bottom: 1rem;
+  }
+  
+  .label {
+    display: block;
+    font-size: var(--fs-p2);
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.25rem;
+  }
+  
+  .input, .select, .textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--mercury);
+    border-radius: 4px;
+  }
+  
+  .characterCount {
+    font-size: var(--fs-p3);
+    color: var(--dove-gray-2);
+    margin-top: 0.25rem;
+  }
+  
+  .buttonGroup {
+    margin-top: 1.5rem;
+    display: flex;
+  }
+  
+  .buttonSpace {
+    margin-left: 1rem;
+  }
+  
+  .backButton {
+    padding: 0.5rem 1rem;
+    background-color: var(--dove-gray);
+    color: var(--alabaster);
+    border-radius: 4px;
+    width: 50%;
+  }
+  
+  .backButton:hover {
+    background-color: var(--dove-gray-2);
+  }
+  
+  .nextButton {
+    padding: 0.5rem 1rem;
+    background-color: var(--blip-action);
+    color: var(--alabaster);
+    border-radius: 4px;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nextButton:hover {
+    background-color: var(--blip-dark);
+  }
+  
+  .nextButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .loadingIcon {
+    animation: spin 1s linear infinite;
+    margin-right: 0.75rem;
+    margin-left: -0.25rem;
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
