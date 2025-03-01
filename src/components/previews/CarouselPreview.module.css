@@ -6,7 +6,7 @@
   align-items: center;
   transition: all var(--transition-normal);
   overflow: hidden;
-  height: 600px;
+  height: 700px;
 }
 
 .expandButton:hover {
@@ -19,7 +19,7 @@
 
 .phoneMockup {
   width: 400px;
-  height: 600px;
+  height: 700px;
   background-color: #f7f7f7;
   border-radius: 24px;
   border: 8px solid #333;
@@ -95,9 +95,11 @@
 .chatWindow {
   flex: 1;
   background-color: #e5ddd5;
-  background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') no-repeat center center;
+  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+  background-repeat: no-repeat;
+  background-position: center;
   padding: 14px;
-  overflow-y: auto;
+  overflow: hidden; /* Impede rolagem no container principal */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -106,18 +108,29 @@
 
 .messageBodyText {
   background-color: white;
-  padding: 8px 12px;
-  border-radius: 0px 8px 8px 8px;
+  padding: 0.6rem;
+  border-radius: 0.65rem;
   font-size: 14px;
   line-height: 1.4;
   max-width: 90%;
   margin-bottom: 12px;
   position: relative;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  overflow: auto; /* Evita que conteúdo extra ultrapasse a borda */
+  display: flex;
+  flex-direction: column;
+  max-height: 5rem; /* Limita a altura, ajustando conforme necessário */
+  position: relative;
   word-wrap: break-word;
   align-self: flex-start;
+  display: -webkit-box;
+  -webkit-line-clamp: 8; /* Limita a 4 linhas */
+  -webkit-box-orient: vertical;
+  overflow-y: auto; /* Faz com que o texto role se ultrapassar */
+  max-height: 10rem;
 }
 
+/* Setinha do balão de mensagem */
 .messageBodyText::before {
   content: '';
   position: absolute;
@@ -125,10 +138,11 @@
   left: -8px;
   width: 0;
   height: 0;
-  border-left: 0px solid white;
-  border-right: 12px solid white;
+  border-left: 12px solid white;
+  border-right: 12px solid white; /* Cor de fundo do balão */
   border-top: 0 solid transparent;
   border-bottom: 12px solid transparent;
+  z-index: 2;
 }
 
 .carouselContainer {
@@ -138,14 +152,13 @@
   justify-content: center;
   position: relative;
   margin-bottom: 12px;
-  overflow: hidden; /* Garante que nada fique vazando */
 }
 
 .navButton {
   background-color: rgba(99, 99, 99, 0.8);
   border-radius: 100%;
   width: 25px;
-  height: 20px;
+  height: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,11 +168,10 @@
   color: #333;
   position: absolute;
   transition: background-color var(--transition-fast);
-  overflow: visible;
 }
 
 .navButton:hover {
-  background-color: rgb(90, 90, 90);
+  background-color: rgb(214, 34, 34);
 }
 
 .prevButton {
@@ -172,25 +184,29 @@
 
 .cardsContainer {
   width: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  overflow: visible; /* Permite que os cards adjacentes apareçam */
+  height: auto;
+  overflow: visible;
 }
 
 .cardsWrapper {
   display: flex;
   transition: transform var(--transition-normal);
   width: 100%;
-  gap: 0.5rem; /* Espaço entre os cards */
-  overflow-x: auto;
+  gap: 0.6rem; /* Espaço entre os cards */
+  overflow: visible;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   border-radius: 1rem 0 0 1rem;
+  
 }
 
 .card {
   flex: 0 0 80%; /* Mantém a largura do card ajustada */
   margin-right: 5%;
+  min-height: 225px; /* Garante que os cards tenham pelo menos esse tamanho */
+  max-height: auto;
+  max-width: 80%; /* Permite que cresça conforme o conteúdo */
   display: flex;
   flex-direction: column;
   background-color: white;
@@ -200,6 +216,7 @@
   scroll-snap-align: center;
   transition: transform var(--transition-normal);
   border-radius: 1rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 .cardHeader {
@@ -252,19 +269,22 @@
 }
 
 .cardBody {
-  padding: 14px;
-  flex: 1;
-  border-bottom: 1px solid #eee;
-  font-size: 16px;
+  padding: 12px;
+  flex-grow: 1;
+  font-size: 14px;
   line-height: 1.4;
   color: #111;
+  overflow: hidden;
 }
 
+
 .cardBody p {
-  width: 100%;
-  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 6rem; /* Aproximadamente 3 linhas */
   word-wrap: break-word;
-  word-break: break-word;
 }
 
 .placeholderText {
@@ -275,23 +295,41 @@
 .cardButtons {
   display: flex;
   flex-direction: column;
-  padding: 8px;
-  gap: 8px;
+  padding: 0.5rem;
+  gap: 0.25rem;
 }
-
 .cardButton {
-  padding: 8px;
-  background-color: #1a73e8;
-  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centraliza o texto horizontalmente */
+  gap: 8px; /* Espaço entre ícone e texto */
+  background-color: transparent;
+  color: rgb(18, 140, 126);
   border: none;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: 1rem;
+  font-size: 14px;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  width: 100%; /* Ocupa toda a largura do container */
+  text-align: center; /* Centraliza o texto */
+  transition: background-color 0.2s ease;
 }
 
 .cardButton:hover {
-  background-color: #1766ca;
+  background-color: rgba(0,0,0,0.05); /* Efeito de hover mais sutil */
+}
+
+.buttonIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(18, 140, 126);
+  width: 20px;
+  height: 20px;
+}
+
+.separator {
+  width: 100%;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .dots {

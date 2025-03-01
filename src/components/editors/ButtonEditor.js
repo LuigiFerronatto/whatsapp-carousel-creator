@@ -38,8 +38,8 @@ const ButtonEditor = ({ index, buttonIndex, button, updateButtonField, removeBut
           className={styles.input}
           value={button.text}
           onChange={(e) => updateButtonField(buttonIndex, 'text', e.target.value)}
-          placeholder="Texto (máximo 20 caracteres)"
-          maxLength={20}
+          placeholder="Texto (máximo 25 caracteres)"
+          maxLength={25}
         />
       </div>
       
@@ -51,7 +51,8 @@ const ButtonEditor = ({ index, buttonIndex, button, updateButtonField, removeBut
             className={styles.input}
             value={button.url || ''}
             onChange={(e) => updateButtonField(buttonIndex, 'url', e.target.value)}
-            placeholder="https://example.com"
+            placeholder="https://example.com (Maximum 2000 characters.)"
+            maxLength={2000}
           />
         </div>
       )}
@@ -79,6 +80,7 @@ const ButtonEditor = ({ index, buttonIndex, button, updateButtonField, removeBut
             value={button.phoneNumber || ''}
             onChange={(e) => updateButtonField(buttonIndex, 'phoneNumber', e.target.value)}
             placeholder="+5521999999999"
+            maxLength={20}
           />
         </div>
       )}

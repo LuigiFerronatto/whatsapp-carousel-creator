@@ -48,9 +48,9 @@ function App() {
           <div className="footer-content">
             <p>&copy; {new Date().getFullYear()} - WhatsApp Carousel Creator</p>
             <div className="footer-links">
-              <a href="#help" className="footer-link">Ajuda</a>
-              <a href="#about" className="footer-link">Sobre</a>
-              <a href="#privacy" className="footer-link">Privacidade</a>
+              <a className="footer-link" target="_blank" href='https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates/media-card-carousel-templates/'>Documentation</a>
+              <p>Created By:</p>
+              <p>Luigi Ferronatto / Blip - CDA</p>
             </div>
           </div>
         </footer>

@@ -16,6 +16,7 @@
     font-size: var(--fs-p3);
     color: var(--dove-gray-2);
     margin-bottom: 0.5rem;
+    word-wrap: break-word;
   }
   
   .formGroup {
