@@ -54,7 +54,7 @@
   height: 40px;
   background-color: #075e54;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start; /* Mudança aqui */
   align-items: center;
   padding: 0 8px;
   color: white;
@@ -73,17 +73,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-right: auto; /* Isso empurrará os outros elementos para a direita */
 }
 
 .contactAvatar {
   width: 36px;
   height: 36px;
-  background-color: #ddd;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #555;
+  background-image: url('../../assets/images/blippinho.png');
+  background-size: 120%;
+  background-position: center center;
+  background-repeat: no-repeat center center;
+  object-fit: cover;
 }
 
 .contactName {
@@ -92,7 +93,7 @@
 }
 
 .chatWindow {
-  flex: 2;
+  flex: 1;
   background-color: #e5ddd5;
   background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') no-repeat center center;
   padding: 14px;
@@ -100,7 +101,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .messageBodyText {
@@ -141,69 +142,77 @@
 }
 
 .navButton {
-  background-color: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  background-color: rgba(99, 99, 99, 0.8);
+  border-radius: 100%;
+  width: 25px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 2;
+  z-index: 5;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   color: #333;
   position: absolute;
   transition: background-color var(--transition-fast);
+  overflow: visible;
 }
 
 .navButton:hover {
-  background-color: rgba(255, 255, 255, 1);
+  background-color: rgb(90, 90, 90);
 }
 
 .prevButton {
-  left: 4px;
+  left: -15px;
 }
 
 .nextButton {
-  right: 4px;
+  right: -15px;
 }
 
 .cardsContainer {
   width: 100%;
-  border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   overflow: visible; /* Permite que os cards adjacentes apareçam */
-  border-radius: 8px;
 }
 
 .cardsWrapper {
   display: flex;
   transition: transform var(--transition-normal);
   width: 100%;
-  justify-content: center;
-  gap: 16px; /* Espaço entre os cards */
+  gap: 0.5rem; /* Espaço entre os cards */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 1rem 0 0 1rem;
 }
 
 .card {
-  min-width: 80%; /* Mantém o tamanho original */
-  max-width: 80%;
+  flex: 0 0 80%; /* Mantém a largura do card ajustada */
+  margin-right: 5%;
   display: flex;
   flex-direction: column;
   background-color: white;
   flex-shrink: 0;
   border-right: 1px solid #eee; /* Alterado para uma borda mais suave */
   margin: 0; /* Remove qualquer margem padrão */
+  scroll-snap-align: center;
+  transition: transform var(--transition-normal);
+  border-radius: 1rem;
 }
 
 .cardHeader {
-  height: 150px;
+  height: 165px;
+  scale: 0.98;
+  top: 2px;
   position: relative;
   background-color: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  border-radius: 0.8rem;
 }
 
 .cardImage, .cardVideo {
@@ -243,12 +252,19 @@
 }
 
 .cardBody {
-  padding: 12px;
+  padding: 14px;
   flex: 1;
   border-bottom: 1px solid #eee;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.4;
   color: #111;
+}
+
+.cardBody p {
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .placeholderText {
