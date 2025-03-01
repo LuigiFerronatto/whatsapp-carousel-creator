@@ -1,47 +1,48 @@
-/* CarouselPreview.module.css */
+/* CarouselPreview.module.css com design de iPhone X */
+
 .previewContainer {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all var(--transition-normal);
+  transition: all 0.3s ease;
   overflow: hidden;
   height: 700px;
+  padding: 20px;
+  background: #f4f6fc;
 }
 
-.expandButton:hover {
-  background-color: var(--color-surface-2);
-}
-
-.expandIcon, .collapseIcon {
-  transition: transform var(--transition-fast);
-}
-
+/* iPhone X mockup styling */
 .phoneMockup {
-  width: 400px;
-  height: 700px;
-  background-color: #f7f7f7;
-  border-radius: 24px;
-  border: 8px solid #333;
   position: relative;
+  width: 360px;
+  height: 750px;
+  background-color: #075e54;
+  border-radius: 40px;
+  box-shadow: 0px 0px 0px 11px #1f1f1f, 0px 0px 0px 13px #191919, 0px 0px 0px 20px #111;
   overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
 }
 
-.phoneHeader {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+.phoneMockup:after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 4px;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  z-index: 100;
 }
 
 .phoneStatusBar {
   display: flex;
   justify-content: space-between;
-  padding: 4px 16px;
+  padding: 10px 16px 4px;
   font-size: 12px;
-  background-color: #075e54;
   color: white;
 }
 
@@ -51,12 +52,12 @@
 }
 
 .whatsappHeader {
-  height: 40px;
+  height: 50px;
   background-color: #075e54;
   display: flex;
-  justify-content: flex-start; /* Mudança aqui */
+  justify-content: flex-start;
   align-items: center;
-  padding: 0 8px;
+  padding: 0 16px;
   color: white;
 }
 
@@ -73,7 +74,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-right: auto; /* Isso empurrará os outros elementos para a direita */
+  margin-right: auto;
 }
 
 .contactAvatar {
@@ -88,7 +89,7 @@
 }
 
 .contactName {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -99,7 +100,7 @@
   background-repeat: no-repeat;
   background-position: center;
   padding: 14px;
-  overflow: hidden; /* Impede rolagem no container principal */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -116,17 +117,17 @@
   margin-bottom: 12px;
   position: relative;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  overflow: auto; /* Evita que conteúdo extra ultrapasse a borda */
+  overflow: auto;
   display: flex;
   flex-direction: column;
-  max-height: 5rem; /* Limita a altura, ajustando conforme necessário */
+  max-height: 5rem;
   position: relative;
   word-wrap: break-word;
   align-self: flex-start;
   display: -webkit-box;
-  -webkit-line-clamp: 8; /* Limita a 4 linhas */
+  -webkit-line-clamp: 8;
   -webkit-box-orient: vertical;
-  overflow-y: auto; /* Faz com que o texto role se ultrapassar */
+  overflow-y: auto;
   max-height: 10rem;
 }
 
@@ -139,7 +140,7 @@
   width: 0;
   height: 0;
   border-left: 12px solid white;
-  border-right: 12px solid white; /* Cor de fundo do balão */
+  border-right: 12px solid white;
   border-top: 0 solid transparent;
   border-bottom: 12px solid transparent;
   z-index: 2;
@@ -165,58 +166,64 @@
   cursor: pointer;
   z-index: 5;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  color: #333;
+  color: white;
   position: absolute;
-  transition: background-color var(--transition-fast);
+  transition: background-color 0.2s ease;
 }
 
 .navButton:hover {
-  background-color: rgb(214, 34, 34);
+  background-color: rgba(120, 120, 120, 0.95);
 }
 
 .prevButton {
-  left: -15px;
+  left: 5px;
 }
 
 .nextButton {
-  right: -15px;
+  right: 5px;
 }
 
+/* Modificações para o carrossel com arrasto */
 .cardsContainer {
   width: 100%;
   height: auto;
-  overflow: visible;
+  position: relative;
+}
+
+/* Cursor para indicar que o elemento pode ser arrastado */
+.grab {
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+}
+
+/* Cursor para quando o usuário está ativamente arrastando */
+.grabbing {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .cardsWrapper {
   display: flex;
-  transition: transform var(--transition-normal);
-  width: 100%;
-  gap: 0.6rem; /* Espaço entre os cards */
-  overflow: visible;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 1rem 0 0 1rem;
-  
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: auto;
+  gap: 0.5rem;
+  padding-left: 0;
+  margin: 0;
 }
 
 .card {
-  flex: 0 0 80%; /* Mantém a largura do card ajustada */
-  margin-right: 5%;
-  min-height: 225px; /* Garante que os cards tenham pelo menos esse tamanho */
-  max-height: auto;
-  max-width: 80%; /* Permite que cresça conforme o conteúdo */
+  flex: 0 0 90%;
+  min-height: 225px;
+  max-width: 90%;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   background-color: white;
   flex-shrink: 0;
-  border-right: 1px solid #eee; /* Alterado para uma borda mais suave */
-  margin: 0; /* Remove qualquer margem padrão */
-  scroll-snap-align: center;
-  transition: transform var(--transition-normal);
   border-radius: 1rem;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
 }
 
 .cardHeader {
@@ -277,13 +284,12 @@
   overflow: hidden;
 }
 
-
 .cardBody p {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 6rem; /* Aproximadamente 3 linhas */
+  max-height: 6rem;
   word-wrap: break-word;
 }
 
@@ -298,24 +304,25 @@
   padding: 0.5rem;
   gap: 0.25rem;
 }
+
 .cardButton {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centraliza o texto horizontalmente */
-  gap: 8px; /* Espaço entre ícone e texto */
+  justify-content: center;
+  gap: 8px;
   background-color: transparent;
   color: rgb(18, 140, 126);
   border: none;
   border-radius: 1rem;
   font-size: 14px;
   cursor: pointer;
-  width: 100%; /* Ocupa toda a largura do container */
-  text-align: center; /* Centraliza o texto */
+  width: 100%;
+  text-align: center;
   transition: background-color 0.2s ease;
 }
 
 .cardButton:hover {
-  background-color: rgba(0,0,0,0.05); /* Efeito de hover mais sutil */
+  background-color: rgba(0,0,0,0.05);
 }
 
 .buttonIcon {
@@ -345,7 +352,7 @@
   height: 8px;
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.2);
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  transition: background-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
 }
 
@@ -358,85 +365,20 @@
   transform: scale(1.2);
 }
 
-@media (max-width: 768px) {
-  .previewContainer {
-    height: 400px;
-  }
-  
-  .previewContainer.expanded {
-    height: 500px;
-  }
-  
-  .phoneMockup {
-    width: 240px;
-    height: 400px;
-    border-width: 6px;
-  }
-
-  .phoneStatusBar {
-    padding: 2px 12px;
-    font-size: 10px;
-  }
-
-  .whatsappHeader {
-    height: 40px;
-  }
-
-  .contactAvatar {
-    width: 30px;
-    height: 30px;
-  }
-
-  .contactName {
-    font-size: 12px;
-  }
-
-  .cardHeader {
-    height: 120px;
-  }
+/* Indicador visual de arrasto (opcional) */
+.grabIndicator {
+  position: absolute;
+  width: 40px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-@media (max-width: 480px) {
-  .previewContainer {
-    height: 380px;
-  }
-  
-  .previewContainer.expanded {
-    height: 420px;
-  }
-  
-  .phoneMockup {
-    width: 220px;
-    height: 360px;
-    border-width: 4px;
-  }
-
-  .cardHeader {
-    height: 100px;
-  }
-
-  .cardBody {
-    padding: 8px;
-    font-size: 12px;
-  }
-
-  .cardButton {
-    font-size: 12px;
-    padding: 6px;
-  }
-}
-
-/* Para telas menores */
-@media (max-width: 768px) {
-  .cardsWrapper {
-    gap: 12px; /* Reduz o gap para telas menores */
-    padding: 0 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .cardsWrapper {
-    gap: 8px; /* Ainda menor para dispositivos muito pequenos */
-    padding: 0 8px;
-  }
+.cardsContainer:active .grabIndicator {
+  opacity: 1;
 }
