@@ -330,8 +330,13 @@
   align-items: center;
   justify-content: center;
   color: rgb(18, 140, 126);
-  width: 20px;
-  height: 20px;
+  width: 24px; /* Tamanho fixo para todos */
+  height: 24px;
+}
+
+.buttonIcon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .separator {
