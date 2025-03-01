@@ -1,16 +1,6 @@
 /* CarouselPreview.module.css com design de iPhone X */
 
-.previewContainer {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.3s ease;
-  overflow: hidden;
-  height: 700px;
-  padding: 20px;
-  background: #f4f6fc;
-}
+
 
 /* iPhone X mockup styling */
 .phoneMockup {
@@ -23,6 +13,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  margin: 2rem 2rem 0rem 3rem;
 }
 
 .phoneMockup:after {
