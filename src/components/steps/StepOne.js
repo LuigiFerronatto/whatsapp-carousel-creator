@@ -1,7 +1,7 @@
 // components/StepOne.js
 import React from 'react';
-import CardUploadInput from './CardUploadInput';
-import StatusMessage from './StatusMessage';
+import CardUploadInput from '../editors/CardUploadInput';
+import StatusMessage from '../common/StatusMessage';
 import styles from './StepOne.module.css';
 
 const StepOne = ({ 

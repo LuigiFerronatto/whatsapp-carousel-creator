@@ -1,7 +1,7 @@
 // components/StepThree.js
 import React from 'react';
-import StatusMessage from './StatusMessage';
-import JsonViewer from './JsonViewer';
+import StatusMessage from '../common/StatusMessage';
+import JsonViewer from '../common/JsonViewer';
 import styles from './StepThree.module.css';
 
 const StepThree = ({

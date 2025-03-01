@@ -93,3 +93,48 @@
       transform: rotate(360deg);
     }
   }
+
+  /* Adicione ao seu StepTwo.module.css */
+.pageContainer {
+  width: 100%;
+}
+
+.contentWrapper {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+}
+
+.formContainer {
+  flex: 1;
+  max-width: 700px;
+}
+
+.previewContainer {
+  flex: 0 0 350px;
+  position: sticky;
+  top: 1rem;
+  align-self: flex-start;
+}
+
+.previewTitle {
+  font-size: var(--fs-h5);
+  font-weight: var(--fw-bold);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+  .contentWrapper {
+    flex-direction: column;
+  }
+
+  .previewContainer {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+  }
+}

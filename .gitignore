@@ -26,6 +26,7 @@ yarn-error.log*
 # Novos itens adicionados
 
 # Credenciais e arquivos sensíveis
+src/.env
 .env
 .env.development
 .env.staging

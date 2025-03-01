@@ -1,0 +1,115 @@
+/* AlertMessage.module.css */
+.container {
+    display: flex;
+    padding: 1rem;
+    border-radius: var(--border-radius-md);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .content {
+    display: flex;
+    align-items: flex-start;
+    flex: 1;
+  }
+  
+  .iconContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+  }
+  
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .messageContainer {
+    flex: 1;
+  }
+  
+  .title {
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-p1);
+    margin-bottom: 0.25rem;
+  }
+  
+  .message {
+    font-size: var(--fs-p2);
+    line-height: var(--lh-p);
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-left: 1rem;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+  }
+  
+  .closeButton:hover {
+    opacity: 1;
+  }
+  
+  /* Estilos específicos por tipo de alerta */
+  .error {
+    background-color: var(--cinderella);
+    border: 1px solid var(--geraldine);
+    color: var(--milano-red);
+  }
+  
+  .warning {
+    background-color: var(--vis-vis);
+    border: 1px solid var(--marigold-yellow);
+    color: var(--buddha-gold);
+  }
+  
+  .success {
+    background-color: var(--magic-mint);
+    border: 1px solid var(--shamrock);
+    color: var(--jewel);
+  }
+  
+  .info {
+    background-color: var(--whisper);
+    border: 1px solid var(--blip-light);
+    color: var(--blip-dark);
+  }
+  
+  /* Responsividade */
+  @media (max-width: 480px) {
+    .container {
+      padding: 0.75rem;
+    }
+    
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .title {
+      font-size: var(--fs-p2);
+    }
+    
+    .message {
+      font-size: var(--fs-p3);
+    }
+  }

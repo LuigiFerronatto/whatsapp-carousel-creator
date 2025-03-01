@@ -1,0 +1,388 @@
+/* CarouselPreview.module.css */
+.previewContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all var(--transition-normal);
+  overflow: hidden;
+  height: 600px;
+}
+
+.expandButton:hover {
+  background-color: var(--color-surface-2);
+}
+
+.expandIcon, .collapseIcon {
+  transition: transform var(--transition-fast);
+}
+
+.phoneMockup {
+  width: 400px;
+  height: 600px;
+  background-color: #f7f7f7;
+  border-radius: 24px;
+  border: 8px solid #333;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.phoneHeader {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.phoneStatusBar {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 16px;
+  font-size: 12px;
+  background-color: #075e54;
+  color: white;
+}
+
+.phoneIcons {
+  display: flex;
+  gap: 6px;
+}
+
+.whatsappHeader {
+  height: 40px;
+  background-color: #075e54;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+  color: white;
+}
+
+.backButton, .moreButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.contactInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contactAvatar {
+  width: 36px;
+  height: 36px;
+  background-color: #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+}
+
+.contactName {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.chatWindow {
+  flex: 2;
+  background-color: #e5ddd5;
+  background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') no-repeat center center;
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.messageBodyText {
+  background-color: white;
+  padding: 8px 12px;
+  border-radius: 0px 8px 8px 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 90%;
+  margin-bottom: 12px;
+  position: relative;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word;
+  align-self: flex-start;
+}
+
+.messageBodyText::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-left: 0px solid white;
+  border-right: 12px solid white;
+  border-top: 0 solid transparent;
+  border-bottom: 12px solid transparent;
+}
+
+.carouselContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 12px;
+  overflow: hidden; /* Garante que nada fique vazando */
+}
+
+.navButton {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: #333;
+  position: absolute;
+  transition: background-color var(--transition-fast);
+}
+
+.navButton:hover {
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.prevButton {
+  left: 4px;
+}
+
+.nextButton {
+  right: 4px;
+}
+
+.cardsContainer {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  overflow: visible; /* Permite que os cards adjacentes apareçam */
+  border-radius: 8px;
+}
+
+.cardsWrapper {
+  display: flex;
+  transition: transform var(--transition-normal);
+  width: 100%;
+  justify-content: center;
+  gap: 16px; /* Espaço entre os cards */
+}
+
+.card {
+  min-width: 80%; /* Mantém o tamanho original */
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  flex-shrink: 0;
+  border-right: 1px solid #eee; /* Alterado para uma borda mais suave */
+  margin: 0; /* Remove qualquer margem padrão */
+}
+
+.cardHeader {
+  height: 150px;
+  position: relative;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cardImage, .cardVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.videoContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.playButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholderImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #999;
+  background-color: #f0f0f0;
+}
+
+.cardBody {
+  padding: 12px;
+  flex: 1;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #111;
+}
+
+.placeholderText {
+  color: #999;
+  font-style: italic;
+}
+
+.cardButtons {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+}
+
+.cardButton {
+  padding: 8px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.cardButton:hover {
+  background-color: #1766ca;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.2);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  cursor: pointer;
+}
+
+.dot:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.activeDot {
+  background-color: #1a73e8;
+  transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+  .previewContainer {
+    height: 400px;
+  }
+  
+  .previewContainer.expanded {
+    height: 500px;
+  }
+  
+  .phoneMockup {
+    width: 240px;
+    height: 400px;
+    border-width: 6px;
+  }
+
+  .phoneStatusBar {
+    padding: 2px 12px;
+    font-size: 10px;
+  }
+
+  .whatsappHeader {
+    height: 40px;
+  }
+
+  .contactAvatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .contactName {
+    font-size: 12px;
+  }
+
+  .cardHeader {
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .previewContainer {
+    height: 380px;
+  }
+  
+  .previewContainer.expanded {
+    height: 420px;
+  }
+  
+  .phoneMockup {
+    width: 220px;
+    height: 360px;
+    border-width: 4px;
+  }
+
+  .cardHeader {
+    height: 100px;
+  }
+
+  .cardBody {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .cardButton {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
+/* Para telas menores */
+@media (max-width: 768px) {
+  .cardsWrapper {
+    gap: 12px; /* Reduz o gap para telas menores */
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardsWrapper {
+    gap: 8px; /* Ainda menor para dispositivos muito pequenos */
+    padding: 0 8px;
+  }
+}

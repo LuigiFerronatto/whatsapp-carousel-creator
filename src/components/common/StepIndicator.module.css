@@ -1,0 +1,125 @@
+/* StepIndicator.module.css */
+.container {
+    width: 100%;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  
+  .stepsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  
+  .stepItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+  }
+  
+  .stepCircle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--color-surface-1);
+    color: var(--text-color-default);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-p2);
+    border: 2px solid var(--color-surface-2);
+    transition: all var(--transition-normal);
+    z-index: 2;
+  }
+  
+  .stepCircle.active {
+    background-color: var(--color-surface-primary);
+    color: var(--alabaster);
+    border-color: var(--color-surface-primary);
+    box-shadow: 0 0 0 4px rgba(30, 107, 241, 0.2);
+  }
+  
+  .stepCircle.completed {
+    background-color: var(--color-surface-positive);
+    color: var(--alabaster);
+    border-color: var(--color-surface-positive);
+  }
+  
+  .stepConnector {
+    position: absolute;
+    height: 2px;
+    background-color: var(--color-surface-2);
+    width: calc(100% - 32px);
+    right: calc(50% - 16px);
+    top: 16px;
+    z-index: 1;
+    transition: background-color var(--transition-normal);
+  }
+  
+  .stepConnector.completed {
+    background-color: var(--color-surface-positive);
+  }
+  
+  .stepLabel {
+    text-align: center;
+    margin-top: 8px;
+    font-size: var(--fs-p3);
+    color: var(--text-color-default);
+    transition: color var(--transition-normal);
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .activeLabel {
+    color: var(--color-surface-primary);
+    font-weight: var(--fw-bold);
+  }
+  
+  .checkIcon {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .stepLabel {
+      font-size: var(--fs-p4);
+      max-width: 80px;
+    }
+    
+    .stepCircle {
+      width: 28px;
+      height: 28px;
+      font-size: var(--fs-p3);
+    }
+    
+    .stepConnector {
+      top: 14px;
+      width: calc(100% - 28px);
+      right: calc(50% - 14px);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .stepLabel {
+      display: none;
+    }
+    
+    .stepCircle {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .stepConnector {
+      top: 12px;
+      width: calc(100% - 24px);
+      right: calc(50% - 12px);
+    }
+  }
