@@ -1,143 +1,309 @@
 /* StepOne.module.css */
 .container {
-    padding: 1.5rem;
-    background-color: var(--snow);
-    border-radius: 0.5rem;
-    box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--snow);
+  border-radius: 0.5rem;
+  box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+}
+
+.introSection {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 1rem;
+}
+
+.stepTitle {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  margin-bottom: 0.75rem;
+  color: var(--blip-blue-brand);
+}
+
+.stepDescription {
+  font-size: var(--fs-p1);
+  color: var(--text-color-default);
+  line-height: 1.5;
+}
+
+/* Seção de autenticação */
+.authSection {
+  margin-bottom: 1rem;
+}
+
+.authCard {
+  padding: 1.25rem;
+  background-color: var(--snow);
+  border: 1px solid var(--blip-light);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.authCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.authHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.authIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+  border-radius: 50%;
+  margin-right: 0.75rem;
+}
+
+.authTitle {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  color: var(--blip-dark);
+}
+
+.authInputContainer {
+  display: flex;
+  position: relative;
+}
+
+.visibilityToggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--blip-action);
+  font-size: var(--fs-p3);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.visibilityToggle:hover {
+  text-decoration: underline;
+}
+
+/* Seção de controle de cards */
+.cardsControlSection {
+  padding: 1.25rem;
+  background-color: var(--box);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.controlHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.controlTitle {
+  font-size: var(--fs-p1);
+  font-weight: var(--fw-bold);
+  color: var(--blip-blue-brand);
+}
+
+.cardCounter {
+  display: flex;
+  align-items: center;
+}
+
+.cardCountLabel {
+  margin-right: 0.75rem;
+  font-size: var(--fs-p2);
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  background-color: var(--snow);
+  border-radius: 2rem;
+  padding: 0.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.controlButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--snow);
+  color: var(--blip-blue-brand);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.controlButton:hover:not(:disabled) {
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+}
+
+.controlButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cardCount {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-p1);
+  color: var(--blip-blue-brand);
+}
+
+.cardControlHelp {
+  font-size: var(--fs-p2);
+  color: var(--dove-gray-2);
+  margin-top: 0.5rem;
+}
+
+/* Grid de cards */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Estilos gerais de formulário */
+.formGroup {
+  margin-bottom: 0.75rem;
+}
+
+.label {
+  display: block;
+  font-size: var(--fs-p2);
+  font-weight: var(--fw-bold);
+  margin-bottom: 0.5rem;
+  color: var(--text-color-default);
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--mercury);
+  border-radius: 0.25rem;
+  font-size: var(--fs-p1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: var(--blip-action);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.2);
+}
+
+.helpText {
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  margin-top: 0.5rem;
+}
+
+/* Seção de ação */
+.actionSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.validationMessage {
+  color: var(--pomegranate);
+  font-size: var(--fs-p2);
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+/* Resumo de uploads */
+.uploadSummary {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: var(--breeze);
+  border: 1px solid var(--blip-light);
+  border-radius: 0.5rem;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.summaryTitle {
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-p1);
+  margin-bottom: 0.75rem;
+  color: var(--blip-blue-brand);
+}
+
+.summaryList {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: var(--fs-p2);
+  border-bottom: 1px solid var(--hover-light);
+}
+
+.summaryItem:last-child {
+  border-bottom: none;
+}
+
+.successStatus {
+  color: var(--color-surface-positive);
+  font-weight: var(--fw-bold);
+  margin-left: 0.5rem;
+}
+
+.simulatedStatus {
+  color: var(--chilean-fire);
+  font-weight: var(--fw-bold);
+  margin-left: 0.5rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
   }
   
-  .stepTitle {
-    font-size: var(--fs-h4);
-    font-weight: var(--fw-bold);
-    margin-bottom: 1rem;
+  .controlHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
   
-  .formGroup {
-    margin-bottom: 1rem;
-  }
-  
-  .label {
-    display: block;
-    font-size: var(--fs-p2);
-    font-weight: var(--fw-bold);
-    margin-bottom: 0.25rem;
-  }
-  
-  .input {
+  .cardCounter {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--mercury);
-    border-radius: 4px;
-  }
-  
-  .helpText {
-    font-size: var(--fs-p3);
-    color: var(--dove-gray-2);
-    margin-top: 0.25rem;
-  }
-  
-  .cardControls {
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
   }
   
   .buttonGroup {
-    display: flex;
+    margin-left: auto;
   }
-  
-  .removeButton {
-    padding: 0.25rem 0.5rem;
-    background-color: var(--pomegranate);
-    color: var(--alabaster);
-    border-radius: 4px;
-    margin-right: 0.5rem;
-  }
-  
-  .removeButton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .addButton {
-    padding: 0.25rem 0.5rem;
-    background-color: var(--mountain-meadow);
-    color: var(--alabaster);
-    border-radius: 4px;
-  }
-  
-  .addButton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .submitButton {
-    margin-top: 1.5rem;
-    padding: 0.5rem 1rem;
-    background-color: var(--blip-action);
-    color: var(--alabaster);
-    border-radius: 4px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .submitButton:hover {
-    background-color: var(--blip-dark);
-  }
-  
-  .submitButton:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-  
-  .loadingIcon {
-    animation: spin 1s linear infinite;
-    margin-right: 0.75rem;
-    margin-left: -0.25rem;
-    height: 1.25rem;
-    width: 1.25rem;
-  }
-  
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .uploadSummary {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background-color: var(--select-bg);
-    border-radius: 4px;
-    border: 1px solid var(--hover-light);
-  }
-  
-  .summaryTitle {
-    font-weight: var(--fw-bold);
-    margin-bottom: 0.5rem;
-  }
-  
-  .summaryList {
-    list-style-type: disc;
-    margin-left: 1.25rem;
-  }
-  
-  .summaryItem {
-    font-size: var(--fs-p2);
-  }
-  
-  .successStatus {
-    color: var(--jewel);
-    font-weight: var(--fw-bold);
-  }
-  
-  .simulatedStatus {
-    color: var(--chilean-fire);
-    font-weight: var(--fw-bold);
-  }
+}

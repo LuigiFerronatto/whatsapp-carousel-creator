@@ -1,102 +1,33 @@
 /* StepTwo.module.css */
-.container {
-    padding: 1.5rem;
-    background-color: var(--snow);
-    border-radius: 0.5rem;
-    box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
-  }
-  
-  .stepTitle {
-    font-size: var(--fs-h4);
-    font-weight: var(--fw-bold);
-    margin-bottom: 1rem;
-  }
-  
-  .formGroup {
-    margin-bottom: 1rem;
-  }
-  
-  .label {
-    display: block;
-    font-size: var(--fs-p2);
-    font-weight: var(--fw-bold);
-    margin-bottom: 0.25rem;
-  }
-  
-  .input, .select, .textarea {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--mercury);
-    border-radius: 4px;
-  }
-  
-  .characterCount {
-    font-size: var(--fs-p3);
-    color: var(--dove-gray-2);
-    margin-top: 0.25rem;
-  }
-  
-  .buttonGroup {
-    margin-top: 1.5rem;
-    display: flex;
-  }
-  
-  .buttonSpace {
-    margin-left: 1rem;
-  }
-  
-  .backButton {
-    padding: 0.5rem 1rem;
-    background-color: var(--dove-gray);
-    color: var(--alabaster);
-    border-radius: 4px;
-    width: 50%;
-  }
-  
-  .backButton:hover {
-    background-color: var(--dove-gray-2);
-  }
-  
-  .nextButton {
-    padding: 0.5rem 1rem;
-    background-color: var(--blip-action);
-    color: var(--alabaster);
-    border-radius: 4px;
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .nextButton:hover {
-    background-color: var(--blip-dark);
-  }
-  
-  .nextButton:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-  
-  .loadingIcon {
-    animation: spin 1s linear infinite;
-    margin-right: 0.75rem;
-    margin-left: -0.25rem;
-    height: 1.25rem;
-    width: 1.25rem;
-  }
-  
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  /* Adicione ao seu StepTwo.module.css */
 .pageContainer {
   width: 100%;
+}
+
+.progressContainer {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.progressBar {
+  height: 8px;
+  background-color: var(--color-surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--mountain-meadow);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  display: block;
+  text-align: right;
 }
 
 .contentWrapper {
@@ -110,6 +41,342 @@
   max-width: 700px;
 }
 
+.container {
+  padding: 1.5rem;
+  background-color: var(--snow);
+  border-radius: 0.5rem;
+  box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+  position: relative;
+}
+
+.stepHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.stepTitle {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  margin: 0;
+  color: var(--blip-blue-brand);
+}
+
+.hintToggle {
+  background: transparent;
+  border: none;
+  color: var(--blip-action);
+  font-size: var(--fs-p3);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.hintToggle:hover {
+  background-color: var(--hover-light);
+}
+
+.tabsContainer {
+  display: flex;
+  border-bottom: 1px solid var(--color-surface-2);
+  margin-bottom: 1.5rem;
+}
+
+.tabButton {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  font-size: var(--fs-p2);
+  color: var(--dove-gray-2);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.tabButton:hover {
+  color: var(--blip-action);
+}
+
+.activeTab {
+  color: var(--blip-action);
+  font-weight: var(--fw-bold);
+}
+
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--blip-action);
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.tabContent {
+  padding-top: 0.5rem;
+  padding-bottom: 3.5rem; /* Space for fixed buttons */
+}
+
+.cardsContainer {
+  margin-bottom: 1rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.cardsContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cardsContainer::-webkit-scrollbar-track {
+  background: var(--color-surface-1);
+  border-radius: 3px;
+}
+
+.cardsContainer::-webkit-scrollbar-thumb {
+  background-color: var(--color-surface-3);
+  border-radius: 3px;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: block;
+  font-size: var(--fs-p2);
+  font-weight: var(--fw-bold);
+  margin-bottom: 0.5rem;
+  color: var(--text-color-default);
+}
+
+.requiredMark {
+  color: var(--pomegranate);
+  margin-left: 0.25rem;
+}
+
+.input, .select, .textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--mercury);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: var(--fs-p2);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--color-surface-0);
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--blip-action);
+  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
+}
+
+.invalidInput {
+  border-color: var(--pomegranate);
+  background-color: rgba(255, 224, 224, 0.2);
+}
+
+.invalidInput:focus {
+  box-shadow: 0 0 0 3px rgba(230, 15, 15, 0.15);
+}
+
+.customSelect {
+  position: relative;
+}
+
+.selectArrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--dove-gray);
+  pointer-events: none;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.characterCount {
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+.almostFull {
+  color: var(--chilean-fire);
+  font-weight: var(--fw-bold);
+}
+
+.hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background-color: var(--whisper);
+  border-left: 3px solid var(--blip-light);
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  border-radius: 0 4px 4px 0;
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hintIcon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  fill: var(--blip-action);
+}
+
+.errorMessage {
+  color: var(--pomegranate);
+  font-size: var(--fs-p3);
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.errorMessage::before {
+  content: "⚠️";
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.prevTabButton, .nextTabButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-p2);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.prevTabButton {
+  background-color: var(--color-surface-1);
+  color: var(--text-color-default);
+}
+
+.prevTabButton:hover {
+  background-color: var(--color-surface-2);
+}
+
+.nextTabButton {
+  background-color: var(--blip-action);
+  color: var(--alabaster);
+}
+
+.nextTabButton:hover {
+  background-color: var(--blip-dark);
+}
+
+.prevTabButton:active, .nextTabButton:active {
+  transform: translateY(1px);
+}
+
+.arrowIcon, .arrowIconLeft {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.fixedButtonGroup {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  background-color: var(--snow);
+  border-top: 1px solid var(--color-surface-2);
+  z-index: 10;
+}
+
+.backButton, .nextButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-p2);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.backButton {
+  background-color: var(--color-surface-2);
+  color: var(--text-color-default);
+  flex: 1;
+}
+
+.backButton:hover {
+  background-color: var(--color-surface-3);
+}
+
+.nextButton {
+  background-color: var(--blip-action);
+  color: var(--alabaster);
+  flex: 2;
+}
+
+.nextButton:hover:not(:disabled) {
+  background-color: var(--blip-dark);
+}
+
+.nextButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.buttonIcon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.loadingIcon {
+  animation: spin 1s linear infinite;
+  margin-right: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .previewContainer {
   flex: 0 0 350px;
   position: sticky;
@@ -117,11 +384,36 @@
   align-self: flex-start;
 }
 
+.previewWrapper {
+  background-color: var(--snow);
+  border-radius: 0.5rem;
+  box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+  overflow: hidden;
+}
+
 .previewTitle {
-  font-size: var(--fs-h5);
+  font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
-  margin-bottom: 1rem;
+  padding: 1rem;
   text-align: center;
+  background-color: var(--blip-blue-brand);
+  color: var(--alabaster);
+  margin: 0;
+}
+
+.previewContent {
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.previewHint {
+  padding: 0.75rem;
+  background-color: var(--whisper);
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  text-align: center;
+  border-top: 1px solid var(--color-surface-2);
 }
 
 /* Responsividade */
@@ -132,9 +424,45 @@
 
   .previewContainer {
     position: static;
+    margin-top: 1.5rem;
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  
+  .previewContent {
     display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .tabsContainer {
     flex-direction: column;
-    align-items: center;
-    margin-top: 1rem;
+    gap: 0.5rem;
+    border-bottom: none;
+  }
+  
+  .tabButton {
+    border: 1px solid var(--color-surface-2);
+    border-radius: 6px;
+    text-align: left;
+  }
+  
+  .activeTab::after {
+    display: none;
+  }
+  
+  .activeTab {
+    background-color: var(--hover-light);
+    border-color: var(--blip-action);
+  }
+  
+  .fixedButtonGroup {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .backButton, .nextButton {
+    width: 100%;
   }
 }

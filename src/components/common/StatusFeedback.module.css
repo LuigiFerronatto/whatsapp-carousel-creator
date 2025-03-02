@@ -1,0 +1,174 @@
+/* StatusFeedback.module.css */
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    width: 100%;
+  }
+  
+  .message {
+    display: flex;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    animation: slideIn 0.3s ease;
+    position: relative;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .error {
+    background-color: var(--cinderella);
+    border-left: 4px solid var(--pomegranate);
+    color: var(--milano-red);
+  }
+  
+  .success {
+    background-color: var(--magic-mint);
+    border-left: 4px solid var(--mountain-meadow);
+    color: var(--jewel);
+  }
+  
+  .validation {
+    background-color: var(--whisper);
+    border-left: 4px solid var(--blip-action);
+    color: var(--blip-dark);
+  }
+  
+  .iconContainer {
+    display: flex;
+    align-items: flex-start;
+    margin-right: 0.75rem;
+    padding-top: 0.125rem;
+  }
+  
+  .content {
+    flex: 1;
+  }
+  
+  .content p {
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  .validationTitle {
+    font-weight: var(--fw-bold);
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .validationList {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: var(--fs-p2);
+  }
+  
+  .validationList li {
+    margin-bottom: 0.25rem;
+  }
+  
+  .validationList li:last-child {
+    margin-bottom: 0;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    margin-left: 0.5rem;
+  }
+  
+  .closeButton:hover {
+    opacity: 1;
+  }
+  
+  .statusBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    background-color: var(--color-surface-1);
+    font-size: var(--fs-p3);
+    color: var(--dove-gray-2);
+    transition: background-color 0.3s ease;
+  }
+  
+  .unsaved {
+    background-color: var(--hover-light);
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      background-color: var(--hover-light);
+    }
+    50% {
+      background-color: var(--select-bg);
+    }
+    100% {
+      background-color: var(--hover-light);
+    }
+  }
+  
+  .statusInfo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .statusIcon {
+    margin-right: 0.5rem;
+  }
+  
+  .saveButton {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--color-surface-0);
+    border: 1px solid var(--color-surface-2);
+    border-radius: 0.25rem;
+    font-size: var(--fs-p3);
+    cursor: pointer;
+    color: var(--blip-action);
+    transition: all 0.2s ease;
+  }
+  
+  .saveButton:hover:not(:disabled) {
+    background-color: var(--blip-light);
+    color: var(--blip-dark);
+  }
+  
+  .saveButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .message {
+      padding: 0.5rem 0.75rem;
+    }
+    
+    .statusBar {
+      padding: 0.375rem 0.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .validationList {
+      padding-left: 1rem;
+    }
+  }

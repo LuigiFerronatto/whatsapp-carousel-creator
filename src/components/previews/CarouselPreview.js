@@ -1,3 +1,5 @@
+// previews/CarouselPreview.js
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styles from './CarouselPreview.module.css';
 

@@ -1,59 +1,290 @@
 /* CardUploadInput.module.css */
 .cardContainer {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    border: 1px solid var(--mercury);
-    border-radius: 4px;
-    background-color: var(--box);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  background-color: var(--color-surface-0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardContainer:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.evenCard {
+  border-top: 4px solid var(--blip-action);
+}
+
+.oddCard {
+  border-top: 4px solid var(--color-surface-primary);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--whisper);
+  border-bottom: 1px solid var(--wave);
+}
+
+.cardNumber {
+  font-weight: var(--fw-bold);
+  color: var(--blip-blue-brand);
+  font-size: var(--fs-p1);
+}
+
+.fileTypeSelect {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  padding: 0.4rem 2rem 0.4rem 0.75rem;
+  border: 1px solid var(--wave);
+  border-radius: 0.25rem;
+  background-color: var(--color-surface-0);
+  font-size: var(--fs-p2);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  padding-left: 2rem;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--blip-action);
+  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.1);
+}
+
+.fileTypeIcon {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--blip-blue-brand);
+}
+
+.cardBody {
+  padding: 1rem;
+  flex-grow: 1;
+}
+
+.uploadMethods {
+  display: flex;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  background-color: var(--box);
+  padding: 0.25rem;
+}
+
+.methodButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: none;
+  background: none;
+  border-radius: 0.25rem;
+  font-size: var(--fs-p2);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--text-color-default);
+}
+
+.methodButton:hover {
+  background-color: var(--color-surface-1);
+}
+
+.activeMethod {
+  background-color: var(--snow);
+  color: var(--blip-blue-brand);
+  font-weight: var(--fw-bold);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: var(--fs-p2);
+  font-weight: var(--fw-bold);
+  margin-bottom: 0.5rem;
+  color: var(--text-color-default);
+}
+
+.inputGroup {
+  display: flex;
+}
+
+.input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--mercury);
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+  border-right: none;
+  font-size: var(--fs-p2);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--blip-action);
+  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.1);
+}
+
+.testButton {
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+  padding: 0.5rem 1rem;
+  border: none;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  font-size: var(--fs-p2);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.testButton:hover {
+  background-color: var(--hover-light);
+}
+
+.helpText {
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  margin-top: 0.5rem;
+}
+
+.dropArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  border: 2px dashed var(--cloud);
+  border-radius: 0.5rem;
+  background-color: var(--whisper);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropArea:hover {
+  background-color: var(--box);
+  border-color: var(--blip-light);
+}
+
+.dragging {
+  background-color: var(--blip-light);
+  border-color: var(--blip-action);
+}
+
+.uploadIcon {
+  color: var(--blip-blue-brand);
+  margin-bottom: 0.75rem;
+}
+
+.dropText {
+  font-size: var(--fs-p1);
+  font-weight: var(--fw-bold);
+  margin-bottom: 0.5rem;
+  color: var(--text-color-default);
+}
+
+.dropHint {
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--milano-red);
+  padding: 0.75rem;
+  background-color: var(--cinderella);
+  border-radius: 0.25rem;
+  font-size: var(--fs-p2);
+  margin-top: 0.5rem;
+}
+
+.previewSection {
+  padding: 1rem;
+  background-color: var(--box);
+  border-top: 1px solid var(--wave);
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.previewTitle {
+  font-size: var(--fs-p2);
+  font-weight: var(--fw-bold);
+  color: var(--blip-blue-brand);
+}
+
+.checkIcon {
+  color: var(--mountain-meadow);
+}
+
+.previewContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--wild-sand);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  position: relative;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+}
+
+.previewImage, .previewVideo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cardContainer {
+    max-width: 100%;
   }
   
-  .cardTitle {
-    font-weight: var(--fw-bold);
-    margin-bottom: 0.5rem;
+  .dropArea {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
   
-  .formGroup {
-    margin-bottom: 0.75rem;
-  }
-  
-  .label {
-    display: block;
-    font-size: var(--fs-p2);
-    font-weight: var(--fw-bold);
-    margin-bottom: 0.25rem;
-  }
-  
-  .inputGroup {
-    display: flex;
-  }
-  
-  .input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid var(--mercury);
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
-    border-right: none;
-  }
-  
-  .testButton {
-    background-color: var(--cloud);
-    color: var(--text-color-default);
-    padding: 0.5rem;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    font-size: var(--fs-p2);
-  }
-  
-  .helpText {
-    font-size: var(--fs-p3);
-    color: var(--dove-gray-2);
-    margin-top: 0.25rem;
+  .fileTypeSelect {
+    width: 100%;
   }
   
   .select {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--mercury);
-    border-radius: 4px;
   }
+}
