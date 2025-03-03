@@ -1,0 +1,25 @@
+{
+    "steps": {
+      "one": {
+        "title": "Passo 1: Configurar Arquivos",
+        "description": "Neste passo, você vai configurar as imagens ou vídeos que serão exibidos no carrossel do WhatsApp e fornecer a chave de autorização necessária para fazer upload dos arquivos.",
+        "authSection": {
+          "label": "Chave de Autorização (Router Key)",
+          "helpText": "Esta chave é necessária para o envio dos arquivos e criação do template. Você pode encontrá-la no portal do Blip."
+        }
+      },
+      "two": {
+        "title": "Passo 2: Criação do Template",
+        "description": "Configure os detalhes do seu template de carrossel, incluindo nome, idioma e conteúdo dos cards."
+      }
+    },
+    "validationMessages": {
+      "authKey": "Por favor, insira uma chave de autorização válida.",
+      "templateName": "O nome do template deve ter pelo menos 3 caracteres",
+      "missingFiles": "Adicione URLs para todos os cards antes de continuar."
+    },
+    "hints": {
+      "templateName": "Use um nome descritivo sem espaços, mínimo de 3 caracteres. Exemplo: 'promocao_verao' ou 'lancamento_produto'",
+      "cardText": "Mantenha entre 60-120 caracteres para melhor visualização. Destaque os principais benefícios ou características."
+    }
+  }
