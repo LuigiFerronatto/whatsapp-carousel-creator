@@ -1,25 +1,89 @@
 {
-    "steps": {
-      "one": {
-        "title": "Passo 1: Configurar Arquivos",
-        "description": "Neste passo, você vai configurar as imagens ou vídeos que serão exibidos no carrossel do WhatsApp e fornecer a chave de autorização necessária para fazer upload dos arquivos.",
-        "authSection": {
-          "label": "Chave de Autorização (Router Key)",
-          "helpText": "Esta chave é necessária para o envio dos arquivos e criação do template. Você pode encontrá-la no portal do Blip."
-        }
-      },
-      "two": {
-        "title": "Passo 2: Criação do Template",
-        "description": "Configure os detalhes do seu template de carrossel, incluindo nome, idioma e conteúdo dos cards."
+    "global": {
+      "appName": "Criador de Carrossel WhatsApp",
+      "buttons": {
+        "next": "Próximo",
+        "back": "Voltar",
+        "continue": "Continuar",
+        "save": "Salvar",
+        "saveFiles": "Salvar Arquivos e Continuar",
+        "draft": "Salvar Rascunho",
+        "reset": "Reiniciar"
       }
     },
-    "validationMessages": {
-      "authKey": "Por favor, insira uma chave de autorização válida.",
-      "templateName": "O nome do template deve ter pelo menos 3 caracteres",
-      "missingFiles": "Adicione URLs para todos os cards antes de continuar."
+    "steps": {
+      "1": {
+        "title": "Configuração de Arquivos",
+        "description": "Faça upload das mídias e configure sua chave de autorização",
+        "authKey": {
+          "label": "Chave de Autorização (Router Key)",
+          "placeholder": "Key=xxxxxxxxx",
+          "help": "Encontre sua chave no portal da Blip. Ela é essencial para upload e criação do template."
+        },
+        "fileUpload": {
+          "title": "Upload de Mídias",
+          "description": "Adicione de 2 a 10 cards com imagens ou vídeos",
+          "uploadMethods": {
+            "url": "Usar URL",
+            "file": "Upload de Arquivo"
+          }
+        },
+        "validations": {
+          "authKeyRequired": "A chave de autorização é obrigatória",
+          "missingFiles": "Adicione URLs ou faça upload para todos os cards"
+        }
+      },
+      "2": {
+        "title": "Personalização do Template",
+        "description": "Configure o nome, idioma e conteúdo dos cards",
+        "templateName": {
+          "label": "Nome do Template",
+          "placeholder": "meu_template_carousel",
+          "help": "Use um nome descritivo sem espaços. Exemplo: promocao_verao"
+        },
+        "bodyText": {
+          "label": "Texto do Corpo da Mensagem",
+          "placeholder": "Descrição geral do carrossel que aparecerá antes dos cards",
+          "help": "Texto introdutório que motiva o usuário a interagir com o carrossel"
+        },
+        "validations": {
+          "nameRequired": "Nome do template é obrigatório",
+          "bodyTextRequired": "Texto do corpo da mensagem é obrigatório",
+          "cardValidation": "Todos os cards precisam ter texto e pelo menos um botão"
+        }
+      },
+      "3": {
+        "title": "Finalização do Template",
+        "description": "Visualize o JSON do template e prepare para envio",
+        "jsonSection": {
+          "createTemplate": "JSON para criação do template",
+          "sendTemplate": "JSON para envio do template"
+        }
+      },
+      "4": {
+        "title": "Envio do Template",
+        "description": "Envie o template para um número de WhatsApp",
+        "phoneNumber": {
+          "label": "Número de Telefone",
+          "placeholder": "5521999999999",
+          "help": "Digite o número completo com DDI"
+        }
+      }
     },
-    "hints": {
-      "templateName": "Use um nome descritivo sem espaços, mínimo de 3 caracteres. Exemplo: 'promocao_verao' ou 'lancamento_produto'",
-      "cardText": "Mantenha entre 60-120 caracteres para melhor visualização. Destaque os principais benefícios ou características."
+    "errors": {
+      "generic": {
+        "validationError": "Por favor, corrija os erros antes de continuar",
+        "uploadFailed": "Falha no upload. Verifique suas credenciais e conexão.",
+        "apiError": "Erro na comunicação com a API. Tente novamente."
+      },
+      "fileUpload": {
+        "invalidType": "Tipo de arquivo não suportado",
+        "sizeLimit": "Arquivo muito grande. Limite: 50MB"
+      }
+    },
+    "success": {
+      "templateCreated": "Template criado com sucesso!",
+      "filesUploaded": "Arquivos enviados com sucesso",
+      "templateSent": "Template enviado para o número informado"
     }
-  }
+  } 

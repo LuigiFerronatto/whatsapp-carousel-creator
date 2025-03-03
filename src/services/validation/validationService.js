@@ -77,8 +77,8 @@ export const validateTemplate = (templateName, bodyText, authKey, cards) => {
         throw new Error(`Texto do botão ${j+1} no card ${i+1} é obrigatório`);
       }
       
-      if (button.text.length > 20) {
-        throw new Error(`Texto do botão ${j+1} no card ${i+1} excede o limite de 20 caracteres. Atual: ${button.text.length}`);
+      if (button.text.length > 25) {
+        throw new Error(`Texto do botão ${j+1} no card ${i+1} excede o limite de 25 caracteres. Atual: ${button.text.length}`);
       }
       
       if (button.type === 'URL' && !button.url) {

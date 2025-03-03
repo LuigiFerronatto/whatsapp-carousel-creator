@@ -20,6 +20,20 @@
   font-weight: var(--fw-bold);
   margin-bottom: 0.75rem;
   color: var(--blip-blue-brand);
+  position: relative;
+  display: inline-block;
+}
+
+.stepTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: var(--blip-action);
+  border-radius: 3px;
 }
 
 .stepDescription {
@@ -28,37 +42,37 @@
   line-height: 1.5;
 }
 
-/* Seção de autenticação */
+/* Authentication section */
 .authSection {
   margin-bottom: 1rem;
 }
 
 .authCard {
-  padding: 1.25rem;
+  padding: 1.5rem;
   background-color: var(--snow);
   border: 1px solid var(--blip-light);
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .authCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .authHeader {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .authIconContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   background-color: var(--blip-light);
   color: var(--blip-dark);
   border-radius: 50%;
@@ -87,25 +101,50 @@
   font-size: var(--fs-p3);
   cursor: pointer;
   padding: 0.25rem 0.5rem;
+  transition: color 0.2s ease;
 }
 
 .visibilityToggle:hover {
+  color: var(--blip-dark);
   text-decoration: underline;
 }
 
-/* Seção de controle de cards */
+.authOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.rememberKeyLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--fs-p3);
+  color: var(--text-color-default);
+  cursor: pointer;
+}
+
+.rememberKeyCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--blip-action);
+}
+
+/* Cards control section */
 .cardsControlSection {
-  padding: 1.25rem;
+  padding: 1.5rem;
   background-color: var(--box);
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--wave);
 }
 
 .controlHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .controlTitle {
@@ -117,17 +156,22 @@
 .cardCounter {
   display: flex;
   align-items: center;
+  background-color: var(--snow);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .cardCountLabel {
   margin-right: 0.75rem;
   font-size: var(--fs-p2);
+  font-weight: var(--fw-bold);
 }
 
 .buttonGroup {
   display: flex;
   align-items: center;
-  background-color: var(--snow);
+  background-color: var(--whisper);
   border-radius: 2rem;
   padding: 0.25rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -165,13 +209,102 @@
   color: var(--blip-blue-brand);
 }
 
+.cardControlOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .cardControlHelp {
   font-size: var(--fs-p2);
   color: var(--dove-gray-2);
   margin-top: 0.5rem;
 }
 
-/* Grid de cards */
+.cardTipsContainer {
+  position: relative;
+}
+
+.tipsToggle {
+  background: none;
+  border: none;
+  color: var(--blip-action);
+  font-size: var(--fs-p3);
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cardTips {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background-color: var(--whisper);
+  border-left: 3px solid var(--blip-light);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+}
+
+.cardTips h4 {
+  font-size: var(--fs-p2);
+  margin-bottom: 0.5rem;
+  color: var(--blip-dark);
+}
+
+.cardTips ul {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.cardTips li {
+  margin-bottom: 0.25rem;
+}
+
+.jumpToCardsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: var(--color-surface-1);
+  color: var(--blip-action);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.jumpToCardsButton:hover {
+  background-color: var(--color-surface-2);
+  transform: translateY(-1px);
+}
+
+.importUrlsSection {
+  margin-bottom: 0.5rem;
+}
+
+.bulkImportButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--fs-p2);
+  color: var(--blip-action);
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-decoration: underline;
+}
+
+.bulkImportButton:hover {
+  color: var(--blip-dark);
+}
+
+/* Grid of cards */
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -179,7 +312,7 @@
   margin-bottom: 1.5rem;
 }
 
-/* Estilos gerais de formulário */
+/* Form elements */
 .formGroup {
   margin-bottom: 0.75rem;
 }
@@ -195,8 +328,8 @@
 .input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--mercury);
-  border-radius: 0.25rem;
+  border: 1px solid var(--wave);
+  border-radius: 0.5rem;
   font-size: var(--fs-p1);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -210,15 +343,32 @@
 .helpText {
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
-  margin-top: 0.5rem;
+  max-width: 300px;
 }
 
-/* Seção de ação */
+/* Action section */
 .actionSection {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--wave);
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+.saveButton {
+  flex: 0 0 auto;
+}
+
+.uploadButton {
+  flex: 1;
 }
 
 .validationMessage {
@@ -226,15 +376,20 @@
   font-size: var(--fs-p2);
   margin-top: 0.75rem;
   text-align: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--cinderella);
+  border-radius: 0.25rem;
+  width: 100%;
+  max-width: 600px;
 }
 
-/* Resumo de uploads */
+/* Upload summary */
 .uploadSummary {
   margin-top: 1.5rem;
-  padding: 1rem;
-  background-color: var(--breeze);
+  padding: 1.25rem;
+  background-color: var(--whisper);
   border: 1px solid var(--blip-light);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   animation: fadeIn 0.5s ease;
 }
 
@@ -259,13 +414,16 @@
 .summaryItem {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: 0.75rem;
   font-size: var(--fs-p2);
-  border-bottom: 1px solid var(--hover-light);
+  border-bottom: 1px solid var(--wave);
+  background-color: var(--snow);
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .summaryItem:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .successStatus {
@@ -280,7 +438,7 @@
   margin-left: 0.5rem;
 }
 
-/* Responsividade */
+/* Responsiveness */
 @media (max-width: 768px) {
   .cardsGrid {
     grid-template-columns: 1fr;
@@ -296,6 +454,10 @@
     width: 100%;
     justify-content: space-between;
   }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 480px) {
@@ -305,5 +467,14 @@
   
   .buttonGroup {
     margin-left: auto;
+  }
+  
+  .authHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .authIconContainer {
+    margin-bottom: 0.5rem;
   }
 }

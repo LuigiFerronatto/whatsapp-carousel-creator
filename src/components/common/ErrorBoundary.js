@@ -1,9 +1,12 @@
 // components/common/ErrorBoundary.js
 import React, { Component } from 'react';
+import { FiAlertTriangle, FiRefreshCw, FiArrowLeft } from 'react-icons/fi';
+import Button from './Button';
+import styles from './ErrorBoundary.module.css';
 
 /**
- * Componente de limite de erro que captura erros em qualquer componente filho
- * e exibe uma UI alternativa em vez de fazer o aplicativo falhar
+ * Error boundary component that catches errors in child components
+ * and displays a fallback UI instead of crashing the app
  */
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -16,29 +19,29 @@ class ErrorBoundary extends Component {
   }
 
   /**
-   * Atualiza o estado para que a próxima renderização mostre a UI de fallback
-   * @param {Error} error - O erro que foi lançado
+   * Update state to show fallback UI in the next render
+   * @param {Error} error - The error that was thrown
    */
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
 
   /**
-   * Chamado quando um erro foi capturado
-   * Útil para registrar o erro
-   * @param {Error} error - O erro que foi lançado
-   * @param {Object} errorInfo - Informações sobre o erro
+   * Called when an error is caught
+   * Useful for logging the error
+   * @param {Error} error - The error that was thrown
+   * @param {Object} errorInfo - Information about the error
    */
   componentDidCatch(error, errorInfo) {
-    // Registrar o erro em um serviço de relatório de erros
+    // Log the error to console
     console.error('Error caught by boundary:', error, errorInfo);
     this.setState({ errorInfo });
     
-    // Você pode enviar o erro para um serviço como Sentry aqui
+    // You can send the error to a service like Sentry here
   }
 
   /**
-   * Reinicia o estado do limite de erro
+   * Reset the error boundary state
    */
   handleReset = () => {
     this.setState({
@@ -49,96 +52,70 @@ class ErrorBoundary extends Component {
   };
 
   render() {
-    if (this.state.hasError) {
-      // Você pode renderizar qualquer UI de fallback
+    const { showDetails, fallbackAction, fallbackActionText, children } = this.props;
+    const { hasError, error, errorInfo } = this.state;
+
+    if (hasError) {
+      // Render fallback UI
       return (
-        <div style={{
-          padding: '2rem',
-          margin: '1rem',
-          backgroundColor: '#fff8f8',
-          border: '1px solid #ffe0e0',
-          borderRadius: '0.5rem',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-        }}>
-          <h2 style={{ color: '#e60f0f', marginBottom: '1rem' }}>
-            Ops! Algo deu errado.
+        <div className={styles.container}>
+          <div className={styles.iconContainer}>
+            <FiAlertTriangle className={styles.icon} />
+          </div>
+          
+          <h2 className={styles.title}>
+            Oops! Something went wrong.
           </h2>
-          <p style={{ marginBottom: '1rem' }}>
-            Ocorreu um erro ao renderizar este componente.
+          
+          <p className={styles.message}>
+            An error occurred while rendering this component.
           </p>
           
-          {this.props.showDetails && this.state.error && (
-            <details style={{ 
-              marginBottom: '1rem',
-              padding: '0.5rem',
-              backgroundColor: '#f9f9f9',
-              border: '1px solid #e0e0e0',
-              borderRadius: '0.25rem'
-            }}>
-              <summary style={{ fontWeight: 'bold', cursor: 'pointer' }}>
-                Detalhes do erro
+          {showDetails && error && (
+            <details className={styles.details}>
+              <summary className={styles.summary}>
+                Error details
               </summary>
-              <pre style={{ 
-                marginTop: '0.5rem',
-                padding: '0.5rem',
-                overflowX: 'auto',
-                backgroundColor: '#f3f3f3',
-                fontSize: '0.85rem'
-              }}>
-                {this.state.error.toString()}
-              </pre>
-              {this.state.errorInfo && (
-                <pre style={{ 
-                  marginTop: '0.5rem',
-                  padding: '0.5rem',
-                  overflowX: 'auto',
-                  backgroundColor: '#f3f3f3',
-                  fontSize: '0.85rem',
-                  maxHeight: '20rem'
-                }}>
-                  {this.state.errorInfo.componentStack}
-                </pre>
-              )}
+              <div className={styles.errorContent}>
+                <div className={styles.errorMessage}>
+                  {error.toString()}
+                </div>
+                {errorInfo && (
+                  <pre className={styles.stackTrace}>
+                    {errorInfo.componentStack}
+                  </pre>
+                )}
+              </div>
             </details>
           )}
           
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button 
+          <div className={styles.actions}>
+            <Button 
+              variant="solid"
+              color="primary"
               onClick={this.handleReset}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#1968F0',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.25rem',
-                cursor: 'pointer'
-              }}
+              iconLeft={<FiRefreshCw />}
             >
-              Tentar Novamente
-            </button>
+              Try Again
+            </Button>
             
-            {this.props.fallbackRender && (
-              <button
-                onClick={() => this.props.fallbackAction?.()}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#e0e0e0',
-                  color: '#333',
-                  border: 'none',
-                  borderRadius: '0.25rem',
-                  cursor: 'pointer'
-                }}
+            {fallbackAction && (
+              <Button
+                variant="outline"
+                color="content"
+                onClick={fallbackAction}
+                iconLeft={<FiArrowLeft />}
               >
-                {this.props.fallbackActionText || 'Voltar'}
-              </button>
+                {fallbackActionText || 'Back'}
+              </Button>
             )}
           </div>
         </div>
       );
     }
 
-    // Renderiza os filhos normalmente se não houver erro
-    return this.props.children;
+    // Render children normally if there is no error
+    return children;
   }
 }
 

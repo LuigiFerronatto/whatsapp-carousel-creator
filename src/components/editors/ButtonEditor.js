@@ -1,5 +1,6 @@
 // components/editors/ButtonEditor.js
 import React, { useState } from 'react';
+import { FiLink, FiPhone, FiMessageSquare, FiInfo, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import styles from './ButtonEditor.module.css';
 
 const ButtonEditor = ({ 
@@ -14,6 +15,8 @@ const ButtonEditor = ({
 }) => {
   const [showUrlHelp, setShowUrlHelp] = useState(false);
   const [showPhoneHelp, setShowPhoneHelp] = useState(false);
+  const [urlTested, setUrlTested] = useState(false);
+  const [phoneTested, setPhoneTested] = useState(false);
   
   // Validate fields
   const isTextValid = !!button.text;
@@ -45,76 +48,66 @@ const ButtonEditor = ({
       return false;
     }
   };
+
+  // Test URL link
+  const testUrl = () => {
+    if (button.url && isValidUrl(button.url)) {
+      window.open(button.url, '_blank', 'noopener,noreferrer');
+      setUrlTested(true);
+      // Reset tested state after a while
+      setTimeout(() => setUrlTested(false), 3000);
+    }
+  };
+
+  // Display phone number in a formatted way
+  const formatPhoneDisplay = (phone) => {
+    if (!phone) return '';
+    
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length < 7) return phone;
+    
+    // Simple formatting to make it more readable
+    const countryCode = cleaned.substring(0, 2);
+    const areaCode = cleaned.substring(2, 4);
+    const firstPart = cleaned.substring(4, 9);
+    const secondPart = cleaned.substring(9);
+    
+    return `+${countryCode} (${areaCode}) ${firstPart}-${secondPart}`;
+  };
+
+  // Test phone number
+  const testPhoneNumber = () => {
+    if (button.phoneNumber) {
+      window.location.href = `tel:${button.phoneNumber}`;
+      setPhoneTested(true);
+      setTimeout(() => setPhoneTested(false), 3000);
+    }
+  };
   
   // Button type options with icons
   const buttonTypes = [
     { 
       value: 'URL', 
       label: 'Link URL', 
-      icon: (
-        <svg className={styles.typeIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M18 10.82a1 1 0 0 0-1 1V16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4.18a1 1 0 0 0 0-2H6a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-4.18a1 1 0 0 0-1-1z"/>
-          <path d="M21.92 2.62a1 1 0 0 0-.54-.54A1 1 0 0 0 21 2h-6a1 1 0 0 0 0 2h3.59l-7.3 7.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0L20 5.41V9a1 1 0 0 0 2 0V3a1 1 0 0 0-.08-.38z"/>
-        </svg>
-      ),
-      description: 'Abre o link em um navegador externo quando clicado'
+      icon: <FiLink size={18} />,
+      description: 'Opens a link in an external browser when clicked'
     },
     { 
       value: 'QUICK_REPLY', 
-      label: 'Resposta Rápida', 
-      icon: (
-        <svg className={styles.typeIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
-          <path d="M7 9h10v2H7z"/>
-          <path d="M7 12h5v2H7z"/>
-        </svg>
-      ),
-      description: 'Envia uma resposta pré-definida quando clicado'
+      label: 'Quick Reply', 
+      icon: <FiMessageSquare size={18} />,
+      description: 'Sends a pre-defined response when clicked'
     },
     { 
       value: 'PHONE_NUMBER', 
-      label: 'Telefone', 
-      icon: (
-        <svg className={styles.typeIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
-        </svg>
-      ),
-      description: 'Inicia uma chamada telefônica quando clicado'
+      label: 'Phone', 
+      icon: <FiPhone size={18} />,
+      description: 'Initiates a phone call when clicked'
     }
   ];
 
   return (
     <div className={`${styles.buttonContainer} ${validationMessage ? styles.invalidContainer : ''}`}>
-      <div className={styles.buttonHeader}>
-        <div className={styles.buttonTitleWrapper}>
-          <span className={styles.buttonTitle}>
-            Botão {buttonIndex + 1}
-          </span>
-          <div className={styles.buttonTypeBadge}>
-            {buttonTypes.find(t => t.value === button.type)?.icon}
-            <span>{buttonTypes.find(t => t.value === button.type)?.label}</span>
-          </div>
-        </div>
-        {totalButtons > 1 && (
-          <button 
-            onClick={removeButton}
-            className={styles.removeButton}
-            aria-label="Remover botão"
-          >
-            <svg className={styles.trashIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/>
-            </svg>
-            Remover
-          </button>
-        )}
-      </div>
-      
-      {validationMessage && (
-        <div className={styles.validationMessage}>
-          {validationMessage}
-        </div>
-      )}
-      
       <div className={styles.buttonTypeSelector}>
         {buttonTypes.map(type => (
           <div 
@@ -122,7 +115,9 @@ const ButtonEditor = ({
             className={`${styles.typeOption} ${button.type === type.value ? styles.selectedType : ''}`}
             onClick={() => updateButtonField(buttonIndex, 'type', type.value)}
           >
-            {type.icon}
+            <div className={styles.typeIconWrapper}>
+              {type.icon}
+            </div>
             <span className={styles.typeLabel}>{type.label}</span>
           </div>
         ))}
@@ -136,7 +131,7 @@ const ButtonEditor = ({
       
       <div className={styles.formGroup}>
         <label className={styles.label}>
-          Texto do Botão
+          Button Text
           <span className={styles.requiredMark}>*</span>
         </label>
         <div className={styles.inputWrapper}>
@@ -145,7 +140,7 @@ const ButtonEditor = ({
             className={`${styles.input} ${!isTextValid && button.text !== '' ? styles.invalidInput : ''}`}
             value={button.text}
             onChange={(e) => updateButtonField(buttonIndex, 'text', e.target.value)}
-            placeholder="Exemplo: Saiba Mais, Comprar Agora, etc."
+            placeholder="Example: Learn More, Buy Now, etc."
             maxLength={25}
           />
           <span className={`${styles.charCount} ${isTextWarning ? styles.warningCount : ''}`}>
@@ -154,10 +149,8 @@ const ButtonEditor = ({
         </div>
         {showHints && (
           <div className={styles.fieldHint}>
-            <svg className={styles.infoIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-            </svg>
-            Mantenha o texto curto e claro. Botões com 1-2 palavras têm melhor aparência.
+            <FiInfo className={styles.infoIcon} />
+            <span>Keep text short and clear. Buttons with 1-2 words look best.</span>
           </div>
         )}
       </div>
@@ -166,7 +159,7 @@ const ButtonEditor = ({
         <div className={styles.formGroup}>
           <div className={styles.labelWithHelp}>
             <label className={styles.label}>
-              URL de Destino
+              Destination URL
               <span className={styles.requiredMark}>*</span>
             </label>
             <button 
@@ -174,34 +167,54 @@ const ButtonEditor = ({
               className={styles.helpButton}
               onClick={() => setShowUrlHelp(!showUrlHelp)}
             >
-              {showUrlHelp ? "Ocultar Ajuda" : "Ver Ajuda"}
+              {showUrlHelp ? "Hide Help" : "Show Help"}
             </button>
           </div>
-          <input 
-            type="url"
-            className={`${styles.input} ${!isUrlValid && button.url !== '' ? styles.invalidInput : ''}`}
-            value={button.url || ''}
-            onChange={(e) => updateButtonField(buttonIndex, 'url', e.target.value)}
-            placeholder="https://www.exemplo.com.br/pagina"
-          />
+          <div className={styles.urlInputWrapper}>
+            <input 
+              type="url"
+              className={`${styles.input} ${!isUrlValid && button.url !== '' ? styles.invalidInput : ''}`}
+              value={button.url || ''}
+              onChange={(e) => updateButtonField(buttonIndex, 'url', e.target.value)}
+              placeholder="https://example.com/page"
+            />
+            {button.url && (
+              <button 
+                type="button"
+                className={styles.testActionButton}
+                onClick={testUrl}
+                disabled={!isValidUrl(button.url)}
+              >
+                {urlTested ? (
+                  <>
+                    <FiCheckCircle size={14} />
+                    Opened
+                  </>
+                ) : (
+                  'Test'
+                )}
+              </button>
+            )}
+          </div>
           {button.url && !isValidUrl(button.url) && (
             <div className={styles.urlWarning}>
-              URL inválida. Certifique-se de incluir "https://" ou "http://"
+              <FiAlertCircle size={14} />
+              Invalid URL. Make sure to include "https://" or "http://"
             </div>
           )}
           {showUrlHelp && (
             <div className={styles.helpContent}>
-              <h4>Como criar um bom link:</h4>
+              <h4>How to create a good link:</h4>
               <ul>
-                <li>Use sempre HTTPS quando possível (mais seguro)</li>
-                <li>URL completa deve incluir "https://" no início</li>
-                <li>Evite encurtadores de URL não confiáveis</li>
-                <li>Teste o link antes de salvar</li>
+                <li>Always use HTTPS when possible (more secure)</li>
+                <li>Full URL must include "https://" at the beginning</li>
+                <li>Avoid unreliable URL shorteners</li>
+                <li>Test the link before saving</li>
               </ul>
               <div className={styles.exampleBox}>
-                <strong>Exemplos válidos:</strong>
-                <code>https://www.exemplo.com.br</code>
-                <code>https://exemplo.com.br/produto?id=123</code>
+                <strong>Valid examples:</strong>
+                <code>https://www.example.com</code>
+                <code>https://example.com/product?id=123</code>
               </div>
             </div>
           )}
@@ -211,22 +224,20 @@ const ButtonEditor = ({
       {button.type === 'QUICK_REPLY' && (
         <div className={styles.formGroup}>
           <label className={styles.label}>
-            Payload (opcional)
-            <span className={styles.optionalBadge}>Opcional</span>
+            Payload (optional)
+            <span className={styles.optionalBadge}>Optional</span>
           </label>
           <input 
             type="text"
             className={styles.input}
             value={button.payload || ''}
             onChange={(e) => updateButtonField(buttonIndex, 'payload', e.target.value)}
-            placeholder="Deixe vazio para usar o texto do botão"
+            placeholder="Leave empty to use the button text"
           />
           {showHints && (
             <div className={styles.fieldHint}>
-              <svg className={styles.infoIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-              </svg>
-              O payload é o texto que será enviado para seu sistema quando o usuário clicar no botão.
+              <FiInfo className={styles.infoIcon} />
+              <span>The payload is the text that will be sent to your system when the user clicks the button.</span>
             </div>
           )}
         </div>
@@ -236,7 +247,7 @@ const ButtonEditor = ({
         <div className={styles.formGroup}>
           <div className={styles.labelWithHelp}>
             <label className={styles.label}>
-              Número de Telefone
+              Phone Number
               <span className={styles.requiredMark}>*</span>
             </label>
             <button 
@@ -244,7 +255,7 @@ const ButtonEditor = ({
               className={styles.helpButton}
               onClick={() => setShowPhoneHelp(!showPhoneHelp)}
             >
-              {showPhoneHelp ? "Ocultar Ajuda" : "Ver Ajuda"}
+              {showPhoneHelp ? "Hide Help" : "Show Help"}
             </button>
           </div>
           <div className={styles.phoneInputWrapper}>
@@ -255,18 +266,39 @@ const ButtonEditor = ({
               onChange={(e) => updateButtonField(buttonIndex, 'phoneNumber', formatPhoneNumber(e.target.value))}
               placeholder="+5521999999999"
             />
+            {button.phoneNumber && (
+              <button 
+                type="button"
+                className={styles.testActionButton}
+                onClick={testPhoneNumber}
+              >
+                {phoneTested ? (
+                  <>
+                    <FiCheckCircle size={14} />
+                    Called
+                  </>
+                ) : (
+                  'Test'
+                )}
+              </button>
+            )}
           </div>
+          {button.phoneNumber && (
+            <div className={styles.phonePreview}>
+              {formatPhoneDisplay(button.phoneNumber)}
+            </div>
+          )}
           {showPhoneHelp && (
             <div className={styles.helpContent}>
-              <h4>Formato do número de telefone:</h4>
+              <h4>Phone number format:</h4>
               <ul>
-                <li>Use o formato internacional com "+" no início</li>
-                <li>Inclua o código do país (Brasil: 55)</li>
-                <li>Inclua o DDD sem o zero</li>
-                <li>Não use espaços, parênteses ou hífens</li>
+                <li>Use international format with "+" at the beginning</li>
+                <li>Include the country code (Brazil: 55)</li>
+                <li>Include the area code without the zero</li>
+                <li>Do not use spaces, parentheses, or hyphens</li>
               </ul>
               <div className={styles.exampleBox}>
-                <strong>Exemplos válidos:</strong>
+                <strong>Valid examples:</strong>
                 <code>+5521999999999</code>
                 <code>+551140042222</code>
               </div>

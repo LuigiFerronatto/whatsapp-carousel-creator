@@ -1,220 +1,237 @@
 /* Button.module.css */
 .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--border-radius-sm);
-    font-family: var(--font-primary);
-    font-weight: var(--fw-bold);
-    cursor: pointer;
-    transition: background-color var(--transition-fast),
-                border-color var(--transition-fast),
-                color var(--transition-fast),
-                transform var(--transition-fast),
-                box-shadow var(--transition-fast);
-    border: 1px solid transparent;
-    outline: none;
-    position: relative;
-    white-space: nowrap;
-    text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  font-family: var(--font-primary);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast);
+  border: 1px solid transparent;
+  outline: none;
+  position: relative;
+  white-space: nowrap;
+  text-decoration: none;
+  gap: 0.5rem;
+}
+
+.button:active:not(.disabled) {
+  transform: translateY(1px);
+}
+
+.button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.25);
+}
+
+/* Button variants */
+.variant-solid {
+  border: none;
+}
+
+.variant-outline {
+  background-color: transparent;
+}
+
+.variant-text {
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+
+/* Button sizes */
+.size-small {
+  font-size: var(--fs-p3);
+  padding: 0.375rem 0.75rem;
+  height: 32px;
+}
+
+.size-medium {
+  font-size: var(--fs-p2);
+  padding: 0.5rem 1rem;
+  height: 40px;
+}
+
+.size-large {
+  font-size: var(--fs-p1);
+  padding: 0.75rem 1.5rem;
+  height: 48px;
+}
+
+/* Colors by variant */
+/* Primary */
+.variant-solid.color-primary {
+  background-color: var(--color-surface-primary);
+  color: var(--alabaster);
+}
+
+.variant-solid.color-primary:hover:not(.disabled) {
+  background-color: var(--blip-dark);
+}
+
+.variant-outline.color-primary {
+  border-color: var(--color-surface-primary);
+  color: var(--color-surface-primary);
+}
+
+.variant-outline.color-primary:hover:not(.disabled) {
+  background-color: rgba(30, 107, 241, 0.08);
+}
+
+.variant-text.color-primary {
+  color: var(--color-surface-primary);
+}
+
+.variant-text.color-primary:hover:not(.disabled) {
+  background-color: rgba(30, 107, 241, 0.08);
+}
+
+/* Content (neutral) */
+.variant-solid.color-content {
+  background-color: var(--color-surface-2);
+  color: var(--text-color-default);
+}
+
+.variant-solid.color-content:hover:not(.disabled) {
+  background-color: var(--color-surface-3);
+}
+
+.variant-outline.color-content {
+  border-color: var(--color-surface-2);
+  color: var(--text-color-default);
+}
+
+.variant-outline.color-content:hover:not(.disabled) {
+  background-color: rgba(224, 224, 224, 0.16);
+}
+
+.variant-text.color-content {
+  color: var(--text-color-default);
+}
+
+.variant-text.color-content:hover:not(.disabled) {
+  background-color: rgba(224, 224, 224, 0.16);
+}
+
+/* Positive */
+.variant-solid.color-positive {
+  background-color: var(--color-surface-positive);
+  color: var(--alabaster);
+}
+
+.variant-solid.color-positive:hover:not(.disabled) {
+  background-color: var(--jewel);
+}
+
+.variant-outline.color-positive {
+  border-color: var(--color-surface-positive);
+  color: var(--color-surface-positive);
+}
+
+.variant-outline.color-positive:hover:not(.disabled) {
+  background-color: rgba(1, 114, 62, 0.08);
+}
+
+.variant-text.color-positive {
+  color: var(--color-surface-positive);
+}
+
+.variant-text.color-positive:hover:not(.disabled) {
+  background-color: rgba(1, 114, 62, 0.08);
+}
+
+/* Negative */
+.variant-solid.color-negative {
+  background-color: var(--color-surface-negative);
+  color: var(--alabaster);
+}
+
+.variant-solid.color-negative:hover:not(.disabled) {
+  background-color: var(--milano-red);
+}
+
+.variant-outline.color-negative {
+  border-color: var(--color-surface-negative);
+  color: var(--color-surface-negative);
+}
+
+.variant-outline.color-negative:hover:not(.disabled) {
+  background-color: rgba(138, 0, 0, 0.08);
+}
+
+.variant-text.color-negative {
+  color: var(--color-surface-negative);
+}
+
+.variant-text.color-negative:hover:not(.disabled) {
+  background-color: rgba(138, 0, 0, 0.08);
+}
+
+/* Button states */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.loading {
+  cursor: wait;
+}
+
+.loading .text {
+  opacity: 0.7;
+}
+
+/* Full width */
+.fullWidth {
+  width: 100%;
+}
+
+/* Icons */
+.iconLeft {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.iconRight {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.loadingIcon {
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  .button:active:not(.disabled) {
-    transform: translateY(1px);
+  100% {
+    transform: rotate(360deg);
   }
-  
-  .button:focus-visible {
-    box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.25);
-  }
-  
-  /* Variantes */
-  .variant-solid {
-    border: none;
-  }
-  
-  .variant-outline {
-    background-color: transparent;
-  }
-  
-  .variant-text {
-    background-color: transparent;
-    border: 1px solid transparent;
-  }
-  
-  /* Tamanhos */
-  .size-medium {
+}
+
+.loadingCircle {
+  opacity: 0.25;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 45;
+}
+
+/* Responsiveness */
+@media (max-width: 480px) {
+  .size-large {
     font-size: var(--fs-p2);
     padding: 0.5rem 1rem;
-    height: 36px;
+    height: 44px;
   }
   
-  .size-large {
-    font-size: var(--fs-p1);
-    padding: 0.75rem 1.5rem;
-    height: 48px;
+  .fullWidth {
+    width: 100%;
   }
-  
-  /* Cores por variante */
-  /* Primary */
-  .variant-solid.color-primary {
-    background-color: var(--color-surface-primary);
-    color: var(--alabaster);
-  }
-  
-  .variant-solid.color-primary:hover:not(.disabled) {
-    background-color: var(--blip-dark);
-  }
-  
-  .variant-outline.color-primary {
-    border-color: var(--color-surface-primary);
-    color: var(--color-surface-primary);
-  }
-  
-  .variant-outline.color-primary:hover:not(.disabled) {
-    background-color: rgba(30, 107, 241, 0.08);
-  }
-  
-  .variant-text.color-primary {
-    color: var(--color-surface-primary);
-  }
-  
-  .variant-text.color-primary:hover:not(.disabled) {
-    background-color: rgba(30, 107, 241, 0.08);
-  }
-  
-  /* Content (neutro) */
-  .variant-solid.color-content {
-    background-color: var(--color-surface-2);
-    color: var(--text-color-default);
-  }
-  
-  .variant-solid.color-content:hover:not(.disabled) {
-    background-color: var(--color-surface-3);
-  }
-  
-  .variant-outline.color-content {
-    border-color: var(--color-surface-2);
-    color: var(--text-color-default);
-  }
-  
-  .variant-outline.color-content:hover:not(.disabled) {
-    background-color: rgba(224, 224, 224, 0.16);
-  }
-  
-  .variant-text.color-content {
-    color: var(--text-color-default);
-  }
-  
-  .variant-text.color-content:hover:not(.disabled) {
-    background-color: rgba(224, 224, 224, 0.16);
-  }
-  
-  /* Positive */
-  .variant-solid.color-positive {
-    background-color: var(--color-surface-positive);
-    color: var(--alabaster);
-  }
-  
-  .variant-solid.color-positive:hover:not(.disabled) {
-    background-color: var(--jewel);
-  }
-  
-  .variant-outline.color-positive {
-    border-color: var(--color-surface-positive);
-    color: var(--color-surface-positive);
-  }
-  
-  .variant-outline.color-positive:hover:not(.disabled) {
-    background-color: rgba(1, 114, 62, 0.08);
-  }
-  
-  .variant-text.color-positive {
-    color: var(--color-surface-positive);
-  }
-  
-  .variant-text.color-positive:hover:not(.disabled) {
-    background-color: rgba(1, 114, 62, 0.08);
-  }
-  
-  /* Negative */
-  .variant-solid.color-negative {
-    background-color: var(--color-surface-negative);
-    color: var(--alabaster);
-  }
-  
-  .variant-solid.color-negative:hover:not(.disabled) {
-    background-color: var(--milano-red);
-  }
-  
-  .variant-outline.color-negative {
-    border-color: var(--color-surface-negative);
-    color: var(--color-surface-negative);
-  }
-  
-  .variant-outline.color-negative:hover:not(.disabled) {
-    background-color: rgba(138, 0, 0, 0.08);
-  }
-  
-  .variant-text.color-negative {
-    color: var(--color-surface-negative);
-  }
-  
-  .variant-text.color-negative:hover:not(.disabled) {
-    background-color: rgba(138, 0, 0, 0.08);
-  }
-  
-  /* Estados do botão */
-  .disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .loading {
-    cursor: wait;
-  }
-  
-  .loading .text {
-    opacity: 0.7;
-  }
-  
-  /* Ícones */
-  .iconLeft {
-    display: flex;
-    margin-right: 0.5rem;
-  }
-  
-  .iconRight {
-    display: flex;
-    margin-left: 0.5rem;
-  }
-  
-  .loadingIcon {
-    width: 16px;
-    height: 16px;
-    margin-right: 0.5rem;
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .loadingCircle {
-    opacity: 0.25;
-    stroke-dasharray: 60;
-    stroke-dashoffset: 45;
-  }
-  
-  /* Responsividade */
-  @media (max-width: 480px) {
-    .size-large {
-      font-size: var(--fs-p2);
-      padding: 0.5rem 1rem;
-      height: 40px;
-    }
-  }
+}

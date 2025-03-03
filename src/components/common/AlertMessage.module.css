@@ -1,115 +1,146 @@
 /* AlertMessage.module.css */
 .container {
-    display: flex;
-    padding: 1rem;
-    border-radius: var(--border-radius-md);
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    align-items: flex-start;
-    justify-content: space-between;
-    animation: slideIn 0.3s ease-out;
+  display: flex;
+  padding: 1rem;
+  border-radius: var(--border-radius-md);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 200px;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
   }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateY(-10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
-  
-  .content {
-    display: flex;
-    align-items: flex-start;
-    flex: 1;
-  }
-  
-  .iconContainer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.messageContainer {
+  flex: 1;
+}
+
+.title {
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-p1);
+  margin-bottom: 0.25rem;
+}
+
+.message {
+  font-size: var(--fs-p2);
+  line-height: var(--lh-p);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 1rem;
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+}
+
+.closeButton:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Specific styles by alert type */
+.error {
+  background-color: var(--cinderella);
+  border-left: 4px solid var(--pomegranate);
+  color: var(--milano-red);
+}
+
+.warning {
+  background-color: var(--vis-vis);
+  border-left: 4px solid var(--marigold-yellow);
+  color: var(--buddha-gold);
+}
+
+.success {
+  background-color: var(--magic-mint);
+  border-left: 4px solid var(--shamrock);
+  color: var(--jewel);
+}
+
+.info {
+  background-color: var(--whisper);
+  border-left: 4px solid var(--blip-light);
+  color: var(--blip-dark);
+}
+
+/* Responsiveness */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
   }
   
   .icon {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .messageContainer {
-    flex: 1;
+    width: 20px;
+    height: 20px;
   }
   
   .title {
-    font-weight: var(--fw-bold);
-    font-size: var(--fs-p1);
-    margin-bottom: 0.25rem;
+    font-size: var(--fs-p2);
   }
   
   .message {
-    font-size: var(--fs-p2);
-    line-height: var(--lh-p);
+    font-size: var(--fs-p3);
   }
-  
-  .closeButton {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.25rem;
-    margin-left: 1rem;
-    color: inherit;
-    opacity: 0.7;
-    transition: opacity var(--transition-fast);
-  }
-  
-  .closeButton:hover {
-    opacity: 1;
-  }
-  
-  /* Estilos específicos por tipo de alerta */
-  .error {
-    background-color: var(--cinderella);
-    border: 1px solid var(--geraldine);
-    color: var(--milano-red);
-  }
-  
-  .warning {
-    background-color: var(--vis-vis);
-    border: 1px solid var(--marigold-yellow);
-    color: var(--buddha-gold);
-  }
-  
-  .success {
-    background-color: var(--magic-mint);
-    border: 1px solid var(--shamrock);
-    color: var(--jewel);
-  }
-  
-  .info {
-    background-color: var(--whisper);
-    border: 1px solid var(--blip-light);
-    color: var(--blip-dark);
-  }
-  
-  /* Responsividade */
-  @media (max-width: 480px) {
-    .container {
-      padding: 0.75rem;
-    }
-    
-    .icon {
-      width: 20px;
-      height: 20px;
-    }
-    
-    .title {
-      font-size: var(--fs-p2);
-    }
-    
-    .message {
-      font-size: var(--fs-p3);
-    }
-  }
+}

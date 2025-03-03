@@ -1,7 +1,8 @@
-// components/StepThree.js
-import React from 'react';
-import StatusMessage from '../common/StatusMessage';
-import JsonViewer from '../common/JsonViewer';
+// components/steps/StepThree.js
+import React, { useState } from 'react';
+import AlertMessage from '../common/AlertMessage';
+import CarouselPreview from '../previews/CarouselPreview';
+import { FiChevronLeft, FiChevronRight, FiCopy, FiCheck, FiSend, FiCode, FiEye, FiDownload, FiRefreshCw } from 'react-icons/fi';
 import styles from './StepThree.module.css';
 
 const StepThree = ({
@@ -13,78 +14,284 @@ const StepThree = ({
   resetForm,
   error,
   success,
-  loading
+  loading,
+  cards,
+  bodyText,
+  setStep,
+  templateName
 }) => {
+  const [activeView, setActiveView] = useState('visual');
+  const [justCopied, setJustCopied] = useState({
+    createTemplate: false,
+    sendTemplate: false
+  });
+  const [sendStep, setSendStep] = useState(1);
+  const [showApprovalInfo, setShowApprovalInfo] = useState(false);
+
+  // Function to handle copy and show feedback
+  const handleCopy = (jsonType) => {
+    copyToClipboard(jsonType);
+    setJustCopied({
+      ...justCopied,
+      [jsonType]: true
+    });
+    
+    // Reset copied state after 2 seconds
+    setTimeout(() => {
+      setJustCopied({
+        ...justCopied,
+        [jsonType]: false
+      });
+    }, 2000);
+  };
+
+  // Function to download template JSON as file
+  const downloadTemplate = (jsonType) => {
+    const jsonContent = JSON.stringify(finalJson[jsonType], null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${templateName}_${jsonType}.json`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Function to handle sending template
+  const handleSendTemplate = () => {
+    sendTemplate();
+    setSendStep(2);
+  };
+
+  // Function to toggle approval info
+  const toggleApprovalInfo = () => {
+    setShowApprovalInfo(!showApprovalInfo);
+  };
+
   return (
     <div className={styles.container}>
-      <h2 className={styles.stepTitle}>Passo 3: Template Criado</h2>
-      
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>1. JSON para criar o template:</h3>
-        <JsonViewer 
-          json={finalJson.createTemplate} 
-          onCopy={() => copyToClipboard('createTemplate')} 
-        />
+      <div className={styles.headerSection}>
+        <h2 className={styles.stepTitle}>Step 3: Template Created</h2>
+        <p className={styles.stepDescription}>
+          Your template has been created successfully. You can now send it for testing or copy the JSON for use in your application.
+        </p>
       </div>
       
-      <div className={styles.largeSection}>
-        <h3 className={styles.sectionTitle}>2. JSON para enviar o template:</h3>
-        <JsonViewer 
-          json={finalJson.sendTemplate} 
-          onCopy={() => copyToClipboard('sendTemplate')} 
-        />
-      </div>
-      
-      <div className={styles.sendSection}>
-        <h3 className={styles.sendTitle}>Enviar Template para WhatsApp</h3>
-        <p className={styles.sendText}>Envie o template diretamente para um número de WhatsApp:</p>
-        
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Número de Telefone (com DDI)</label>
-          <input 
-            type="text" 
-            className={styles.input}
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="5521999999999"
-          />
-          <p className={styles.helpText}>Digite o número completo com DDI (ex: 5521999999999)</p>
-        </div>
-        
+      <div className={styles.viewTabs}>
         <button 
-          className={styles.sendButton}
-          onClick={sendTemplate}
-          disabled={loading}
+          className={`${styles.viewTab} ${activeView === 'visual' ? styles.activeTab : ''}`}
+          onClick={() => setActiveView('visual')}
         >
-          {loading && (
-            <svg className={styles.loadingIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          )}
-          {loading ? 'Enviando...' : 'Enviar Template'}
+          <FiEye className={styles.tabIcon} />
+          Visual Preview
+        </button>
+        <button 
+          className={`${styles.viewTab} ${activeView === 'code' ? styles.activeTab : ''}`}
+          onClick={() => setActiveView('code')}
+        >
+          <FiCode className={styles.tabIcon} />
+          JSON Code
+        </button>
+        <button 
+          className={`${styles.viewTab} ${activeView === 'send' ? styles.activeTab : ''}`}
+          onClick={() => setActiveView('send')}
+        >
+          <FiSend className={styles.tabIcon} />
+          Send Template
         </button>
       </div>
       
-      <div className={styles.nextStepsSection}>
-        <h3 className={styles.nextStepsTitle}>Próximos Passos:</h3>
-        <ol className={styles.stepsList}>
-          <li className={styles.stepItem}>O template criado precisa ser aprovado pela Meta antes de poder ser enviado</li>
-          <li className={styles.stepItem}>O processo de aprovação geralmente leva algumas horas ou dias</li>
-          <li className={styles.stepItem}>Após aprovado, você pode enviar o template para qualquer contato que interagiu com seu número</li>
-        </ol>
+      <div className={styles.viewContent}>
+        {activeView === 'visual' && (
+          <div className={styles.visualPreview}>
+            <div className={styles.previewHeader}>
+              <h3 className={styles.previewTitle}>Template Preview</h3>
+              <p className={styles.previewSubtitle}>This is how your carousel will appear in WhatsApp</p>
+            </div>
+            
+            <div className={styles.previewContainer}>
+              <CarouselPreview 
+                cards={cards} 
+                bodyText={bodyText} 
+                contactName="WhatsApp Business"
+              />
+            </div>
+          </div>
+        )}
+        
+        {activeView === 'code' && (
+          <div className={styles.codeView}>
+            <div className={styles.codeSection}>
+              <div className={styles.codeSectionHeader}>
+                <h3 className={styles.codeSectionTitle}>1. JSON for creating the template</h3>
+                <div className={styles.codeActions}>
+                  <button 
+                    className={styles.codeActionButton}
+                    onClick={() => downloadTemplate('createTemplate')}
+                    title="Download JSON"
+                  >
+                    <FiDownload />
+                  </button>
+                  <button 
+                    className={styles.codeActionButton}
+                    onClick={() => handleCopy('createTemplate')}
+                    title="Copy JSON"
+                  >
+                    {justCopied.createTemplate ? <FiCheck /> : <FiCopy />}
+                  </button>
+                </div>
+              </div>
+              <div className={styles.codeContainer}>
+                <pre className={styles.codeBlock}>
+                  {JSON.stringify(finalJson.createTemplate, null, 2)}
+                </pre>
+              </div>
+            </div>
+            
+            <div className={styles.codeSection}>
+              <div className={styles.codeSectionHeader}>
+                <h3 className={styles.codeSectionTitle}>2. JSON for sending the template</h3>
+                <div className={styles.codeActions}>
+                  <button 
+                    className={styles.codeActionButton}
+                    onClick={() => downloadTemplate('sendTemplate')}
+                    title="Download JSON"
+                  >
+                    <FiDownload />
+                  </button>
+                  <button 
+                    className={styles.codeActionButton}
+                    onClick={() => handleCopy('sendTemplate')}
+                    title="Copy JSON"
+                  >
+                    {justCopied.sendTemplate ? <FiCheck /> : <FiCopy />}
+                  </button>
+                </div>
+              </div>
+              <div className={styles.codeContainer}>
+                <pre className={styles.codeBlock}>
+                  {JSON.stringify(finalJson.sendTemplate, null, 2)}
+                </pre>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {activeView === 'send' && (
+          <div className={styles.sendView}>
+            {sendStep === 1 ? (
+              <div className={styles.sendForm}>
+                <h3 className={styles.sendTitle}>Send Template for Testing</h3>
+                <p className={styles.sendDescription}>
+                  Send your template directly to a WhatsApp number to test it before submission.
+                </p>
+                
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>WhatsApp Number (with country code)</label>
+                  <div className={styles.phoneInputWrapper}>
+                    <span className={styles.phonePrefix}>+</span>
+                    <input 
+                      type="tel" 
+                      className={styles.phoneInput}
+                      value={phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value.startsWith('+') ? e.target.value : '+' + e.target.value)}
+                      placeholder="5521999999999"
+                    />
+                  </div>
+                  <p className={styles.helpText}>Enter the full number with country code (e.g., 5521999999999)</p>
+                </div>
+                
+                <button 
+                  className={styles.sendButton}
+                  onClick={handleSendTemplate}
+                  disabled={loading || !phoneNumber}
+                >
+                  {loading ? (
+                    <>
+                      <div className={styles.loadingSpinner}></div>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <FiSend />
+                      Send Template
+                    </>
+                  )}
+                </button>
+                
+                <div className={styles.approvalInfoToggle}>
+                  <button 
+                    className={styles.infoToggleButton}
+                    onClick={toggleApprovalInfo}
+                  >
+                    {showApprovalInfo ? 'Hide approval information' : 'Show approval information'}
+                  </button>
+                  
+                  {showApprovalInfo && (
+                    <div className={styles.approvalInfoBox}>
+                      <h4>Template Approval Process</h4>
+                      <ol className={styles.approvalSteps}>
+                        <li>Templates are subject to Meta review before being approved</li>
+                        <li>Approval usually takes 24-48 hours</li>
+                        <li>Once approved, the template can be sent to any user who has messaged your number</li>
+                        <li>Avoid promotional language and follow WhatsApp's guidelines for higher approval rates</li>
+                      </ol>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.sendResult}>
+                <div className={styles.sendSuccessIcon}>
+                  <FiCheck size={48} />
+                </div>
+                <h3 className={styles.sendSuccessTitle}>Template Sent Successfully!</h3>
+                <p className={styles.sendSuccessMessage}>
+                  Your template has been sent to <strong>{phoneNumber}</strong> for testing.
+                </p>
+                <p className={styles.sendSuccessNote}>
+                  If you don't receive the message, please ensure the number is valid and has previously messaged your WhatsApp Business account.
+                </p>
+                
+                <div className={styles.sendResultActions}>
+                  <button 
+                    className={styles.sendAgainButton}
+                    onClick={() => setSendStep(1)}
+                  >
+                    <FiRefreshCw />
+                    Send to Another Number
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
-      <div className={styles.largeSection}>
+      <div className={styles.actionButtons}>
+        <button 
+          className={styles.backButton}
+          onClick={() => setStep(2)}
+        >
+          <FiChevronLeft />
+          Back to Editing
+        </button>
+        
         <button 
           className={styles.newTemplateButton}
           onClick={resetForm}
         >
-          Criar Novo Template
+          Create New Template
         </button>
       </div>
       
-      <StatusMessage error={error} success={success} />
+      {error && <AlertMessage error={error} onClose={() => {}} />}
+      {success && activeView !== 'send' && <AlertMessage success={success} onClose={() => {}} />}
     </div>
   );
 };

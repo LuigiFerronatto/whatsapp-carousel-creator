@@ -1,13 +1,54 @@
 // components/common/IntroductionGuide.js
 import React, { useState, useEffect } from 'react';
-import { FiX, FiChevronRight, FiChevronLeft, FiHelpCircle } from 'react-icons/fi';
+import { FiX, FiChevronRight, FiChevronLeft, FiHelpCircle, FiInfo } from 'react-icons/fi';
+import Button from './Button';
 import styles from './IntroductionGuide.module.css';
 
-const IntroductionGuide = ({ onClose }) => {
+/**
+ * Introduction Guide component that shows a step-by-step tutorial
+ * @param {Object} props - Component properties
+ * @param {Function} props.onClose - Function to call when the guide is closed
+ * @param {Array} props.steps - Array of steps for the guide
+ * @param {boolean} props.showFloatingHelp - Whether to show the floating help button after closing
+ * @returns {JSX.Element} Introduction guide component
+ */
+const IntroductionGuide = ({ onClose, steps: customSteps, showFloatingHelp = true }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  
+  // Default steps for the guide
+  const defaultSteps = [
+    {
+      title: "Welcome to WhatsApp Carousel Creator!",
+      content: "This tool allows you to create carousel templates through Blip APIs for WhatsApp Business quickly and easily. We'll guide you through each step of the process.",
+      image: "welcome"
+    },
+    {
+      title: "Step 1: Initial Setup",
+      content: "In the first step, you will provide your API key (Router Key) and upload images or videos for each card in the carousel.",
+      image: "step1"
+    },
+    {
+      title: "Step 2: Template Customization",
+      content: "Next, you'll define the text for each card and configure the buttons that will appear in the carousel. These can be links, phone numbers, or quick replies.",
+      image: "step2"
+    },
+    {
+      title: "Step 3: Finalization",
+      content: "Finally, you'll be able to view the JSON of the template ready to be used in the WhatsApp API, and even test it by sending a message directly to a WhatsApp number.",
+      image: "step3"
+    },
+    {
+      title: "Tips for quick approval",
+      content: "Remember that all templates need to be approved by Meta. Avoid excessive promotional content, follow the guidelines, and use clear messages to increase your chances of approval.",
+      image: "tips"
+    }
+  ];
+  
+  // Use custom steps if provided, otherwise use default steps
+  const steps = customSteps || defaultSteps;
 
-  // Efeito para animação de entrada
+  // Effect for entry animation
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -16,36 +57,7 @@ const IntroductionGuide = ({ onClose }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Passos do tour guiado
-  const steps = [
-    {
-      title: "Bem-vindo ao Criador de Carrossel para WhatsApp!",
-      content: "Esta ferramenta permite criar templates de carrossel através das APIs da Blip para WhatsApp Business de forma simples e rápida. Vamos orientá-lo em cada etapa do processo.",
-      image: "welcome.svg"
-    },
-    {
-      title: "Passo 1: Configuração Inicial",
-      content: "Na primeira etapa, você fornecerá sua chave de API (Router Key) e fará o upload das imagens ou vídeos para cada card do carrossel.",
-      image: "step1.svg"
-    },
-    {
-      title: "Passo 2: Personalização do Template",
-      content: "Em seguida, você definirá o texto para cada card e configurará os botões que aparecerão no carrossel. Estes podem ser links, números de telefone ou respostas rápidas.",
-      image: "step2.svg"
-    },
-    {
-      title: "Passo 3: Finalização",
-      content: "Por fim, você poderá visualizar o JSON do template pronto para ser usado na API do WhatsApp, e até mesmo enviar uma mensagem de teste diretamente para um número WhatsApp.",
-      image: "step3.svg"
-    },
-    {
-      title: "Dicas para aprovação rápida",
-      content: "Lembre-se que todos os templates precisam ser aprovados pela Meta. Evite conteúdo promocional excessivo, siga as diretrizes e use mensagens claras para aumentar suas chances de aprovação.",
-      image: "tips.svg"
-    }
-  ];
-
-  // Navegar para o próximo passo
+  // Go to next step
   const goToNextStep = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -54,37 +66,43 @@ const IntroductionGuide = ({ onClose }) => {
     }
   };
 
-  // Navegar para o passo anterior
+  // Go to previous step
   const goToPreviousStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
 
-  // Fechar o guia e salvar no localStorage
+  // Close the guide and save to localStorage
   const handleClose = () => {
     setIsVisible(false);
     
-    // Após a animação de saída, chamar o callback de fechamento
+    // After the exit animation, call the close callback
     setTimeout(() => {
       localStorage.setItem('introductionGuideShown', 'true');
       onClose();
     }, 300);
   };
 
+  // Show the guide again when the help button is clicked
+  const handleShowGuide = () => {
+    setIsVisible(true);
+  };
+
   return (
     <div className={`${styles.overlay} ${isVisible ? styles.visible : ''}`}>
       <div className={styles.modal}>
-        <button className={styles.closeButton} onClick={handleClose} aria-label="Fechar guia">
+        <button className={styles.closeButton} onClick={handleClose} aria-label="Close guide">
           <FiX size={20} />
         </button>
         
         <div className={styles.content}>
           <div className={styles.imageContainer}>
             <div className={styles.image}>
-              {/* Placeholder para imagem - no projeto real, usar imagens reais */}
+              {/* Placeholder for image - in a real project, use real images */}
               <div className={styles.placeholderImage}>
-                {steps[currentStep].image.replace('.svg', '')}
+                <FiInfo size={32} />
+                <div className={styles.imageText}>{steps[currentStep].image}</div>
               </div>
             </div>
           </div>
@@ -108,42 +126,40 @@ const IntroductionGuide = ({ onClose }) => {
           
           <div className={styles.buttons}>
             {currentStep > 0 && (
-              <button 
-                className={styles.backButton} 
+              <Button 
+                variant="outline"
+                color="content"
                 onClick={goToPreviousStep}
-                aria-label="Passo anterior"
+                iconLeft={<FiChevronLeft />}
+                className={styles.navigationButton}
               >
-                <FiChevronLeft size={18} />
-                Anterior
-              </button>
+                Previous
+              </Button>
             )}
             
-            <button 
-              className={styles.nextButton} 
+            <Button 
+              variant="solid"
+              color="primary"
               onClick={goToNextStep}
-              aria-label={currentStep < steps.length - 1 ? "Próximo passo" : "Concluir guia"}
+              iconRight={currentStep < steps.length - 1 ? <FiChevronRight /> : null}
+              className={styles.navigationButton}
             >
-              {currentStep < steps.length - 1 ? (
-                <>
-                  Próximo
-                  <FiChevronRight size={18} />
-                </>
-              ) : (
-                "Vamos começar!"
-              )}
-            </button>
+              {currentStep < steps.length - 1 ? "Next" : "Let's Start!"}
+            </Button>
           </div>
         </div>
       </div>
       
-      {/* Botão flutuante de ajuda que aparece após fechar o guia */}
-      <button 
-        className={`${styles.helpButton} ${!isVisible ? styles.showHelp : ''}`}
-        onClick={() => setIsVisible(true)}
-        aria-label="Abrir guia de ajuda"
-      >
-        <FiHelpCircle size={24} />
-      </button>
+      {/* Floating help button that appears after closing the guide */}
+      {showFloatingHelp && (
+        <button 
+          className={`${styles.helpButton} ${!isVisible ? styles.showHelp : ''}`}
+          onClick={handleShowGuide}
+          aria-label="Open help guide"
+        >
+          <FiHelpCircle size={24} />
+        </button>
+      )}
     </div>
   );
 };

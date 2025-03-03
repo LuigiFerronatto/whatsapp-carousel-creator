@@ -1,85 +1,20 @@
 /* ButtonEditor.module.css */
 .buttonContainer {
   padding: 1.25rem;
-  border: 1px solid var(--mercury);
+  background-color: var(--alabaster);
   border-radius: 8px;
-  margin-bottom: 1rem;
-  background-color: var(--snow);
+  margin-bottom: 0;
   transition: all 0.2s ease;
   position: relative;
 }
 
 .buttonContainer:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background-color: var(--snow);
 }
 
 .invalidContainer {
-  border-color: var(--pomegranate);
-  background-color: rgba(255, 224, 224, 0.1);
-}
-
-.buttonHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.buttonTitleWrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.buttonTitle {
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-p1);
-  color: var(--text-color-default);
-}
-
-.buttonTypeBadge {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  background-color: var(--select-bg);
-  border-radius: 100px;
-  font-size: var(--fs-p3);
-  color: var(--hover-medium);
-}
-
-.removeButton {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  background: none;
-  border: none;
-  color: var(--milano-red);
-  font-size: var(--fs-p3);
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.removeButton:hover {
-  background-color: var(--cinderella);
-}
-
-.trashIcon {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
-
-.validationMessage {
-  margin: -0.5rem 0 1rem 0;
-  padding: 0.5rem;
-  background-color: rgba(255, 224, 224, 0.5);
-  border-left: 3px solid var(--pomegranate);
-  font-size: var(--fs-p3);
-  color: var(--milano-red);
-  border-radius: 0 4px 4px 0;
+  border: 1px solid var(--pomegranate);
+  background-color: rgba(255, 224, 224, 0.05);
 }
 
 .buttonTypeSelector {
@@ -95,27 +30,40 @@
   align-items: center;
   justify-content: center;
   padding: 0.75rem 0.5rem;
-  background-color: var(--color-surface-1);
-  border: 2px solid var(--color-surface-1);
+  background-color: var(--whisper);
+  border: 2px solid var(--whisper);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .typeOption:hover {
-  background-color: var(--color-surface-2);
+  background-color: var(--hover-light);
+  transform: translateY(-2px);
 }
 
 .selectedType {
   border-color: var(--blip-action);
   background-color: var(--hover-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.typeIcon {
-  width: 24px;
-  height: 24px;
-  fill: var(--blip-action);
+.typeIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+  border-radius: 50%;
   margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.selectedType .typeIconWrapper {
+  background-color: var(--blip-action);
+  color: var(--alabaster);
 }
 
 .typeLabel {
@@ -128,13 +76,17 @@
   color: var(--dove-gray-2);
   margin: -0.5rem 0 1rem 0;
   text-align: center;
-  background-color: var(--hover-light);
+  background-color: var(--whisper);
   padding: 0.5rem;
   border-radius: 4px;
 }
 
 .formGroup {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
 }
 
 .label {
@@ -212,9 +164,7 @@
 
 .infoIcon {
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  fill: var(--blip-light);
+  color: var(--blip-light);
 }
 
 .labelWithHelp {
@@ -234,10 +184,14 @@
   padding: 0.25rem 0.5rem;
 }
 
+.helpButton:hover {
+  color: var(--blip-dark);
+}
+
 .helpContent {
   background-color: var(--whisper);
   padding: 1rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   border-radius: 6px;
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
@@ -289,8 +243,39 @@
   color: var(--blip-action);
 }
 
-.phoneInputWrapper {
+.urlInputWrapper, .phoneInputWrapper {
   position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.testActionButton {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.3rem 0.6rem;
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+  border: none;
+  border-radius: 4px;
+  font-size: var(--fs-p3);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.testActionButton:hover:not(:disabled) {
+  background-color: var(--blip-action);
+  color: var(--alabaster);
+}
+
+.testActionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .urlWarning {
@@ -300,10 +285,21 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  padding: 0.5rem;
+  background-color: var(--vis-vis);
+  border-radius: 4px;
 }
 
-.urlWarning::before {
-  content: "⚠️";
+.phonePreview {
+  font-size: var(--fs-p3);
+  color: var(--text-color-default);
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--whisper);
+  border-radius: 4px;
+  text-align: center;
+  font-family: monospace;
+  font-weight: var(--fw-bold);
 }
 
 /* Media Queries for Responsiveness */
@@ -320,24 +316,18 @@
     padding: 0.5rem 0.75rem;
   }
   
-  .typeIcon {
+  .typeIconWrapper {
     margin-bottom: 0;
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
+  }
+  
+  .urlInputWrapper .input, .phoneInputWrapper .input {
+    padding-right: 4rem;
   }
 }
 
 @media (max-width: 480px) {
-  .buttonHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .removeButton {
-    align-self: flex-end;
-  }
-  
   .labelWithHelp {
     flex-direction: column;
     align-items: flex-start;
@@ -346,5 +336,10 @@
   
   .helpButton {
     padding-left: 0;
+  }
+  
+  .testActionButton {
+    padding: 0.25rem 0.5rem;
+    font-size: var(--fs-p4);
   }
 }

@@ -22,7 +22,7 @@
   
   .modal {
     width: 90%;
-    max-width: 600px;
+    max-width: 700px;
     background-color: var(--color-surface-0);
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
@@ -77,8 +77,8 @@
   }
   
   .image {
-    width: 200px;
-    height: 200px;
+    width: 240px;
+    height: 240px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,6 +89,7 @@
     height: 100%;
     background-color: var(--blip-action);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
@@ -96,6 +97,11 @@
     font-weight: bold;
     text-align: center;
     padding: 16px;
+  }
+  
+  .imageText {
+    margin-top: 12px;
+    font-size: var(--fs-p1);
   }
   
   .textContent {
@@ -131,8 +137,8 @@
   }
   
   .dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background-color: var(--mercury);
     cursor: pointer;
@@ -153,47 +159,19 @@
     gap: 12px;
   }
   
-  .backButton,
-  .nextButton {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 16px;
-    border-radius: 4px;
-    font-weight: var(--fw-bold);
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-  }
-  
-  .backButton {
-    background-color: var(--color-surface-1);
-    color: var(--text-color-default);
-    border: 1px solid var(--mercury);
-  }
-  
-  .backButton:hover {
-    background-color: var(--color-surface-2);
-  }
-  
-  .nextButton {
-    background-color: var(--blip-action);
-    color: white;
-    border: none;
-  }
-  
-  .nextButton:hover {
-    background-color: var(--blip-dark);
+  .navigationButton {
+    min-width: 100px;
   }
   
   .helpButton {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background-color: var(--blip-action);
-    color: white;
+    color: var(--alabaster);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -216,7 +194,7 @@
     opacity: 1;
   }
   
-  /* Responsividade */
+  /* Responsiveness */
   @media (min-width: 768px) {
     .content {
       flex-direction: row;
@@ -250,9 +228,15 @@
       width: 100%;
     }
     
-    .backButton,
-    .nextButton {
+    .navigationButton {
       flex: 1;
-      justify-content: center;
+      min-width: auto;
+    }
+    
+    .helpButton {
+      width: 48px;
+      height: 48px;
+      bottom: 16px;
+      right: 16px;
     }
   }

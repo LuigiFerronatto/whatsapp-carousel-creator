@@ -1,8 +1,9 @@
 // components/steps/StepTwo.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
-import StatusMessage from '../common/StatusMessage';
+import AlertMessage from '../common/AlertMessage';
+import { FiSave, FiCheck, FiChevronRight, FiChevronLeft, FiEye, FiEyeOff, FiInfo } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 
 const StepTwo = ({
@@ -19,11 +20,33 @@ const StepTwo = ({
   setStep,
   error,
   loading,
-  isStepValid
+  isStepValid,
+  saveDraftManually
 }) => {
-  const [activeTab, setActiveTab] = useState('details');
   const [showHints, setShowHints] = useState(true);
+  const [showPreview, setShowPreview] = useState(true);
   const [validationMessages, setValidationMessages] = useState({});
+  const [activeCard, setActiveCard] = useState(0);
+  const [justSaved, setJustSaved] = useState(false);
+
+  // Reset validation messages when fields change
+  useEffect(() => {
+    if (templateName) {
+      setValidationMessages(prev => {
+        const newMessages = { ...prev };
+        delete newMessages.templateName;
+        return newMessages;
+      });
+    }
+    
+    if (bodyText) {
+      setValidationMessages(prev => {
+        const newMessages = { ...prev };
+        delete newMessages.bodyText;
+        return newMessages;
+      });
+    }
+  }, [templateName, bodyText]);
 
   // Check if required fields are filled
   const isTemplateNameValid = templateName.length >= 3;
@@ -36,22 +59,22 @@ const StepTwo = ({
     
     cards.slice(0, numCards).forEach((card, index) => {
       if (!card.bodyText) {
-        messages[`card-${index}`] = `O texto do card ${index + 1} é obrigatório`;
+        messages[`card-${index}`] = `Card ${index + 1} text is required`;
         allValid = false;
       }
       
       if (card.buttons.some(button => !button.text)) {
-        messages[`card-${index}-buttons`] = `Todos os botões do card ${index + 1} precisam ter texto`;
+        messages[`card-${index}-buttons`] = `All buttons in card ${index + 1} must have text`;
         allValid = false;
       }
       
       card.buttons.forEach((button, btnIndex) => {
         if (button.type === 'URL' && !button.url) {
-          messages[`card-${index}-button-${btnIndex}`] = `URL é obrigatória para o botão ${btnIndex + 1}`;
+          messages[`card-${index}-button-${btnIndex}`] = `URL is required for button ${btnIndex + 1}`;
           allValid = false;
         }
         if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) {
-          messages[`card-${index}-button-${btnIndex}`] = `Número de telefone é obrigatório para o botão ${btnIndex + 1}`;
+          messages[`card-${index}-button-${btnIndex}`] = `Phone number is required for button ${btnIndex + 1}`;
           allValid = false;
         }
       });
@@ -64,19 +87,30 @@ const StepTwo = ({
   const handleContinue = () => {
     if (validateCards()) {
       handleCreateTemplate();
-    } else {
-      // Scroll to first error
-      const firstErrorKey = Object.keys(validationMessages)[0];
-      if (firstErrorKey) {
-        const element = document.getElementById(firstErrorKey);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
+    }
+  };
+  
+  const handleSaveDraft = () => {
+    saveDraftManually();
+    setJustSaved(true);
+    
+    // Reset saved flag after 3 seconds
+    setTimeout(() => {
+      setJustSaved(false);
+    }, 3000);
+  };
+
+  const navigateToCard = (direction) => {
+    if (direction === 'next' && activeCard < numCards - 1) {
+      setActiveCard(activeCard + 1);
+    } else if (direction === 'prev' && activeCard > 0) {
+      setActiveCard(activeCard - 1);
     }
   };
   
   const isAllValid = isTemplateNameValid && isBodyTextValid && Object.keys(validationMessages).length === 0;
+  
+  // Calculate completion percentage
   const completionPercentage = [
     isTemplateNameValid,
     isBodyTextValid,
@@ -100,245 +134,259 @@ const StepTwo = ({
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.progressContainer}>
-        <div className={styles.progressBar}>
-          <div 
-            className={styles.progressFill} 
-            style={{ width: `${completionPercentage}%` }}
-          />
-        </div>
-        <span className={styles.progressText}>
-          {completionPercentage === 100 ? 
-            '✓ Todos os campos preenchidos!' : 
-            `${completionPercentage}% preenchido`}
-        </span>
-      </div>
-      
-      <div className={styles.contentWrapper}>
-        <div className={styles.formContainer}>
-          <div className={styles.container}>
-            <header className={styles.stepHeader}>
-              <h2 className={styles.stepTitle}>Passo 2: Criação do Template</h2>
-              <button 
-                className={styles.hintToggle}
-                onClick={() => setShowHints(!showHints)}
-                aria-label={showHints ? "Ocultar dicas" : "Mostrar dicas"}
-              >
-                {showHints ? "Ocultar dicas" : "Mostrar dicas"}
-              </button>
-            </header>
-            
-            <div className={styles.tabsContainer}>
-              <button 
-                className={`${styles.tabButton} ${activeTab === 'details' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('details')}
-              >
-                1. Detalhes Básicos
-              </button>
-              <button 
-                className={`${styles.tabButton} ${activeTab === 'cards' ? styles.activeTab : ''}`}
-                onClick={() => setActiveTab('cards')}
-              >
-                2. Conteúdo dos Cards
-              </button>
+      <div className={styles.headerContainer}>
+        <div className={styles.progressContainer}>
+          <div className={styles.progressBarWrapper}>
+            <div className={styles.progressBar}>
+              <div 
+                className={styles.progressFill} 
+                style={{ width: `${completionPercentage}%` }}
+              />
             </div>
+            <span className={styles.progressText}>
+              {completionPercentage === 100 ? 
+                '✓ All fields completed!' : 
+                `${completionPercentage}% completed`}
+            </span>
+          </div>
+          
+          <div className={styles.viewControls}>
+            <button 
+              className={styles.viewToggle}
+              onClick={() => setShowPreview(!showPreview)}
+              aria-label={showPreview ? "Hide preview" : "Show preview"}
+            >
+              {showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+              {showPreview ? "Hide preview" : "Show preview"}
+            </button>
             
-            {activeTab === 'details' && (
-              <div className={styles.tabContent}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="templateName">
-                    Nome do Template
-                    <span className={styles.requiredMark}>*</span>
-                  </label>
-                  <input 
-                    id="templateName"
-                    type="text" 
-                    className={`${styles.input} ${!isTemplateNameValid && templateName ? styles.invalidInput : ''}`}
-                    value={templateName}
-                    onChange={(e) => setTemplateName(e.target.value)}
-                    placeholder="meu_template_carousel"
-                  />
-                  {showHints && (
-                    <div className={styles.hint}>
-                      <svg className={styles.hintIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm0-10h2v8h-2z"/>
-                      </svg>
-                      Use um nome descritivo sem espaços, mínimo de 3 caracteres. Exemplo: "promocao_verao" ou "lancamento_produto"
-                    </div>
-                  )}
-                  {!isTemplateNameValid && templateName && (
-                    <div className={styles.errorMessage}>
-                      O nome do template deve ter pelo menos 3 caracteres
-                    </div>
-                  )}
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="language">
-                    Idioma do Template
-                    <span className={styles.requiredMark}>*</span>
-                  </label>
-                  <div className={styles.customSelect}>
-                    <select 
-                      id="language"
-                      className={styles.select}
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
-                    >
-                      {languageOptions.map(option => (
-                        <option key={option.code} value={option.code}>
-                          {option.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className={styles.selectArrow}></div>
-                  </div>
-                  {showHints && (
-                    <div className={styles.hint}>
-                      <svg className={styles.hintIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm0-10h2v8h-2z"/>
-                      </svg>
-                      Escolha o idioma principal do template. Isso afetará a aprovação do template pelo WhatsApp.
-                    </div>
-                  )}
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="bodyText">
-                    Texto do Corpo da Mensagem
-                    <span className={styles.requiredMark}>*</span>
-                  </label>
-                  <textarea 
-                    id="bodyText"
-                    className={`${styles.textarea} ${!isBodyTextValid && bodyText !== '' ? styles.invalidInput : ''}`}
-                    rows="4"
-                    value={bodyText}
-                    onChange={(e) => setBodyText(e.target.value)}
-                    placeholder="Este texto aparecerá antes do carrossel. Seja claro e objetivo para engajar seus clientes."
-                    maxLength={1024}
-                  ></textarea>
-                  <div className={`${styles.characterCount} ${bodyText.length > 900 ? styles.almostFull : ''}`}>
-                    {bodyText.length}/1024 caracteres
-                    {bodyText.length > 900 && " - Chegando ao limite!"}
-                  </div>
-                  {showHints && (
-                    <div className={styles.hint}>
-                      <svg className={styles.hintIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2v2h-2zm0-10h2v8h-2z"/>
-                      </svg>
-                      Escreva de forma clara e objetiva. Este texto introduz seu carrossel e aparece acima dele na conversa.
-                    </div>
-                  )}
-                  {!isBodyTextValid && bodyText !== '' && (
-                    <div className={styles.errorMessage}>
-                      O texto do corpo da mensagem é obrigatório
-                    </div>
-                  )}
-                </div>
-                
-                <div className={styles.actionButtons}>
-                  <button 
-                    className={styles.nextTabButton}
-                    onClick={() => setActiveTab('cards')}
-                  >
-                    Continuar para Conteúdo dos Cards
-                    <svg className={styles.arrowIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {activeTab === 'cards' && (
-              <div className={styles.tabContent}>
-                <div className={styles.cardsContainer}>
-                  {cards.slice(0, numCards).map((card, index) => (
-                    <CardTemplateEditor 
-                      key={index} 
-                      id={`card-${index}`}
-                      index={index} 
-                      card={card} 
-                      cards={cards}
-                      updateCard={updateCard}
-                      showHints={showHints}
-                      validationMessage={
-                        validationMessages[`card-${index}`] || 
-                        validationMessages[`card-${index}-buttons`]
-                      }
-                    />
-                  ))}
-                </div>
-                
-                <div className={styles.actionButtons}>
-                  <button 
-                    className={styles.prevTabButton}
-                    onClick={() => setActiveTab('details')}
-                  >
-                    <svg className={styles.arrowIconLeft} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                    </svg>
-                    Voltar para Detalhes Básicos
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {/* Botões de navegação fixos na parte inferior */}
-            <div className={styles.fixedButtonGroup}>
-              <button 
-                className={styles.backButton}
-                onClick={() => setStep(1)}
-              >
-                <svg className={styles.buttonIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                </svg>
-                Voltar
-              </button>
-              
-              <button 
-                className={styles.nextButton}
-                onClick={handleContinue}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <svg className={styles.loadingIcon} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    Criar Template
-                    <svg className={styles.buttonIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
-                    </svg>
-                  </>
-                )}
-              </button>
-            </div>
-            
-            <StatusMessage error={error} success={null} />
+            <button 
+              className={styles.hintsToggle}
+              onClick={() => setShowHints(!showHints)}
+              aria-label={showHints ? "Hide hints" : "Show hints"}
+            >
+              <FiInfo size={16} />
+              {showHints ? "Hide hints" : "Show hints"}
+            </button>
           </div>
         </div>
 
-        <div className={styles.previewContainer}>
-          <div className={styles.previewWrapper}>
-            <h3 className={styles.previewTitle}>Pré-visualização do Carrossel</h3>
-            <div className={styles.previewContent}>
-              <CarouselPreview 
-                cards={cards.slice(0, numCards)} 
-                bodyText={bodyText} 
+        <h2 className={styles.stepTitle}>Step 2: Template Creation</h2>
+        <p className={styles.stepDescription}>
+          Configure your template details, including name, language, and content for each card.
+        </p>
+      </div>
+      
+      <div className={styles.contentWrapper}>
+        <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
+          <div className={styles.basicDetailsSection}>
+            <h3 className={styles.sectionTitle}>Basic Template Information</h3>
+            
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="templateName">
+                Template Name
+                <span className={styles.requiredMark}>*</span>
+              </label>
+              <input 
+                id="templateName"
+                type="text" 
+                className={`${styles.input} ${!isTemplateNameValid && templateName ? styles.invalidInput : ''}`}
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="my_carousel_template"
               />
+              {showHints && (
+                <div className={styles.hint}>
+                  <FiInfo className={styles.hintIcon} />
+                  Use a descriptive name without spaces, minimum 3 characters. Example: "summer_promo" or "product_launch"
+                </div>
+              )}
+              {!isTemplateNameValid && templateName && (
+                <div className={styles.errorMessage}>
+                  Template name must be at least 3 characters
+                </div>
+              )}
             </div>
             
-            <div className={styles.previewHint}>
-              Esta é uma visualização de como seu carrossel aparecerá no WhatsApp.
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="language">
+                Template Language
+                <span className={styles.requiredMark}>*</span>
+              </label>
+              <div className={styles.customSelect}>
+                <select 
+                  id="language"
+                  className={styles.select}
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                >
+                  {languageOptions.map(option => (
+                    <option key={option.code} value={option.code}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+                <div className={styles.selectArrow}></div>
+              </div>
+              {showHints && (
+                <div className={styles.hint}>
+                  <FiInfo className={styles.hintIcon} />
+                  Choose the main language for your template. This will affect approval by WhatsApp.
+                </div>
+              )}
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="bodyText">
+                Message Body Text
+                <span className={styles.requiredMark}>*</span>
+              </label>
+              <textarea 
+                id="bodyText"
+                className={`${styles.textarea} ${!isBodyTextValid && bodyText !== '' ? styles.invalidInput : ''}`}
+                rows="3"
+                value={bodyText}
+                onChange={(e) => setBodyText(e.target.value)}
+                placeholder="This text will appear before the carousel. Be clear and engaging for your customers."
+                maxLength={1024}
+              ></textarea>
+              <div className={`${styles.characterCount} ${bodyText.length > 900 ? styles.almostFull : ''}`}>
+                {bodyText.length}/1024 characters
+                {bodyText.length > 900 && " - Approaching limit!"}
+              </div>
+              {showHints && (
+                <div className={styles.hint}>
+                  <FiInfo className={styles.hintIcon} />
+                  Write clearly and concisely. This text introduces your carousel and appears above it in the conversation.
+                </div>
+              )}
+              {!isBodyTextValid && bodyText !== '' && (
+                <div className={styles.errorMessage}>
+                  Message body text is required
+                </div>
+              )}
             </div>
           </div>
+
+          <div className={styles.cardEditorSection}>
+            <div className={styles.cardNavigation}>
+              <h3 className={styles.sectionTitle}>Card Content</h3>
+              
+              <div className={styles.cardTabs}>
+                {cards.slice(0, numCards).map((_, index) => (
+                  <button
+                    key={index}
+                    className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''}`}
+                    onClick={() => setActiveCard(index)}
+                  >
+                    Card {index + 1}
+                    {!cards[index].bodyText && <span className={styles.incompleteIndicator}>!</span>}
+                  </button>
+                ))}
+              </div>
+              
+              <div className={styles.cardNavigationButtons}>
+                <button
+                  className={styles.cardNavButton}
+                  onClick={() => navigateToCard('prev')}
+                  disabled={activeCard === 0}
+                >
+                  <FiChevronLeft />
+                  Previous
+                </button>
+                <button
+                  className={styles.cardNavButton}
+                  onClick={() => navigateToCard('next')}
+                  disabled={activeCard === numCards - 1}
+                >
+                  Next
+                  <FiChevronRight />
+                </button>
+              </div>
+            </div>
+            
+            <div className={styles.activeCardEditor}>
+              {cards[activeCard] && (
+                <CardTemplateEditor 
+                  id={`card-${activeCard}`}
+                  index={activeCard} 
+                  card={cards[activeCard]} 
+                  cards={cards}
+                  updateCard={updateCard}
+                  showHints={showHints}
+                  validationMessage={
+                    validationMessages[`card-${activeCard}`] || 
+                    validationMessages[`card-${activeCard}-buttons`]
+                  }
+                />
+              )}
+            </div>
+          </div>
+          
+          <div className={styles.fixedButtonGroup}>
+            <div className={styles.actionStatus}>
+              {justSaved && (
+                <div className={styles.savedIndicator}>
+                  <FiCheck size={16} />
+                  Draft saved!
+                </div>
+              )}
+            </div>
+            
+            <button 
+              className={styles.backButton}
+              onClick={() => setStep(1)}
+            >
+              <FiChevronLeft className={styles.buttonIcon} />
+              Back
+            </button>
+            
+            <button
+              className={styles.saveButton}
+              onClick={handleSaveDraft}
+            >
+              <FiSave className={styles.buttonIcon} />
+              Save Draft
+            </button>
+            
+            <button 
+              className={styles.nextButton}
+              onClick={handleContinue}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <div className={styles.loadingSpinner}></div>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Create Template
+                  <FiChevronRight className={styles.buttonIcon} />
+                </>
+              )}
+            </button>
+          </div>
+          
+          {error && <AlertMessage error={error} />}
         </div>
+
+        {showPreview && (
+          <div className={styles.previewContainer}>
+            <div className={styles.previewWrapper}>
+              <h3 className={styles.previewTitle}>Carousel Preview</h3>
+              <p className={styles.previewSubtitle}>
+                Live preview of how your carousel will appear in WhatsApp
+              </p>
+              <div className={styles.previewContent}>
+                <CarouselPreview 
+                  cards={cards.slice(0, numCards)} 
+                  bodyText={bodyText} 
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

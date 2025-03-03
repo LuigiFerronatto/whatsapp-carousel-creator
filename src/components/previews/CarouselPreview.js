@@ -73,7 +73,7 @@ const NavButton = ({ direction, onClick }) => (
 // Componente Principal
 const CarouselPreview = ({ 
   cards = [], 
-  bodyText = '', 
+  bodyText = 'Exemplo de Body Text', 
   contactName = 'Blip CDA' 
 }) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -88,7 +88,7 @@ const CarouselPreview = ({
   // Atualiza a posição de translação com base no índice atual
   const updateTranslatePosition = (index) => {
     const cardWidth = 90; // Considera a largura dos cards
-    const gap = 1.5; // Considera o espaçamento entre os cards
+    const gap = 1.45; // Considera o espaçamento entre os cards
     const newTranslate = -(index * (cardWidth + gap)); // Considera o espaçamento
     setCurrentTranslate(newTranslate);
     setPrevTranslate(newTranslate);

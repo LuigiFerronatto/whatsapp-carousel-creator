@@ -1,32 +1,107 @@
 /* JsonViewer.module.css */
 .emptyContainer {
-    background-color: var(--wild-sand);
-    padding: 1rem;
-    border-radius: 4px;
-    color: var(--dove-gray-2);
-    text-align: center;
-  }
-  
-  .jsonContainer {
-    position: relative;
-  }
-  
-  .jsonContent {
-    background-color: var(--wild-sand);
-    padding: 1rem;
-    border-radius: 4px;
-    overflow: auto;
-    max-height: 16rem;
-    font-size: var(--fs-p3);
-  }
-  
-  .copyButton {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    background-color: var(--blip-action);
-    color: var(--alabaster);
-    border-radius: 4px;
-    font-size: var(--fs-p3);
-  }
+  background-color: var(--wild-sand);
+  padding: 1rem;
+  border-radius: 6px;
+  color: var(--dove-gray-2);
+  text-align: center;
+  font-style: italic;
+}
+
+.jsonContainer {
+  position: relative;
+  border: 1px solid var(--wave);
+  border-radius: 6px;
+  background-color: var(--whisper);
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.titleBar {
+  background-color: var(--blip-blue-brand);
+  color: var(--alabaster);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--wave);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-p1);
+  font-weight: var(--fw-bold);
+}
+
+.toolBar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.toolButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--wave);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--blip-action);
+}
+
+.toolButton:hover {
+  background-color: var(--color-surface-0);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.successIcon {
+  color: var(--mountain-meadow);
+}
+
+.jsonContent {
+  padding: 1rem;
+  margin: 0;
+  max-height: 400px;
+  overflow: auto;
+  background-color: var(--alabaster);
+  font-family: "Menlo", "Monaco", "Consolas", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-color-default);
+  tab-size: 2;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  scrollbar-width: thin;
+}
+
+.jsonContent::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.jsonContent::-webkit-scrollbar-track {
+  background: var(--whisper);
+  border-radius: 4px;
+}
+
+.jsonContent::-webkit-scrollbar-thumb {
+  background-color: var(--cloud);
+  border-radius: 4px;
+}
+
+.jsonContent::-webkit-scrollbar-thumb:hover {
+  background-color: var(--silver);
+}
+
+/* Syntax highlighting (a simple version) */
+.jsonContent .string { color: #228B22; }
+.jsonContent .number { color: #1E90FF; }
+.jsonContent .boolean { color: #B8860B; }
+.jsonContent .null { color: #808080; }
+.jsonContent .key { color: #A52A2A; }
