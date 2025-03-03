@@ -125,15 +125,15 @@
 
 .inputGroup {
   display: flex;
+  position: relative;
 }
 
 .input {
   flex: 1;
   padding: 0.75rem;
+  padding-right: 4rem;
   border: 1px solid var(--mercury);
-  border-top-left-radius: 0.25rem;
-  border-bottom-left-radius: 0.25rem;
-  border-right: none;
+  border-radius: 0.25rem;
   font-size: var(--fs-p2);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -144,27 +144,56 @@
   box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.1);
 }
 
-.testButton {
-  background-color: var(--blip-light);
-  color: var(--blip-dark);
-  padding: 0.5rem 1rem;
+.inputError {
+  border-color: var(--pomegranate);
+  background-color: rgba(255, 224, 224, 0.05);
+}
+
+.clearButton, .testButton {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: transparent;
+  color: var(--dove-gray-2);
   border: none;
-  border-top-right-radius: 0.25rem;
-  border-bottom-right-radius: 0.25rem;
-  font-size: var(--fs-p2);
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  font-size: var(--fs-p3);
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
+.clearButton {
+  color: var(--pomegranate);
+}
+
+.clearButton:hover {
+  background-color: var(--cinderella);
+  color: var(--milano-red);
+}
+
+.testButton {
+  color: var(--blip-action);
+}
+
 .testButton:hover {
-  background-color: var(--hover-light);
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+}
+
+.helpText, .errorText {
+  font-size: var(--fs-p3);
+  margin-top: 0.5rem;
 }
 
 .helpText {
-  font-size: var(--fs-p3);
   color: var(--dove-gray-2);
-  margin-top: 0.5rem;
+}
+
+.errorText {
+  color: var(--pomegranate);
 }
 
 .dropArea {
@@ -286,5 +315,14 @@
   
   .select {
     width: 100%;
+  }
+  
+  .testButton {
+    font-size: 0; /* Esconde o texto em telas pequenas */
+  }
+  
+  .testButton::after {
+    content: "Testar";
+    font-size: var(--fs-p3);
   }
 }

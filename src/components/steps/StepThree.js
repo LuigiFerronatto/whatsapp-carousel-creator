@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import AlertMessage from '../common/AlertMessage';
 import CarouselPreview from '../previews/CarouselPreview';
-import { FiChevronLeft, FiChevronRight, FiCopy, FiCheck, FiSend, FiCode, FiEye, FiDownload, FiRefreshCw } from 'react-icons/fi';
+import { FiChevronLeft, FiCopy, FiCheck, FiSend, FiCode, FiEye, FiDownload, FiRefreshCw } from 'react-icons/fi';
 import styles from './StepThree.module.css';
 
 const StepThree = ({

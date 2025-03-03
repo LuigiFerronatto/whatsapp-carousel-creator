@@ -282,28 +282,6 @@
   transform: translateY(-1px);
 }
 
-.importUrlsSection {
-  margin-bottom: 0.5rem;
-}
-
-.bulkImportButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: var(--fs-p2);
-  color: var(--blip-action);
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  text-decoration: underline;
-}
-
-.bulkImportButton:hover {
-  color: var(--blip-dark);
-}
-
 /* Grid of cards */
 .cardsGrid {
   display: grid;

@@ -135,7 +135,42 @@ const StepTwo = ({
   return (
     <div className={styles.pageContainer}>
       <div className={styles.headerContainer}>
-        <div className={styles.progressContainer}>
+
+        <h2 className={styles.stepTitle}>Step 2: Template Creation</h2>
+        <p className={styles.stepDescription}>
+          Configure your template details, including name, language, and content for each card.
+        </p>
+
+
+        <div className={styles.viewControls}>
+          <button 
+            className={styles.viewToggle}
+            onClick={() => setShowPreview(!showPreview)}
+            aria-label={showPreview ? "Hide preview" : "Show preview"}
+          >
+            {showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+            {showPreview ? "Hide preview" : "Show preview"}
+          </button>
+          
+          <button 
+            className={styles.hintsToggle}
+            onClick={() => setShowHints(!showHints)}
+            aria-label={showHints ? "Hide hints" : "Show hints"}
+          >
+            <FiInfo size={16} />
+            {showHints ? "Hide hints" : "Show hints"}
+          </button>
+        </div>
+      </div>
+      
+      <div className={styles.contentWrapper}>
+        <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
+          <div className={styles.basicDetailsSection}>
+
+            <h3 className={styles.sectionTitle}>Basic Template Information</h3>
+            
+
+            <div className={styles.progressContainer}>
           <div className={styles.progressBarWrapper}>
             <div className={styles.progressBar}>
               <div 
@@ -143,44 +178,14 @@ const StepTwo = ({
                 style={{ width: `${completionPercentage}%` }}
               />
             </div>
+            
             <span className={styles.progressText}>
               {completionPercentage === 100 ? 
                 '✓ All fields completed!' : 
                 `${completionPercentage}% completed`}
             </span>
           </div>
-          
-          <div className={styles.viewControls}>
-            <button 
-              className={styles.viewToggle}
-              onClick={() => setShowPreview(!showPreview)}
-              aria-label={showPreview ? "Hide preview" : "Show preview"}
-            >
-              {showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-              {showPreview ? "Hide preview" : "Show preview"}
-            </button>
-            
-            <button 
-              className={styles.hintsToggle}
-              onClick={() => setShowHints(!showHints)}
-              aria-label={showHints ? "Hide hints" : "Show hints"}
-            >
-              <FiInfo size={16} />
-              {showHints ? "Hide hints" : "Show hints"}
-            </button>
-          </div>
         </div>
-
-        <h2 className={styles.stepTitle}>Step 2: Template Creation</h2>
-        <p className={styles.stepDescription}>
-          Configure your template details, including name, language, and content for each card.
-        </p>
-      </div>
-      
-      <div className={styles.contentWrapper}>
-        <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
-          <div className={styles.basicDetailsSection}>
-            <h3 className={styles.sectionTitle}>Basic Template Information</h3>
             
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="templateName">

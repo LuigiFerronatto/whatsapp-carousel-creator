@@ -1,10 +1,16 @@
-// steps/StepFour.js
+// components/steps/StepFour.js
 import React, { useState } from 'react';
 import CarouselPreview from '../previews/CarouselPreview';
 import AlertMessage from '../common/AlertMessage';
-import { FiCheckCircle, FiChevronLeft, FiRefreshCw, FiShare2, FiDownload, FiClipboard, FiCopy, FiSend } from 'react-icons/fi';
+import Button from '../common/Button';
+import StatusMessage from '../common/StatusMessage';
+import { FiChevronLeft, FiCheck, FiSend, FiDownload, FiCopy, FiRefreshCw } from 'react-icons/fi';
 import styles from './StepFour.module.css';
 
+/**
+ * StepFour - Etapa final para envio do template
+ * Componente refatorado para maior simplicidade e melhor UX
+ */
 const StepFour = ({
   finalJson,
   phoneNumber,
@@ -20,86 +26,16 @@ const StepFour = ({
   templateName,
   copyToClipboard
 }) => {
-  // Additional state for enhanced functionality
-  const [sentStatus, setSentStatus] = useState({
-    isSent: false,
-    targetNumber: ''
-  });
-  const [showShareOptions, setShowShareOptions] = useState(false);
-  const [exportFormat, setExportFormat] = useState('json');
-  const [justCopied, setJustCopied] = useState({
-    template: false,
-    phoneNumber: false
-  });
+  // Estados locais simplificados
+  const [sentStatus, setSentStatus] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
-  // Handle send template with status update
-  const handleSendTemplate = () => {
-    sendTemplate().then(() => {
-      setSentStatus({
-        isSent: true,
-        targetNumber: phoneNumber
-      });
-    }).catch(error => {
-      console.error('Error sending template:', error);
-    });
-  };
-
-  // Reset the sent status to send to another number
-  const handleSendToAnother = () => {
-    setSentStatus({
-      isSent: false,
-      targetNumber: ''
-    });
-    setPhoneNumber('');
-  };
-
-  // Handle copy with visual feedback
-  const handleCopy = (type) => {
-    if (type === 'template') {
-      copyToClipboard('sendTemplate');
-    } else if (type === 'phoneNumber') {
-      navigator.clipboard.writeText(phoneNumber);
-    }
-
-    setJustCopied({
-      ...justCopied,
-      [type]: true
-    });
-
-    setTimeout(() => {
-      setJustCopied({
-        ...justCopied,
-        [type]: false
-      });
-    }, 2000);
-  };
-
-  // Export template as file
-  const exportTemplate = () => {
-    const fileContent = JSON.stringify(finalJson.sendTemplate, null, 2);
-    const blob = new Blob([fileContent], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${templateName || 'whatsapp_template'}.json`;
-    document.body.appendChild(link);
-    link.click();
-    
-    // Cleanup
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  // Function to format phone number
-  const formatPhoneForDisplay = (phone) => {
+  // Formatar telefone para exibição
+  const formatPhoneDisplay = (phone) => {
     if (!phone) return '';
-    
-    // Basic formatting for readability
     const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length < 7) return cleaned;
+    if (cleaned.length < 7) return phone;
     
-    // Format as country code + area code + number
     const countryCode = cleaned.substring(0, 2);
     const areaCode = cleaned.substring(2, 4);
     const firstPart = cleaned.substring(4, 9);
@@ -108,270 +44,199 @@ const StepFour = ({
     return `+${countryCode} (${areaCode}) ${firstPart}-${secondPart}`;
   };
 
+  // Função simplificada para envio com acompanhamento de status
+  const handleSendTemplate = async () => {
+    try {
+      await sendTemplate();
+      setSentStatus(true);
+    } catch (error) {
+      console.error("Erro ao enviar template:", error);
+    }
+  };
+
+  // Reiniciar o status para enviar para outro número
+  const handleSendToAnother = () => {
+    setSentStatus(false);
+    setPhoneNumber('');
+  };
+
+  // Copiar JSON com feedback visual
+  const handleCopy = () => {
+    copyToClipboard('sendTemplate');
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  // Download do JSON como arquivo
+  const handleDownload = () => {
+    const jsonContent = JSON.stringify(finalJson.sendTemplate, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${templateName || 'whatsapp_template'}.json`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Limpeza
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerSection}>
-        <h2 className={styles.stepTitle}>Step 4: Template Delivery</h2>
+        <h2 className={styles.stepTitle}>Envio do Template</h2>
         <p className={styles.stepDescription}>
-          Your template is ready! Send it to WhatsApp for testing or share it with your team.
+          Seu template está pronto! Envie para um número WhatsApp para testar ou baixe o JSON para usar em sua aplicação.
         </p>
       </div>
       
       <div className={styles.contentWrapper}>
+        {/* Coluna de Visualização */}
         <div className={styles.previewSection}>
-          <h3 className={styles.sectionTitle}>
-            <span className={styles.sectionIcon}>
-              <FiCheckCircle />
-            </span>
-            Final Preview
-          </h3>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>Visualização Final</h3>
+          </div>
           
           <div className={styles.previewContainer}>
             <CarouselPreview 
               cards={cards} 
               bodyText={bodyText} 
-              contactName="WhatsApp Business"
+              contactName="WhatsApp"
             />
           </div>
           
           <div className={styles.templateInfo}>
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Template Name:</span>
+              <span className={styles.infoLabel}>Template:</span>
               <span className={styles.infoValue}>{templateName}</span>
             </div>
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>Cards:</span>
               <span className={styles.infoValue}>{cards.length}</span>
             </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Status:</span>
-              <span className={`${styles.infoValue} ${styles.statusValue}`}>
-                Ready for Submission
-              </span>
-            </div>
+          </div>
+          
+          <div className={styles.actionsContainer}>
+            <Button 
+              variant="outline" 
+              color="content"
+              onClick={handleCopy}
+              iconLeft={copySuccess ? <FiCheck /> : <FiCopy />}
+            >
+              {copySuccess ? 'Copiado!' : 'Copiar JSON'}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              color="content"
+              onClick={handleDownload}
+              iconLeft={<FiDownload />}
+            >
+              Download JSON
+            </Button>
           </div>
         </div>
         
+        {/* Coluna de Envio */}
         <div className={styles.sendSection}>
-          {!sentStatus.isSent ? (
+          {!sentStatus ? (
             <>
-              <h3 className={styles.sectionTitle}>
-                <span className={styles.sectionIcon}>
-                  <FiSend />
-                </span>
-                Send Template for Testing
-              </h3>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Testar Envio</h3>
+              </div>
               
               <p className={styles.sendDescription}>
-                Send your template directly to a WhatsApp number to preview it in action.
+                Envie seu template para um número WhatsApp para visualizá-lo em ação
               </p>
               
-              <div className={styles.sendForm}>
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>
-                    WhatsApp Number (with country code)
-                  </label>
-                  <div className={styles.phoneInputWrapper}>
-                    <span className={styles.phonePrefix}>+</span>
-                    <input 
-                      type="tel" 
-                      className={styles.phoneInput}
-                      value={phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value.startsWith('+') ? e.target.value : '+' + e.target.value)}
-                      placeholder="5521999999999"
-                    />
-                  </div>
-                  <p className={styles.inputHelp}>
-                    Enter the complete number including country code (e.g., 5521999999999)
-                  </p>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Número com código do país</label>
+                <div className={styles.phoneInputWrapper}>
+                  <span className={styles.phonePrefix}>+</span>
+                  <input 
+                    type="tel" 
+                    className={styles.phoneInput}
+                    value={phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.startsWith('+') ? e.target.value : '+' + e.target.value)}
+                    placeholder="5521999999999"
+                  />
                 </div>
-                
-                <button 
-                  className={styles.sendButton}
+                <span className={styles.inputHelp}>
+                  Número completo com código do país (ex: 5521999999999)
+                </span>
+              </div>
+              
+              <div className={styles.sendButtonContainer}>
+                <Button 
+                  variant="solid"
+                  color="primary"
                   onClick={handleSendTemplate}
-                  disabled={loading || !phoneNumber}
+                  disabled={!phoneNumber || loading}
+                  loading={loading}
+                  iconLeft={<FiSend />}
+                  fullWidth
                 >
-                  {loading ? (
-                    <>
-                      <div className={styles.loadingSpinner}></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <FiSend />
-                      Send Template
-                    </>
-                  )}
-                </button>
+                  Enviar Template
+                </Button>
               </div>
             </>
           ) : (
-            <div className={styles.sentConfirmation}>
-              <div className={styles.sentIcon}>
-                <FiCheckCircle size={48} />
+            <div className={styles.successContainer}>
+              <div className={styles.successIcon}>
+                <FiCheck size={40} />
               </div>
               
-              <h3 className={styles.sentTitle}>Template Sent Successfully!</h3>
+              <h3 className={styles.successTitle}>Template Enviado!</h3>
               
-              <p className={styles.sentMessage}>
-                Your template has been sent to:
+              <p className={styles.successMessage}>
+                Template enviado com sucesso para:
               </p>
               
-              <div className={styles.phoneNumberDisplay}>
-                <span>{formatPhoneForDisplay(sentStatus.targetNumber)}</span>
-                <button 
-                  className={styles.copyPhoneButton}
-                  onClick={() => handleCopy('phoneNumber')}
-                >
-                  {justCopied.phoneNumber ? (
-                    <FiCheckCircle size={16} />
-                  ) : (
-                    <FiCopy size={16} />
-                  )}
-                </button>
+              <div className={styles.phoneDisplay}>
+                {formatPhoneDisplay(phoneNumber)}
               </div>
               
-              <p className={styles.sentHelp}>
-                If you don't receive the message, please check that the number is valid 
-                and that you've previously sent a message to your WhatsApp Business account.
+              <p className={styles.successNote}>
+                Se não receber o template, verifique se o número está correto e se já enviou mensagem para sua conta WhatsApp Business.
               </p>
               
-              <button 
-                className={styles.sendAnotherButton}
+              <Button 
+                variant="outline"
+                color="primary"
                 onClick={handleSendToAnother}
+                iconLeft={<FiRefreshCw />}
               >
-                <FiRefreshCw />
-                Send to another number
-              </button>
+                Enviar para outro número
+              </Button>
             </div>
           )}
         </div>
       </div>
       
-      <div className={styles.shareSection}>
-        <h3 className={styles.sectionTitle}>
-          <span className={styles.sectionIcon}>
-            <FiShare2 />
-          </span>
-          Share & Export Options
-        </h3>
-        
-        <div className={styles.shareOptions}>
-          <button 
-            className={styles.shareButton}
-            onClick={() => handleCopy('template')}
-          >
-            {justCopied.template ? (
-              <>
-                <FiCheckCircle />
-                Copied!
-              </>
-            ) : (
-              <>
-                <FiClipboard />
-                Copy JSON
-              </>
-            )}
-          </button>
-          
-          <button 
-            className={styles.shareButton}
-            onClick={exportTemplate}
-          >
-            <FiDownload />
-            Download JSON
-          </button>
-          
-          <div 
-            className={`${styles.shareOptionsExpand} ${showShareOptions ? styles.expanded : ''}`}
-          >
-            <button 
-              className={styles.expandButton}
-              onClick={() => setShowShareOptions(!showShareOptions)}
-            >
-              {showShareOptions ? 'Fewer options' : 'More options'}
-            </button>
-            
-            {showShareOptions && (
-              <div className={styles.expandedOptions}>
-                <div className={styles.exportFormatSelector}>
-                  <label className={styles.selectLabel}>Export Format:</label>
-                  <select 
-                    className={styles.formatSelect}
-                    value={exportFormat}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                  >
-                    <option value="json">JSON (API Ready)</option>
-                    <option value="yaml">YAML</option>
-                    <option value="csv">CSV (Template Info)</option>
-                  </select>
-                </div>
-                
-                <button className={styles.shareExtraButton}>
-                  Email Template
-                </button>
-                
-                <button className={styles.shareExtraButton}>
-                  Create Documentation
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <div className={styles.nextStepsSection}>
-        <h3 className={styles.nextStepsTitle}>What's Next?</h3>
-        
-        <div className={styles.stepCards}>
-          <div className={styles.stepCard}>
-            <div className={styles.stepNumber}>1</div>
-            <h4 className={styles.stepCardTitle}>Template Review Process</h4>
-            <p className={styles.stepCardDescription}>
-              Your template will be reviewed by Meta within 24-48 hours. You'll receive 
-              an email notification once it's approved or if changes are needed.
-            </p>
-          </div>
-          
-          <div className={styles.stepCard}>
-            <div className={styles.stepNumber}>2</div>
-            <h4 className={styles.stepCardTitle}>Implementing in Your Application</h4>
-            <p className={styles.stepCardDescription}>
-              Use the template JSON in your application to programmatically send carousel 
-              messages to your customers through the WhatsApp Business API.
-            </p>
-          </div>
-          
-          <div className={styles.stepCard}>
-            <div className={styles.stepNumber}>3</div>
-            <h4 className={styles.stepCardTitle}>Monitor Performance</h4>
-            <p className={styles.stepCardDescription}>
-              Track engagement and performance of your carousel template through the Blip 
-              analytics dashboard to optimize your messaging strategy.
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <div className={styles.actionButtons}>
-        <button 
-          className={styles.backButton}
+      <div className={styles.navigationButtons}>
+        <Button 
+          variant="outline"
+          color="content"
           onClick={() => setStep(3)}
+          iconLeft={<FiChevronLeft />}
         >
-          <FiChevronLeft />
-          Back
-        </button>
+          Voltar
+        </Button>
         
-        <button 
-          className={styles.newTemplateButton}
+        <Button 
+          variant="solid"
+          color="primary"
           onClick={resetForm}
         >
-          Create New Template
-        </button>
+          Criar Novo Template
+        </Button>
       </div>
       
       {error && <AlertMessage error={error} />}
-      {success && !sentStatus.isSent && <AlertMessage success={success} />}
+      {success && !sentStatus && <AlertMessage success={success} />}
     </div>
   );
 };

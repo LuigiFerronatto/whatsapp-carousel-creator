@@ -1,0 +1,63 @@
+/* Steps.module.css */
+
+/* Contêiner principal de cada passo */
+.stepContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: var(--snow);
+    border-radius: 0.5rem;
+    box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Cabeçalho */
+  .headerSection {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Título do passo */
+  .stepTitle {
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-bold);
+    color: var(--blip-blue-brand);
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .stepTitle::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background-color: var(--blip-action);
+    border-radius: 3px;
+  }
+  
+  /* Descrição do passo */
+  .stepDescription {
+    font-size: var(--fs-p1);
+    color: var(--dove-gray-2);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .stepContainer {
+      padding: 1rem;
+    }
+  
+    .stepTitle {
+      font-size: var(--fs-h4);
+    }
+  }
+  

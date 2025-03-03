@@ -75,26 +75,6 @@ const WhatsAppCarouselCreator = () => {
       
       <div className={styles.content}>
         {renderCurrentStep()}
-
-        <div className={styles.actions}>
-          {step > 1 && (
-            <button 
-              className={styles.backButton}
-              onClick={() => setStep(step - 1)}
-            >
-              Voltar
-            </button>
-          )}
-
-          {step === 4 && (
-            <button 
-              className={styles.resetButton}
-              onClick={resetForm}
-            >
-              Criar Novo Template
-            </button>
-          )}
-        </div>
       </div>
       
       <button 

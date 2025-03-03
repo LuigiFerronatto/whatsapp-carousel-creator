@@ -21,7 +21,7 @@
 }
 
 .stepsWrapper {
-  overflow-x: auto;
+  overflow: visible;
   scrollbar-width: none; /* Firefox */
   margin: 0 -1rem;
   padding: 0 1rem;
@@ -36,6 +36,7 @@
   position: relative;
   padding: 0 1rem;
   min-width: max-content;
+  overflow: visible;
 }
 
 .step {
@@ -165,6 +166,7 @@
 @media (min-width: 768px) {
   .stepsContainer {
     justify-content: space-between;
+    overflow: visible;
   }
   
   .step {

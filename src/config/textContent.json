@@ -1,89 +1,88 @@
 {
-    "global": {
-      "appName": "Criador de Carrossel WhatsApp",
-      "buttons": {
-        "next": "Próximo",
-        "back": "Voltar",
-        "continue": "Continuar",
-        "save": "Salvar",
-        "saveFiles": "Salvar Arquivos e Continuar",
-        "draft": "Salvar Rascunho",
-        "reset": "Reiniciar"
-      }
-    },
-    "steps": {
-      "1": {
-        "title": "Configuração de Arquivos",
-        "description": "Faça upload das mídias e configure sua chave de autorização",
-        "authKey": {
-          "label": "Chave de Autorização (Router Key)",
-          "placeholder": "Key=xxxxxxxxx",
-          "help": "Encontre sua chave no portal da Blip. Ela é essencial para upload e criação do template."
-        },
-        "fileUpload": {
-          "title": "Upload de Mídias",
-          "description": "Adicione de 2 a 10 cards com imagens ou vídeos",
-          "uploadMethods": {
-            "url": "Usar URL",
-            "file": "Upload de Arquivo"
-          }
-        },
-        "validations": {
-          "authKeyRequired": "A chave de autorização é obrigatória",
-          "missingFiles": "Adicione URLs ou faça upload para todos os cards"
-        }
-      },
-      "2": {
-        "title": "Personalização do Template",
-        "description": "Configure o nome, idioma e conteúdo dos cards",
-        "templateName": {
-          "label": "Nome do Template",
-          "placeholder": "meu_template_carousel",
-          "help": "Use um nome descritivo sem espaços. Exemplo: promocao_verao"
-        },
-        "bodyText": {
-          "label": "Texto do Corpo da Mensagem",
-          "placeholder": "Descrição geral do carrossel que aparecerá antes dos cards",
-          "help": "Texto introdutório que motiva o usuário a interagir com o carrossel"
-        },
-        "validations": {
-          "nameRequired": "Nome do template é obrigatório",
-          "bodyTextRequired": "Texto do corpo da mensagem é obrigatório",
-          "cardValidation": "Todos os cards precisam ter texto e pelo menos um botão"
-        }
-      },
-      "3": {
-        "title": "Finalização do Template",
-        "description": "Visualize o JSON do template e prepare para envio",
-        "jsonSection": {
-          "createTemplate": "JSON para criação do template",
-          "sendTemplate": "JSON para envio do template"
-        }
-      },
-      "4": {
-        "title": "Envio do Template",
-        "description": "Envie o template para um número de WhatsApp",
-        "phoneNumber": {
-          "label": "Número de Telefone",
-          "placeholder": "5521999999999",
-          "help": "Digite o número completo com DDI"
-        }
-      }
-    },
-    "errors": {
-      "generic": {
-        "validationError": "Por favor, corrija os erros antes de continuar",
-        "uploadFailed": "Falha no upload. Verifique suas credenciais e conexão.",
-        "apiError": "Erro na comunicação com a API. Tente novamente."
+  "global": {
+    "appName": "WhatsApp Carousel Creator",
+    "buttons": {
+      "next": "Continuar",
+      "back": "Voltar",
+      "save": "Salvar",
+      "saveFiles": "Salvar e Continuar",
+      "draft": "Salvar Rascunho",
+      "reset": "Começar Novo Template"
+    }
+  },
+  "steps": {
+    "1": {
+      "title": "Configure as Mídias",
+      "description": "Adicione imagens ou vídeos para cada card do seu carousel",
+      "authKey": {
+        "label": "Chave de Autorização (Router Key)",
+        "placeholder": "Cole sua chave aqui",
+        "help": "Encontre esta chave no portal da Blip. Necessária para uploads e criação do template."
       },
       "fileUpload": {
-        "invalidType": "Tipo de arquivo não suportado",
-        "sizeLimit": "Arquivo muito grande. Limite: 50MB"
+        "title": "Mídias do Carousel",
+        "description": "Adicione de 2 a 10 cards com imagens ou vídeos",
+        "uploadMethods": {
+          "url": "Usar URL",
+          "file": "Upload de Arquivo"
+        }
+      },
+      "validations": {
+        "authKeyRequired": "Adicione sua chave de autorização para continuar",
+        "missingFiles": "Adicione URLs ou faça upload para todos os cards"
       }
     },
-    "success": {
-      "templateCreated": "Template criado com sucesso!",
-      "filesUploaded": "Arquivos enviados com sucesso",
-      "templateSent": "Template enviado para o número informado"
+    "2": {
+      "title": "Personalize Seu Template",
+      "description": "Configure textos e botões para cada card do carousel",
+      "templateName": {
+        "label": "Nome do Template",
+        "placeholder": "meu_template_carousel",
+        "help": "Use um nome descritivo sem espaços. Exemplo: promocao_verao"
+      },
+      "bodyText": {
+        "label": "Mensagem de Introdução",
+        "placeholder": "Texto que aparecerá antes do carousel",
+        "help": "Uma mensagem clara que incentiva o cliente a explorar as opções do carousel"
+      }
+    },
+    "3": {
+      "title": "Revise Seu Template",
+      "description": "Visualize e faça ajustes finais antes de concluir",
+      "jsonSection": {
+        "createTemplate": "JSON para criação do template",
+        "sendTemplate": "JSON para envio do template"
+      }
+    },
+    "4": {
+      "title": "Envie Seu Template",
+      "description": "Teste seu template enviando para um número WhatsApp",
+      "phoneNumber": {
+        "label": "Número do WhatsApp",
+        "placeholder": "5521999999999",
+        "help": "Digite o número completo com código do país"
+      },
+      "success": {
+        "title": "Template Enviado!",
+        "message": "Verifique seu WhatsApp para visualizar o template em ação"
+      }
     }
-  } 
+  },
+  "errors": {
+    "generic": {
+      "validationError": "Corrija os erros destacados antes de continuar",
+      "uploadFailed": "Não foi possível fazer upload. Verifique sua conexão e tente novamente.",
+      "apiError": "Erro na comunicação com o servidor. Tente novamente em alguns instantes."
+    }
+  },
+  "success": {
+    "templateCreated": "Template criado com sucesso!",
+    "filesUploaded": "Todos os arquivos foram enviados",
+    "templateSent": "Template enviado com sucesso!"
+  },
+  "accessibility": {
+    "loadingAlt": "Carregando conteúdo",
+    "previewAlt": "Prévia do carousel",
+    "requiredField": "Campo obrigatório"
+  }
+}

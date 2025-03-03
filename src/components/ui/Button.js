@@ -1,10 +1,12 @@
-// components/common/Button.js
+// components/ui/Button.js
 import React from 'react';
+import PropTypes from 'prop-types';
 import styles from './Button.module.css';
 
 /**
- * Componente Button aprimorado e reutilizável
- * Projetado para ser usado em toda a aplicação com estilos consistentes
+ * Componente de botão padronizado para toda a aplicação
+ * @param {Object} props - Propriedades do componente
+ * @returns {JSX.Element} Componente de botão
  */
 const Button = ({
   children,
@@ -21,7 +23,7 @@ const Button = ({
   onClick,
   ...restProps
 }) => {
-  // Construir classes de CSS de forma dinâmica
+  // Construir classes CSS com base nas props
   const buttonClasses = [
     styles.button,
     styles[`variant-${variant}`],
@@ -32,23 +34,22 @@ const Button = ({
     fullWidth ? styles.fullWidth : '',
     className
   ].filter(Boolean).join(' ');
-  
+
   // Componente de carregamento
   const LoadingSpinner = () => (
-    <div className={styles.loadingIcon}>
+    <span className={styles.loadingSpinner} aria-hidden="true">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <circle className={styles.loadingCircle} cx="12" cy="12" r="10" 
-          stroke="currentColor" strokeWidth="4" fill="none" />
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
       </svg>
-    </div>
+    </span>
   );
-  
+
   return (
     <button
       type={type}
       className={buttonClasses}
       disabled={disabled || loading}
-      onClick={!loading && !disabled ? onClick : undefined}
+      onClick={onClick}
       {...restProps}
     >
       {loading && <LoadingSpinner />}
@@ -57,6 +58,21 @@ const Button = ({
       {!loading && iconRight && <span className={styles.iconRight}>{iconRight}</span>}
     </button>
   );
+};
+
+Button.propTypes = {
+  children: PropTypes.node,
+  variant: PropTypes.oneOf(['solid', 'outline', 'text']),
+  color: PropTypes.oneOf(['primary', 'content', 'positive', 'negative']),
+  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
+  disabled: PropTypes.bool,
+  loading: PropTypes.bool,
+  fullWidth: PropTypes.bool,
+  iconLeft: PropTypes.node,
+  iconRight: PropTypes.node,
+  className: PropTypes.string,
+  onClick: PropTypes.func
 };
 
 export default Button;

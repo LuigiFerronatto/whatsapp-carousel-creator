@@ -1,6 +1,8 @@
 // App.js
 import React, { useEffect, Suspense, lazy } from 'react';
 import { WhatsAppTemplateProvider } from './contexts/WhatsAppTemplateContext';
+import { TextContentProvider } from './contexts/TextContentContext';
+import { ToastProvider } from './components/ui/Feedback';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Loading from './components/common/Loading';
 import { createAzureBlobService } from './services/storage/azureBlobService';
@@ -11,7 +13,7 @@ const WhatsAppCarouselCreator = lazy(() => import('./components/WhatsAppCarousel
 
 /**
  * Componente raiz da aplicação
- * Inicializa serviços e provê contexto global
+ * Inicializa serviços e provê contextos globais
  */
 function App() {
   // Inicializar serviços ao carregar a aplicação
@@ -35,49 +37,60 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-      <WhatsAppTemplateProvider>
-        <div className="app-container">
-          <header className="app-header">
-            <h1>WhatsApp Carousel Creator</h1>
-            <div className="app-tagline">
-              Crie templates de carrossel de forma simples e rápida
-            </div>
-          </header>
-          
-          <main className="app-content">
-            <Suspense fallback={
-              <div className="loading-container">
-                <Loading 
-                  size="large" 
-                  color="primary" 
-                  message="Carregando aplicação..." 
-                />
+      <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
+        <TextContentProvider>
+          <WhatsAppTemplateProvider>
+            <ToastProvider>
+              <div className="app-container">
+                {/* <header className="app-header">
+                  <h1>WhatsApp Carousel Creator</h1>
+                  <div className="app-tagline">
+                    Crie templates de carrossel de forma simples e rápida
+                  </div>
+                </header> */}
+                
+                <main className="app-content">
+                  <Suspense fallback={
+                    <div className="loading-container">
+                      <Loading 
+                        size="large" 
+                        color="primary" 
+                        message="Carregando aplicação..." 
+                      />
+                    </div>
+                  }>
+                    <ErrorBoundary 
+                      showDetails={process.env.NODE_ENV === 'development'}
+                      fallbackAction={() => window.location.reload()}
+                      fallbackActionText="Recarregar Página"
+                    >
+                      <WhatsAppCarouselCreator />
+                    </ErrorBoundary>
+                  </Suspense>
+                </main>
+                
+                <footer className="app-footer">
+                  <div className="footer-content">
+                    <p>&copy; {new Date().getFullYear()} - WhatsApp Carousel Creator</p>
+                    <div className="footer-links">
+                      <a 
+                        className="footer-link" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        href='https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates/media-card-carousel-templates/'
+                      >
+                        Documentação
+                      </a>
+                      <p>Developed by:</p>
+                      <p> Luigi Ferronatto | Blip - CDA </p>
+                    </div>
+                  </div>
+                </footer>
               </div>
-            }>
-              <ErrorBoundary 
-                showDetails={process.env.NODE_ENV === 'development'}
-                fallbackAction={() => window.location.reload()}
-                fallbackActionText="Recarregar Página"
-              >
-                <WhatsAppCarouselCreator />
-              </ErrorBoundary>
-            </Suspense>
-          </main>
-          
-          <footer className="app-footer">
-            <div className="footer-content">
-              <p>&copy; {new Date().getFullYear()} - WhatsApp Carousel Creator</p>
-              <div className="footer-links">
-                <a className="footer-link" target="_blank" rel="noopener noreferrer" href='https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates/media-card-carousel-templates/'>Documentation</a>
-                <p>Created By:</p>
-                <p>Luigi Ferronatto / Blip - CDA</p>
-              </div>
-            </div>
-          </footer>
-        </div>
-      </WhatsAppTemplateProvider>
-    </ErrorBoundary>
+            </ToastProvider>
+          </WhatsAppTemplateProvider>
+        </TextContentProvider>
+      </ErrorBoundary>
   );
 }
 
