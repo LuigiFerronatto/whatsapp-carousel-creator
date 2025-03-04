@@ -1,7 +1,7 @@
 // components/editors/CardUploadInput.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useFileUpload } from '../../hooks/useFileUpload';
-import Button from '../common/Button';
+import Button from '../ui/Button/Button';
 import { 
   FiImage, 
   FiVideo, 

@@ -369,30 +369,37 @@ const CarouselPreview = ({
                             className={styles.cardImage}
                           />
                         ) : (
-                          <div className={styles.videoContainer}>
-                            <video
-                              src={card.fileUrl}
-                              className={styles.cardVideo}
-                              controls={false}
-                            />
-                            <div className={styles.playButton}>
-                              <svg 
-                                width="24" 
-                                height="24" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path 
-                                  d="M5 3L19 12L5 21V3Z" 
-                                  stroke="white" 
-                                  strokeWidth="2" 
-                                  strokeLinecap="round" 
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </div>
-                          </div>
+                          <div className={styles.videoContainer} onClick={(e) => e.currentTarget.querySelector('video').play()}>
+  <video
+    src={card.fileUrl}
+    className={styles.cardVideo}
+    controls={true}   // Habilita controles para o usuário
+    autoPlay={false}  // Opcional: você pode ativar `true`
+    muted={true}      // Necessário para autoplay funcionar em alguns navegadores
+    loop={true}       // Faz o vídeo rodar em loop
+    playsInline={true} // Evita fullscreen automático no iOS
+    onPlay={(e) => e.currentTarget.nextSibling.style.display = 'none'} // Esconde botão de play ao iniciar
+    onPause={(e) => e.currentTarget.nextSibling.style.display = 'flex'} // Mostra botão de play ao pausar
+  />
+  <div className={styles.playButton}>
+    <svg 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path 
+        d="M5 3L19 12L5 21V3Z" 
+        stroke="white" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  </div>
+</div>
+
                         )
                       ) : (
                         <div className={styles.placeholderImage}>

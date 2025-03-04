@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CardUploadInput from '../editors/CardUploadInput';
 import AlertMessage from '../common/AlertMessage';
-import Button from '../common/Button';
+import Button from '../ui/Button/Button';
 import { 
   FiUpload, 
   FiPlus, 

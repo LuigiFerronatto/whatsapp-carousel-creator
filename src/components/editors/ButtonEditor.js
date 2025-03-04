@@ -47,15 +47,19 @@ const ButtonEditor = ({
   
   // Phone number formatting helper
   const formatPhoneNumber = (value) => {
-    // Remove non-numeric characters except for +
-    let cleaned = value.replace(/[^\\d+]/g, '');
-    // Ensure + is only at the beginning
-    if (cleaned.indexOf('+') > 0) {
-      cleaned = cleaned.replace(/\\+/g, '');
-      cleaned = '+' + cleaned;
+    // Remove todos os caracteres que não sejam números ou "+"
+    let cleaned = value.replace(/[^\d+]/g, '');
+  
+    // Garante que "+" aparece apenas no começo
+    if (cleaned.startsWith('+')) {
+      cleaned = '+' + cleaned.replace(/\+/g, '');
+    } else {
+      cleaned = cleaned.replace(/\+/g, ''); // Remove "+" extras
     }
+  
     return cleaned;
   };
+  
   
   // URL validation check with proper protocol
   const isValidUrl = (url) => {

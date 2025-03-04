@@ -408,7 +408,7 @@
   display: flex;
   gap: 0.25rem;
   margin-bottom: 1rem;
-  overflow-x: auto;
+  overflow: visible;
   padding-bottom: 0.5rem;
 }
 
@@ -637,7 +637,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-1);
   overflow: hidden;
-  height: 100%;
+  height: 97dvh;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--wave);
@@ -664,7 +664,7 @@
 }
 
 .previewContent {
-  padding: 1rem;
+  padding: 0.5rem;
   display: flex;
   justify-content: center;
   flex: 1;
