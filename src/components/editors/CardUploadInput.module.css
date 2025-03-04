@@ -1,10 +1,10 @@
 /* CardUploadInput.module.css */
 .cardContainer {
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-1);
   background-color: var(--color-surface-0);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -12,15 +12,15 @@
 
 .cardContainer:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-2);
 }
 
 .evenCard {
-  border-top: 4px solid var(--blip-action);
+  border-top: 4px solid var(--color-surface-primary);
 }
 
 .oddCard {
-  border-top: 4px solid var(--color-surface-primary);
+  border-top: 4px solid var(--mountain-meadow);
 }
 
 .cardHeader {
@@ -36,6 +36,9 @@
   font-weight: var(--fw-bold);
   color: var(--blip-blue-brand);
   font-size: var(--fs-p1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .fileTypeSelect {
@@ -46,29 +49,35 @@
 
 .select {
   appearance: none;
-  padding: 0.4rem 2rem 0.4rem 0.75rem;
+  padding: 0.4rem 2rem 0.4rem 2.25rem;
   border: 1px solid var(--wave);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-md);
   background-color: var(--color-surface-0);
   font-size: var(--fs-p2);
   cursor: pointer;
-  transition: border-color 0.2s ease;
-  padding-left: 2rem;
+  transition: border-color var(--transition-fast);
 }
 
 .select:focus {
   outline: none;
-  border-color: var(--blip-action);
+  border-color: var(--color-surface-primary);
   box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.1);
 }
 
-.fileTypeIcon {
+.fileTypeIconWrapper {
   position: absolute;
   left: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
   color: var(--blip-blue-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.typeIcon {
+  flex-shrink: 0;
 }
 
 .cardBody {
@@ -78,9 +87,9 @@
 
 .uploadMethods {
   display: flex;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
-  background-color: var(--box);
+  background-color: var(--whisper);
   padding: 0.25rem;
 }
 
@@ -93,10 +102,10 @@
   padding: 0.5rem;
   border: none;
   background: none;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-md);
   font-size: var(--fs-p2);
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all var(--transition-fast);
   color: var(--text-color-default);
 }
 
@@ -105,10 +114,10 @@
 }
 
 .activeMethod {
-  background-color: var(--snow);
-  color: var(--blip-blue-brand);
+  background-color: var(--color-surface-0);
+  color: var(--color-surface-primary);
   font-weight: var(--fw-bold);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-1);
 }
 
 .formGroup {
@@ -132,20 +141,21 @@
   flex: 1;
   padding: 0.75rem;
   padding-right: 4rem;
-  border: 1px solid var(--mercury);
-  border-radius: 0.25rem;
+  border: 1px solid var(--wave);
+  border-radius: var(--radius-md);
   font-size: var(--fs-p2);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all var(--transition-fast);
+  background-color: var(--color-surface-0);
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--blip-action);
+  border-color: var(--color-surface-primary);
   box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.1);
 }
 
 .inputError {
-  border-color: var(--pomegranate);
+  border-color: var(--color-surface-negative);
   background-color: rgba(255, 224, 224, 0.05);
 }
 
@@ -157,16 +167,19 @@
   background-color: transparent;
   color: var(--dove-gray-2);
   border: none;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
   cursor: pointer;
   font-size: var(--fs-p3);
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .clearButton {
-  color: var(--pomegranate);
+  color: var(--color-surface-negative);
 }
 
 .clearButton:hover {
@@ -175,7 +188,7 @@
 }
 
 .testButton {
-  color: var(--blip-action);
+  color: var(--color-surface-primary);
 }
 
 .testButton:hover {
@@ -193,7 +206,10 @@
 }
 
 .errorText {
-  color: var(--pomegranate);
+  color: var(--color-surface-negative);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .dropArea {
@@ -202,21 +218,21 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  border: 2px dashed var(--cloud);
-  border-radius: 0.5rem;
+  border: 2px dashed var(--wave);
+  border-radius: var(--radius-md);
   background-color: var(--whisper);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .dropArea:hover {
-  background-color: var(--box);
+  background-color: var(--hover-light);
   border-color: var(--blip-light);
 }
 
 .dragging {
   background-color: var(--blip-light);
-  border-color: var(--blip-action);
+  border-color: var(--color-surface-primary);
 }
 
 .uploadIcon {
@@ -243,14 +259,14 @@
   color: var(--milano-red);
   padding: 0.75rem;
   background-color: var(--cinderella);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-md);
   font-size: var(--fs-p2);
   margin-top: 0.5rem;
 }
 
 .previewSection {
   padding: 1rem;
-  background-color: var(--box);
+  background-color: var(--whisper);
   border-top: 1px solid var(--wave);
 }
 
@@ -276,7 +292,7 @@
   justify-content: center;
   align-items: center;
   background-color: var(--wild-sand);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-md);
   overflow: hidden;
   position: relative;
   padding-top: 56.25%; /* 16:9 aspect ratio */
@@ -291,7 +307,30 @@
   object-fit: contain;
 }
 
-/* Responsividade */
+.previewActions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.viewOriginalLink {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-surface-primary);
+  font-size: var(--fs-p3);
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.viewOriginalLink:hover {
+  background-color: var(--hover-light);
+  text-decoration: underline;
+}
+
+/* Responsiveness */
 @media (max-width: 768px) {
   .cardContainer {
     max-width: 100%;
@@ -317,12 +356,12 @@
     width: 100%;
   }
   
-  .testButton {
-    font-size: 0; /* Esconde o texto em telas pequenas */
+  .testButton span {
+    display: none;
   }
   
   .testButton::after {
-    content: "Testar";
+    content: "Test";
     font-size: var(--fs-p3);
   }
 }

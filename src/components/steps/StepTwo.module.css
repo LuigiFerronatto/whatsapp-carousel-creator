@@ -1,43 +1,13 @@
-/* StepTwo.module.css */
+/* StepTwo.module.css com adições para o editor formatado e variáveis */
 @import '../../styles/Steps.module.css';
+@import '../../styles/design-system.css';
 
-.progressContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.progressBarWrapper {
-  flex: 1;
-  margin-right: 1rem;
-}
-
-.progressBar {
-  height: 8px;
-  background-color: var(--color-surface-2);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-
-.progressFill {
-  height: 100%;
-  background-color: var(--mountain-meadow);
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.progressText {
-  font-size: var(--fs-p3);
-  color: var(--dove-gray-2);
-  display: block;
-  text-align: right;
-}
-
+/* View Controls */
 .viewControls {
   display: flex;
+  justify-content: center;
   gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .viewToggle, .hintsToggle {
@@ -47,17 +17,23 @@
   background: none;
   border: none;
   font-size: var(--fs-p3);
-  color: var(--blip-action);
+  color: var(--color-surface-primary);
   cursor: pointer;
   padding: 0.4rem 0.6rem;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
 }
 
 .viewToggle:hover, .hintsToggle:hover {
   background-color: var(--hover-light);
 }
 
+.hintsToggle.active {
+  background-color: var(--color-surface-primary);
+  color: var(--alabaster);
+}
+
+/* Content Layout */
 .contentWrapper {
   display: flex;
   gap: 2rem;
@@ -76,11 +52,195 @@
   max-width: 60%;
 }
 
+/* Variable Manager */
+.variableManagerContainer {
+  padding: 1rem;
+  background-color: var(--whisper);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--blip-light);
+  box-shadow: var(--shadow-1);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.variableManagerHeader {
+  margin-bottom: 1rem;
+}
+
+.variableManagerTitle {
+  font-size: var(--fs-p1);
+  font-weight: var(--fw-bold);
+  color: var(--blip-blue-brand);
+  margin-bottom: 0.5rem;
+}
+
+.variableManagerDescription {
+  color: var(--dove-gray-2);
+  font-size: var(--fs-p2);
+}
+
+.variableList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.variableItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--wave);
+  transition: all var(--transition-fast);
+}
+
+.variableItem:hover {
+  background-color: var(--color-surface-1);
+  box-shadow: var(--shadow-1);
+}
+
+.variableIndex {
+  background-color: var(--color-system);
+  color: var(--blip-dark);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: var(--fw-bold);
+  font-family: monospace;
+  font-size: var(--fs-p3);
+  flex-shrink: 0;
+}
+
+.variableInput {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--wave);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.variableInput:focus {
+  outline: none;
+  border-color: var(--color-surface-primary);
+  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
+}
+
+.removeVariableBtn {
+  background-color: var(--color-surface-1);
+  color: var(--dove-gray-2);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.removeVariableBtn:hover {
+  background-color: var(--cinderella);
+  color: var(--color-surface-negative);
+}
+
+.addVariableContainer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.newVariableInput {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--wave);
+  border-radius: var(--radius-sm);
+}
+
+.newVariableInput:focus {
+  outline: none;
+  border-color: var(--color-surface-primary);
+  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
+}
+
+.addVariableBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.addVariableBtn:hover:not(:disabled) {
+  background-color: var(--color-surface-primary);
+  color: var(--alabaster);
+}
+
+.addVariableBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.variableTips {
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  border-left: 3px solid var(--blip-light);
+}
+
+.tipIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--blip-light);
+  border-radius: var(--radius-circle);
+  flex-shrink: 0;
+}
+
+.tipIcon {
+  color: var(--blip-dark);
+}
+
+.variableTips p {
+  margin: 0 0 0.5rem 0;
+  font-weight: var(--fw-bold);
+}
+
+.variableTips ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.variableTips li {
+  margin-bottom: 0.25rem;
+}
+
+/* Form Sections */
 .basicDetailsSection, .cardEditorSection {
-  background-color: var(--snow);
-  border-radius: 0.75rem;
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--wave);
 }
 
 .sectionTitle {
@@ -92,6 +252,42 @@
   border-bottom: 1px solid var(--wave);
 }
 
+/* Progress Bar */
+.progressContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.progressBarWrapper {
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.progressBar {
+  height: 8px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--mountain-meadow);
+  border-radius: var(--radius-pill);
+  transition: width var(--transition-normal);
+}
+
+.progressText {
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  display: block;
+  text-align: right;
+}
+
+/* Form Elements */
 .formGroup {
   margin-bottom: 1.5rem;
 }
@@ -105,7 +301,7 @@
 }
 
 .requiredMark {
-  color: var(--pomegranate);
+  color: var(--color-surface-negative);
   margin-left: 0.25rem;
 }
 
@@ -113,21 +309,21 @@
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--wave);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: var(--fs-p2);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   background-color: var(--color-surface-0);
 }
 
 .input:focus, .select:focus, .textarea:focus {
   outline: none;
-  border-color: var(--blip-action);
+  border-color: var(--color-surface-primary);
   box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
 }
 
 .invalidInput {
-  border-color: var(--pomegranate);
+  border-color: var(--color-surface-negative);
   background-color: rgba(255, 224, 224, 0.2);
 }
 
@@ -182,7 +378,7 @@
   border-left: 3px solid var(--blip-light);
   padding: 0.75rem;
   margin-top: 0.5rem;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
 }
@@ -191,16 +387,16 @@
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  color: var(--blip-action);
+  color: var(--color-surface-primary);
 }
 
 .errorMessage {
-  color: var(--pomegranate);
+  color: var(--color-surface-negative);
   font-size: var(--fs-p3);
   margin-top: 0.5rem;
   padding: 0.5rem;
   background-color: var(--cinderella);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
 }
 
 /* Card Navigation */
@@ -221,11 +417,11 @@
   padding: 0.75rem 1rem;
   background-color: var(--color-surface-1);
   border: 1px solid var(--wave);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   font-size: var(--fs-p2);
   color: var(--text-color-default);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   position: relative;
 }
 
@@ -234,9 +430,9 @@
 }
 
 .activeCardTab {
-  background-color: var(--blip-action);
+  background-color: var(--color-surface-primary);
   color: var(--alabaster);
-  border-color: var(--blip-action);
+  border-color: var(--color-surface-primary);
   font-weight: var(--fw-bold);
 }
 
@@ -246,9 +442,9 @@
   right: -6px;
   width: 18px;
   height: 18px;
-  background-color: var(--pomegranate);
+  background-color: var(--color-surface-negative);
   color: var(--alabaster);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -268,11 +464,11 @@
   padding: 0.5rem 0.75rem;
   background-color: var(--color-surface-1);
   border: 1px solid var(--wave);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   font-size: var(--fs-p3);
   color: var(--text-color-default);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .cardNavButton:hover:not(:disabled) {
@@ -305,15 +501,36 @@
   border-radius: 3px;
 }
 
-/* Fixed Button Group */
+/* Card Content Editor */
+.cardContentEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cardTextEditor {
+  background-color: var(--whisper);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  border: 1px solid var(--wave);
+}
+
+.cardTextLabel {
+  display: block;
+  font-size: var(--fs-p2);
+  font-weight: var(--fw-bold);
+  margin-bottom: 0.75rem;
+  color: var(--text-color-default);
+}
+
+/* Action Buttons */
 .fixedButtonGroup {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1rem 0;
-  background-color: var(--snow);
+  margin-top: 1.5rem;
   border-top: 1px solid var(--wave);
-  margin-top: 1rem;
 }
 
 .actionStatus {
@@ -342,17 +559,17 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   font-weight: var(--fw-bold);
   font-size: var(--fs-p2);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .backButton {
   background-color: var(--color-surface-2);
   color: var(--text-color-default);
+  border: none;
 }
 
 .backButton:hover {
@@ -361,8 +578,8 @@
 
 .saveButton {
   background-color: var(--color-surface-1);
-  color: var(--blip-action);
-  border: 1px solid var(--blip-action);
+  color: var(--color-surface-primary);
+  border: 1px solid var(--color-surface-primary);
 }
 
 .saveButton:hover {
@@ -370,14 +587,16 @@
 }
 
 .nextButton {
-  background-color: var(--blip-action);
+  background-color: var(--color-surface-primary);
   color: var(--alabaster);
+  border: none;
   min-width: 160px;
 }
 
 .nextButton:hover:not(:disabled) {
   background-color: var(--blip-dark);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
 }
 
 .nextButton:disabled {
@@ -414,13 +633,14 @@
 }
 
 .previewWrapper {
-  background-color: var(--snow);
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
   overflow: hidden;
   height: 100%;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--wave);
 }
 
 .previewTitle {
@@ -503,5 +723,11 @@
     display: flex;
     justify-content: center;
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
   }
 }

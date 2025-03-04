@@ -42,6 +42,45 @@ const truncateText = (text, maxLength) => {
     : text;
 };
 
+// Formata o texto com marcação WhatsApp
+const formatWhatsAppText = (text) => {
+  if (!text) return '';
+  
+  // Substituir variáveis 
+  let formattedText = text.replace(/\{\{(\d+)\}\}/g, (match, number) => {
+    return `<span class="${styles.variable}">{{${number}}}</span>`;
+  });
+
+  // Negrito: *texto*
+  formattedText = formattedText.replace(/\*([^*\n]+)\*/g, '<strong>$1</strong>');
+  
+  // Itálico: _texto_
+  formattedText = formattedText.replace(/\_([^_\n]+)\_/g, '<em>$1</em>');
+  
+  // Tachado: ~texto~
+  formattedText = formattedText.replace(/\~([^~\n]+)\~/g, '<del>$1</del>');
+  
+  // Código: ```texto```
+  formattedText = formattedText.replace(/```([^`]+)```/g, '<code class="multiline-code">$1</code>');
+  
+  // Código inline: `texto`
+  formattedText = formattedText.replace(/`([^`\n]+)`/g, '<code class="inline-code">$1</code>');
+  
+  // Lista com marcadores: * texto ou - texto
+  formattedText = formattedText.replace(/^[*-]\s(.+)$/gm, '<div class="list-item"><span class="bullet">•</span> $1</div>');
+  
+  // Lista numerada: 1. texto
+  formattedText = formattedText.replace(/^(\d+)\.\s(.+)$/gm, '<div class="list-item"><span class="number">$1.</span> $2</div>');
+  
+  // Citação: > texto
+  formattedText = formattedText.replace(/^>\s(.+)$/gm, '<div class="blockquote">$1</div>');
+  
+  // Quebra de linha
+  formattedText = formattedText.replace(/\n/g, '<br />');
+  
+  return formattedText;
+};
+
 // Componente de Botão de Navegação
 const NavButton = ({ direction, onClick }) => (
   <button
@@ -93,9 +132,7 @@ const CarouselPreview = ({
     setCurrentTranslate(newTranslate);
     setPrevTranslate(newTranslate);
     setDragOffset(0);
-};
-
-
+  };
 
   // Navegação cíclica dos cards
   const goToPrevCard = () => {
@@ -302,9 +339,10 @@ const CarouselPreview = ({
       
       <div className={styles.chatWindow}>
         {bodyText && (
-          <div className={styles.messageBodyText}>
-            {truncateText(bodyText, CONFIG.MAX_BODY_TEXT_LENGTH)}
-          </div>
+          <div 
+            className={styles.messageBodyText} 
+            dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+          />
         )}
         
         {hasValidCards && (
@@ -394,7 +432,7 @@ const CarouselPreview = ({
                     
                     <div className={styles.cardBody}>
                       {card.bodyText ? (
-                        <p>{truncateText(card.bodyText, CONFIG.MAX_CARD_TEXT_LENGTH)}</p>
+                        <div dangerouslySetInnerHTML={{ __html: formatWhatsAppText(card.bodyText) }} />
                       ) : (
                         <p className={styles.placeholderText}>Texto do card</p>
                       )}

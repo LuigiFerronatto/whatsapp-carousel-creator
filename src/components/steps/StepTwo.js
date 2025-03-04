@@ -5,6 +5,7 @@ import CarouselPreview from '../previews/CarouselPreview';
 import AlertMessage from '../common/AlertMessage';
 import { FiSave, FiCheck, FiChevronRight, FiChevronLeft, FiEye, FiEyeOff, FiInfo } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
+import steps from '../../styles/Steps.module.css';
 
 const StepTwo = ({
   templateName,
@@ -133,11 +134,11 @@ const StepTwo = ({
   ];
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.headerContainer}>
+    <div className={steps.container}>
+      <div className={steps.introSection}>
 
-        <h2 className={styles.stepTitle}>Step 2: Template Creation</h2>
-        <p className={styles.stepDescription}>
+        <h2 className={steps.stepTitle}>Template Creation</h2>
+        <p className={steps.stepDescription}>
           Configure your template details, including name, language, and content for each card.
         </p>
 

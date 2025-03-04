@@ -1,165 +1,128 @@
 // components/common/IntroductionGuide.js
-import React, { useState, useEffect } from 'react';
-import { FiX, FiChevronRight, FiChevronLeft, FiHelpCircle, FiInfo } from 'react-icons/fi';
-import Button from './Button';
+import React, { useState } from 'react';
+import { 
+  FiInfo, 
+  FiArrowRight, 
+  FiUpload, 
+  FiEdit3, 
+  FiCheckCircle, 
+  FiSend, 
+  FiX, 
+  FiChevronLeft, 
+  FiChevronRight 
+} from 'react-icons/fi';
 import styles from './IntroductionGuide.module.css';
 
 /**
- * Introduction Guide component that shows a step-by-step tutorial
- * @param {Object} props - Component properties
- * @param {Function} props.onClose - Function to call when the guide is closed
- * @param {Array} props.steps - Array of steps for the guide
- * @param {boolean} props.showFloatingHelp - Whether to show the floating help button after closing
- * @returns {JSX.Element} Introduction guide component
+ * Introduction guide component shown to first-time users
+ * Provides a step-by-step walkthrough of the application
+ * 
+ * @param {Object} props Component properties
+ * @param {Function} props.onClose Function called when guide is closed
+ * @returns {JSX.Element} IntroductionGuide component
  */
-const IntroductionGuide = ({ onClose, steps: customSteps, showFloatingHelp = true }) => {
+const IntroductionGuide = ({ onClose }) => {
+  // Current step in the guide
   const [currentStep, setCurrentStep] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
   
-  // Default steps for the guide
-  const defaultSteps = [
+  // Guide steps data
+  const steps = [
     {
-      title: "Welcome to WhatsApp Carousel Creator!",
-      content: "This tool allows you to create carousel templates through Blip APIs for WhatsApp Business quickly and easily. We'll guide you through each step of the process.",
-      image: "welcome"
+      title: 'Welcome to WhatsApp Carousel Creator',
+      icon: <FiInfo size={28} />,
+      content: 'This tool helps you create interactive carousel templates for WhatsApp Business API. Follow this quick guide to learn how it works.'
     },
     {
-      title: "Step 1: Initial Setup",
-      content: "In the first step, you will provide your API key (Router Key) and upload images or videos for each card in the carousel.",
-      image: "step1"
+      title: '1. File Configuration',
+      icon: <FiUpload size={28} />,
+      content: 'First, you\'ll upload images or videos for each card in your carousel. You can add up to 10 cards, each with its own media and interactive buttons.'
     },
     {
-      title: "Step 2: Template Customization",
-      content: "Next, you'll define the text for each card and configure the buttons that will appear in the carousel. These can be links, phone numbers, or quick replies.",
-      image: "step2"
+      title: '2. Template Creation',
+      icon: <FiEdit3 size={28} />,
+      content: 'Next, you\'ll configure your template with text content and interactive buttons. Each card can have up to 2 buttons with different action types like links and quick replies.'
     },
     {
-      title: "Step 3: Finalization",
-      content: "Finally, you'll be able to view the JSON of the template ready to be used in the WhatsApp API, and even test it by sending a message directly to a WhatsApp number.",
-      image: "step3"
+      title: '3. Template Review',
+      icon: <FiCheckCircle size={28} />,
+      content: 'Preview your carousel and generate the template JSON. You can download or copy this JSON for use in your WhatsApp Business API integration.'
     },
     {
-      title: "Tips for quick approval",
-      content: "Remember that all templates need to be approved by Meta. Avoid excessive promotional content, follow the guidelines, and use clear messages to increase your chances of approval.",
-      image: "tips"
+      title: '4. Send Template',
+      icon: <FiSend size={28} />,
+      content: 'Finally, you can test your template by sending it to a WhatsApp number. This helps you see how it will appear to your customers.'
     }
   ];
   
-  // Use custom steps if provided, otherwise use default steps
-  const steps = customSteps || defaultSteps;
-
-  // Effect for entry animation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Go to next step
-  const goToNextStep = () => {
+  // Move to next step
+  const nextStep = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      handleClose();
+      onClose();
     }
   };
-
-  // Go to previous step
-  const goToPreviousStep = () => {
+  
+  // Move to previous step
+  const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
-
-  // Close the guide and save to localStorage
-  const handleClose = () => {
-    setIsVisible(false);
-    
-    // After the exit animation, call the close callback
-    setTimeout(() => {
-      localStorage.setItem('introductionGuideShown', 'true');
-      onClose();
-    }, 300);
-  };
-
-  // Show the guide again when the help button is clicked
-  const handleShowGuide = () => {
-    setIsVisible(true);
-  };
-
+  
+  // Get current step data
+  const currentStepData = steps[currentStep];
+  
   return (
-    <div className={`${styles.overlay} ${isVisible ? styles.visible : ''}`}>
-      <div className={styles.modal}>
-        <button className={styles.closeButton} onClick={handleClose} aria-label="Close guide">
-          <FiX size={20} />
+    <div className={styles.overlay}>
+      <div className={styles.guideContainer}>
+        <button className={styles.closeButton} onClick={onClose} aria-label="Close guide">
+          <FiX size={24} />
         </button>
         
-        <div className={styles.content}>
-          <div className={styles.imageContainer}>
-            <div className={styles.image}>
-              {/* Placeholder for image - in a real project, use real images */}
-              <div className={styles.placeholderImage}>
-                <FiInfo size={32} />
-                <div className={styles.imageText}>{steps[currentStep].image}</div>
-              </div>
-            </div>
+        <div className={styles.guideContent}>
+          <div className={styles.iconContainer}>
+            {currentStepData.icon}
           </div>
           
-          <div className={styles.textContent}>
-            <h3 className={styles.title}>{steps[currentStep].title}</h3>
-            <p className={styles.description}>{steps[currentStep].content}</p>
-          </div>
-        </div>
-        
-        <div className={styles.footer}>
-          <div className={styles.stepIndicator}>
+          <h2 className={styles.guideTitle}>{currentStepData.title}</h2>
+          
+          <p className={styles.guideText}>{currentStepData.content}</p>
+          
+          <div className={styles.progressIndicator}>
             {steps.map((_, index) => (
               <div 
                 key={index} 
-                className={`${styles.dot} ${index === currentStep ? styles.activeDot : ''}`}
+                className={`${styles.progressDot} ${index === currentStep ? styles.activeDot : ''}`}
                 onClick={() => setCurrentStep(index)}
               />
             ))}
           </div>
+        </div>
+        
+        <div className={styles.guideActions}>
+          {currentStep > 0 && (
+            <button className={styles.backButton} onClick={prevStep}>
+              <FiChevronLeft size={18} />
+              Back
+            </button>
+          )}
           
-          <div className={styles.buttons}>
-            {currentStep > 0 && (
-              <Button 
-                variant="outline"
-                color="content"
-                onClick={goToPreviousStep}
-                iconLeft={<FiChevronLeft />}
-                className={styles.navigationButton}
-              >
-                Previous
-              </Button>
+          <button className={styles.nextButton} onClick={nextStep}>
+            {currentStep < steps.length - 1 ? (
+              <>
+                Next
+                <FiChevronRight size={18} />
+              </>
+            ) : (
+              <>
+                Get Started
+                <FiArrowRight size={18} />
+              </>
             )}
-            
-            <Button 
-              variant="solid"
-              color="primary"
-              onClick={goToNextStep}
-              iconRight={currentStep < steps.length - 1 ? <FiChevronRight /> : null}
-              className={styles.navigationButton}
-            >
-              {currentStep < steps.length - 1 ? "Next" : "Let's Start!"}
-            </Button>
-          </div>
+          </button>
         </div>
       </div>
-      
-      {/* Floating help button that appears after closing the guide */}
-      {showFloatingHelp && (
-        <button 
-          className={`${styles.helpButton} ${!isVisible ? styles.showHelp : ''}`}
-          onClick={handleShowGuide}
-          aria-label="Open help guide"
-        >
-          <FiHelpCircle size={24} />
-        </button>
-      )}
     </div>
   );
 };

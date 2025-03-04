@@ -4,9 +4,9 @@
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem;
-  background-color: var(--snow);
-  border-radius: 0.5rem;
-  box-shadow: 0 var(--elevation-1-y) var(--elevation-1-blur) rgba(0, 0, 0, var(--elevation-1-opacity));
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
 }
 
 .introSection {
@@ -16,7 +16,7 @@
 }
 
 .stepTitle {
-  font-size: var(--fs-h4);
+  font-size: var(--fs-h3);
   font-weight: var(--fw-bold);
   margin-bottom: 0.75rem;
   color: var(--blip-blue-brand);
@@ -32,13 +32,13 @@
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background-color: var(--blip-action);
+  background-color: var(--color-surface-primary);
   border-radius: 3px;
 }
 
 .stepDescription {
   font-size: var(--fs-p1);
-  color: var(--text-color-default);
+  color: var(--dove-gray-2);
   line-height: 1.5;
 }
 
@@ -49,16 +49,16 @@
 
 .authCard {
   padding: 1.5rem;
-  background-color: var(--snow);
+  background-color: var(--color-surface-0);
   border: 1px solid var(--blip-light);
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .authCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-2);
 }
 
 .authHeader {
@@ -75,7 +75,7 @@
   height: 46px;
   background-color: var(--blip-light);
   color: var(--blip-dark);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   margin-right: 0.75rem;
 }
 
@@ -97,16 +97,18 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--blip-action);
+  color: var(--color-surface-primary);
   font-size: var(--fs-p3);
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .visibilityToggle:hover {
   color: var(--blip-dark);
-  text-decoration: underline;
 }
 
 .authOptions {
@@ -128,14 +130,14 @@
 .rememberKeyCheckbox {
   width: 16px;
   height: 16px;
-  accent-color: var(--blip-action);
+  accent-color: var(--color-surface-primary);
 }
 
 /* Cards control section */
 .cardsControlSection {
   padding: 1.5rem;
-  background-color: var(--box);
-  border-radius: 0.75rem;
+  background-color: var(--whisper);
+  border-radius: var(--radius-lg);
   margin-bottom: 1.5rem;
   border: 1px solid var(--wave);
 }
@@ -156,10 +158,10 @@
 .cardCounter {
   display: flex;
   align-items: center;
-  background-color: var(--snow);
+  background-color: var(--color-surface-0);
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
 }
 
 .cardCountLabel {
@@ -172,7 +174,7 @@
   display: flex;
   align-items: center;
   background-color: var(--whisper);
-  border-radius: 2rem;
+  border-radius: var(--radius-pill);
   padding: 0.25rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
@@ -183,17 +185,18 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: none;
-  background-color: var(--snow);
-  color: var(--blip-blue-brand);
+  background-color: var(--color-surface-0);
+  color: var(--color-surface-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .controlButton:hover:not(:disabled) {
   background-color: var(--blip-light);
   color: var(--blip-dark);
+  transform: scale(1.05);
 }
 
 .controlButton:disabled {
@@ -228,21 +231,30 @@
 .tipsToggle {
   background: none;
   border: none;
-  color: var(--blip-action);
+  color: var(--color-surface-primary);
   font-size: var(--fs-p3);
   padding: 0;
   text-decoration: underline;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tipsToggle:hover {
+  color: var(--blip-dark);
 }
 
 .cardTips {
   margin-top: 0.75rem;
   padding: 1rem;
-  background-color: var(--whisper);
+  background-color: var(--color-surface-0);
   border-left: 3px solid var(--blip-light);
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
+  animation: fadeIn var(--transition-normal);
+  box-shadow: var(--shadow-1);
 }
 
 .cardTips h4 {
@@ -261,25 +273,8 @@
 }
 
 .jumpToCardsButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
   margin-top: 1rem;
-  padding: 0.6rem 1rem;
-  border: none;
-  border-radius: 0.5rem;
-  background-color: var(--color-surface-1);
-  color: var(--blip-action);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all 0.2s ease;
   width: 100%;
-}
-
-.jumpToCardsButton:hover {
-  background-color: var(--color-surface-2);
-  transform: translateY(-1px);
 }
 
 /* Grid of cards */
@@ -307,13 +302,14 @@
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--wave);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   font-size: var(--fs-p1);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  background-color: var(--color-surface-0);
 }
 
 .input:focus {
-  border-color: var(--blip-action);
+  border-color: var(--color-surface-primary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.2);
 }
@@ -350,15 +346,20 @@
 }
 
 .validationMessage {
-  color: var(--pomegranate);
+  color: var(--chilean-fire);
   font-size: var(--fs-p2);
   margin-top: 0.75rem;
   text-align: center;
-  padding: 0.5rem 1rem;
-  background-color: var(--cinderella);
-  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--vis-vis);
+  border-radius: var(--radius-md);
   width: 100%;
   max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-1);
 }
 
 /* Upload summary */
@@ -367,8 +368,8 @@
   padding: 1.25rem;
   background-color: var(--whisper);
   border: 1px solid var(--blip-light);
-  border-radius: 0.75rem;
-  animation: fadeIn 0.5s ease;
+  border-radius: var(--radius-lg);
+  animation: fadeIn var(--transition-normal);
 }
 
 @keyframes fadeIn {
@@ -395,8 +396,8 @@
   padding: 0.75rem;
   font-size: var(--fs-p2);
   border-bottom: 1px solid var(--wave);
-  background-color: var(--snow);
-  border-radius: 0.25rem;
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-md);
   margin-bottom: 0.5rem;
 }
 
@@ -405,7 +406,7 @@
 }
 
 .successStatus {
-  color: var(--color-surface-positive);
+  color: var(--mountain-meadow);
   font-weight: var(--fw-bold);
   margin-left: 0.5rem;
 }

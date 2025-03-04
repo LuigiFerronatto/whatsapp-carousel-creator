@@ -6,7 +6,7 @@ import { ToastProvider } from './components/ui/Feedback';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Loading from './components/common/Loading';
 import { createAzureBlobService } from './services/storage/azureBlobService';
-import './index.css';
+import './styles/design-system.css';
 
 // Lazy load the main component to improve initial load performance
 const WhatsAppCarouselCreator = lazy(() => import('./components/WhatsAppCarouselCreator'));
@@ -42,12 +42,6 @@ function App() {
           <WhatsAppTemplateProvider>
             <ToastProvider>
               <div className="app-container">
-                {/* <header className="app-header">
-                  <h1>WhatsApp Carousel Creator</h1>
-                  <div className="app-tagline">
-                    Crie templates de carrossel de forma simples e rápida
-                  </div>
-                </header> */}
                 
                 <main className="app-content">
                   <Suspense fallback={
@@ -68,24 +62,7 @@ function App() {
                     </ErrorBoundary>
                   </Suspense>
                 </main>
-                
-                <footer className="app-footer">
-                  <div className="footer-content">
-                    <p>&copy; {new Date().getFullYear()} - WhatsApp Carousel Creator</p>
-                    <div className="footer-links">
-                      <a 
-                        className="footer-link" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        href='https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates/media-card-carousel-templates/'
-                      >
-                        Documentação
-                      </a>
-                      <p>Developed by:</p>
-                      <p> Luigi Ferronatto | Blip - CDA </p>
-                    </div>
-                  </div>
-                </footer>
+            
               </div>
             </ToastProvider>
           </WhatsAppTemplateProvider>

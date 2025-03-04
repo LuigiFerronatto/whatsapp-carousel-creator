@@ -1,242 +1,181 @@
 /* IntroductionGuide.module.css */
 .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn var(--transition-normal);
+}
+
+.guideContainer {
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp var(--transition-normal);
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--dove-gray-2);
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-circle);
+  transition: all var(--transition-fast);
+}
+
+.closeButton:hover {
+  background-color: var(--color-surface-2);
+  color: var(--text-color-default);
+}
+
+.guideContent {
+  padding: 2rem;
+  text-align: center;
+}
+
+.iconContainer {
+  width: 64px;
+  height: 64px;
+  background-color: var(--blip-light);
+  color: var(--blip-dark);
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.guideTitle {
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  color: var(--text-color-default);
+  margin-bottom: 1rem;
+}
+
+.guideText {
+  font-size: var(--fs-p2);
+  color: var(--dove-gray-2);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.progressIndicator {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.progressDot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-circle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.activeDot {
+  background-color: var(--color-surface-primary);
+  transform: scale(1.2);
+}
+
+.guideActions {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem 2rem;
+}
+
+.backButton, .nextButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: var(--fw-bold);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.backButton {
+  background-color: var(--color-surface-2);
+  color: var(--text-color-default);
+  border: none;
+}
+
+.backButton:hover {
+  background-color: var(--color-surface-3);
+}
+
+.nextButton {
+  background-color: var(--color-surface-primary);
+  color: var(--alabaster);
+  border: none;
+}
+
+.nextButton:hover {
+  background-color: var(--blip-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transform: translateY(50px);
   }
-  
-  .visible {
+  to { 
     opacity: 1;
-    visibility: visible;
+    transform: translateY(0);
+  }
+}
+
+/* Responsiveness */
+@media (max-width: 576px) {
+  .guideContainer {
+    max-width: 100%;
+    height: auto;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
   }
   
-  .modal {
-    width: 90%;
-    max-width: 700px;
-    background-color: var(--color-surface-0);
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    position: relative;
-    overflow: hidden;
-    transform: translateY(20px);
-    opacity: 0;
-    animation: slideIn 0.4s ease forwards;
+  .guideContent, .guideActions {
+    padding: 1.5rem 1rem;
   }
   
-  @keyframes slideIn {
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  .iconContainer {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
   }
   
-  .closeButton {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 32px;
-    height: 32px;
-    background-color: rgba(0, 0, 0, 0.05);
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--text-color-default);
-    z-index: 5;
-    transition: background-color 0.2s ease;
-  }
-  
-  .closeButton:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-  
-  .content {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .imageContainer {
-    flex: 1;
-    background-color: var(--blip-light);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 32px 0;
-  }
-  
-  .image {
-    width: 240px;
-    height: 240px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .placeholderImage {
-    width: 100%;
-    height: 100%;
-    background-color: var(--blip-action);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    color: white;
-    font-weight: bold;
-    text-align: center;
-    padding: 16px;
-  }
-  
-  .imageText {
-    margin-top: 12px;
+  .guideTitle {
     font-size: var(--fs-p1);
   }
-  
-  .textContent {
-    padding: 24px;
-    flex: 1;
-  }
-  
-  .title {
-    font-size: var(--fs-h3);
-    margin-bottom: 12px;
-    color: var(--blip-blue-brand);
-    font-weight: var(--fw-bold);
-  }
-  
-  .description {
-    font-size: var(--fs-p1);
-    line-height: 1.6;
-    color: var(--text-color-default);
-  }
-  
-  .footer {
-    padding: 16px 24px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--whisper);
-    border-top: 1px solid var(--wave);
-  }
-  
-  .stepIndicator {
-    display: flex;
-    gap: 8px;
-  }
-  
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: var(--mercury);
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-  }
-  
-  .dot:hover {
-    background-color: var(--cloud);
-  }
-  
-  .activeDot {
-    background-color: var(--blip-action);
-    transform: scale(1.25);
-  }
-  
-  .buttons {
-    display: flex;
-    gap: 12px;
-  }
-  
-  .navigationButton {
-    min-width: 100px;
-  }
-  
-  .helpButton {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background-color: var(--blip-action);
-    color: var(--alabaster);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    border: none;
-    cursor: pointer;
-    z-index: 999;
-    transform: scale(0);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.2s ease;
-  }
-  
-  .helpButton:hover {
-    background-color: var(--blip-dark);
-    transform: scale(1.05) !important;
-  }
-  
-  .showHelp {
-    transform: scale(1);
-    opacity: 1;
-  }
-  
-  /* Responsiveness */
-  @media (min-width: 768px) {
-    .content {
-      flex-direction: row;
-    }
-    
-    .imageContainer {
-      min-height: 300px;
-      width: 40%;
-    }
-    
-    .textContent {
-      width: 60%;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .title {
-      font-size: var(--fs-h4);
-    }
-    
-    .description {
-      font-size: var(--fs-p2);
-    }
-    
-    .footer {
-      flex-direction: column;
-      gap: 16px;
-    }
-    
-    .buttons {
-      width: 100%;
-    }
-    
-    .navigationButton {
-      flex: 1;
-      min-width: auto;
-    }
-    
-    .helpButton {
-      width: 48px;
-      height: 48px;
-      bottom: 16px;
-      right: 16px;
-    }
-  }
+}

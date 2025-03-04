@@ -1,22 +1,38 @@
 // components/editors/CardTemplateEditor.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ButtonEditor from './ButtonEditor';
-import { FiMaximize2, FiMinimize2, FiEye, FiEyeOff, FiAlertCircle, FiLink, FiCheck } from 'react-icons/fi';
+import { 
+  FiMaximize2, 
+  FiMinimize2, 
+  FiEye, 
+  FiEyeOff, 
+  FiAlertCircle, 
+  FiLink, 
+  FiCheck, 
+  FiMessageSquare,
+  FiPlus,
+  FiInfo,
+  FiBold,
+  FiItalic,
+  FiList,
+  FiCode,
+  FiHash,
+  FiCornerUpRight
+} from 'react-icons/fi';
 import styles from './CardTemplateEditor.module.css';
 
 /**
- * Editor de Template de Card do WhatsApp
- * Componente refatorado para maior modularidade e facilidade de uso
+ * Enhanced Card Template Editor Component
  * 
- * @param {Object} props Propriedades do componente
- * @param {string} props.id ID único do card
- * @param {number} props.index Índice do card no array
- * @param {Object} props.card Dados do card
- * @param {Array} props.cards Array com todos os cards
- * @param {Function} props.updateCard Função para atualizar um card
- * @param {boolean} props.showHints Mostrar dicas de ajuda
- * @param {string} props.validationMessage Mensagem de validação (se houver)
- * @returns {JSX.Element} Componente de editor de card
+ * @param {Object} props Component properties
+ * @param {string} props.id Unique ID for the card
+ * @param {number} props.index Index of the card in the array
+ * @param {Object} props.card Card data
+ * @param {Array} props.cards Array of all cards
+ * @param {Function} props.updateCard Function to update card data
+ * @param {boolean} props.showHints Whether to show helpful hints
+ * @param {string} props.validationMessage Validation error message if any
+ * @returns {JSX.Element} Card Template Editor component
  */
 const CardTemplateEditor = ({ 
   id, 
@@ -27,14 +43,15 @@ const CardTemplateEditor = ({
   showHints = true,
   validationMessage 
 }) => {
-  // Estados locais
+  // Local state
   const [isExpanded, setIsExpanded] = useState(true);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [activeSection, setActiveSection] = useState('text');
   const [changedFields, setChangedFields] = useState([]);
+  const textareaRef = useRef(null);
   
-  // Limpar campos alterados depois de um tempo
+  // Clear changed fields highlighting after a delay
   useEffect(() => {
     if (changedFields.length > 0) {
       const timer = setTimeout(() => {
@@ -45,7 +62,7 @@ const CardTemplateEditor = ({
     }
   }, [changedFields]);
   
-  // Validações básicas
+  // Basic text validations with visual feedback
   const textLength = card.bodyText ? card.bodyText.length : 0;
   const maxTextLength = 160;
   const textPercentage = Math.min((textLength / maxTextLength) * 100, 100);
@@ -53,7 +70,7 @@ const CardTemplateEditor = ({
   const isTextDanger = textLength > 150;
   const isTextValid = !!card.bodyText;
   
-  // Atualizar o texto do card com rastreamento de alterações
+  // Update card text with change tracking
   const handleBodyTextChange = useCallback((e) => {
     updateCard(index, 'bodyText', e.target.value);
     if (!changedFields.includes('bodyText')) {
@@ -61,7 +78,7 @@ const CardTemplateEditor = ({
     }
   }, [updateCard, index, changedFields]);
 
-  // Atualizar botões do card
+  // Update buttons data
   const updateButtons = useCallback((newButtons) => {
     updateCard(index, 'buttons', newButtons);
     if (!changedFields.includes('buttons')) {
@@ -69,7 +86,7 @@ const CardTemplateEditor = ({
     }
   }, [updateCard, index, changedFields]);
 
-  // Adicionar um novo botão
+  // Add a new button to the card
   const addButton = useCallback(() => {
     if (card.buttons.length < 2) {
       const newButtons = [...card.buttons, { type: 'QUICK_REPLY', text: '' }];
@@ -77,32 +94,32 @@ const CardTemplateEditor = ({
     }
   }, [card.buttons, updateButtons]);
 
-  // Remover um botão
+  // Remove a button from the card
   const removeButton = useCallback((buttonIndex) => {
     const newButtons = card.buttons.filter((_, i) => i !== buttonIndex);
     updateButtons(newButtons);
   }, [card.buttons, updateButtons]);
 
-  // Atualizar um campo específico de um botão
+  // Update a specific field of a button
   const updateButtonField = useCallback((buttonIndex, field, value) => {
     const newButtons = [...card.buttons];
     newButtons[buttonIndex] = { ...newButtons[buttonIndex], [field]: value };
     updateButtons(newButtons);
   }, [card.buttons, updateButtons]);
 
-  // Gerar cor com base no índice
+  // Generate color based on card index for visual distinction
   const getCardColor = useCallback(() => {
     const colors = [
-      'var(--blip-light)',
-      'var(--magic-mint)',
+      'var(--blip-action)',
+      'var(--mountain-meadow)',
       'var(--marigold-yellow)',
-      'var(--romantic)',
-      'var(--perfume)'
+      'var(--chilean-fire)',
+      'var(--windsor)'
     ];
     return colors[index % colors.length];
   }, [index]);
 
-  // Copiar o identificador do arquivo para a área de transferência
+  // Copy file handle to clipboard
   const copyFileHandle = useCallback(() => {
     if (card.fileHandle) {
       navigator.clipboard.writeText(card.fileHandle)
@@ -115,13 +132,91 @@ const CardTemplateEditor = ({
         });
     }
   }, [card.fileHandle]);
+  
+  // Inserir formatação no texto selecionado
+  const insertFormatting = (format) => {
+    if (!textareaRef.current) return;
 
-  // Renderizar painel de texto do card
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const selectedText = card.bodyText ? card.bodyText.substring(start, end) : '';
+    let newText = card.bodyText || '';
+    let newPosition = end;
+
+    switch (format) {
+      case 'bold':
+        newText = newText.substring(0, start) + '*' + selectedText + '*' + newText.substring(end);
+        newPosition = end + 2;
+        break;
+      case 'italic':
+        newText = newText.substring(0, start) + '_' + selectedText + '_' + newText.substring(end);
+        newPosition = end + 2;
+        break;
+      case 'strikethrough':
+        newText = newText.substring(0, start) + '~' + selectedText + '~' + newText.substring(end);
+        newPosition = end + 2;
+        break;
+      case 'code':
+        newText = newText.substring(0, start) + '```' + selectedText + '```' + newText.substring(end);
+        newPosition = end + 6;
+        break;
+      case 'bullet':
+        // Adiciona lista com marcadores
+        const bulletText = selectedText ? 
+          selectedText.split('\n').map(line => `* ${line}`).join('\n') :
+          '* ';
+        newText = newText.substring(0, start) + bulletText + newText.substring(end);
+        newPosition = start + bulletText.length;
+        break;
+      case 'numbered':
+        // Adiciona lista numerada
+        const numberedText = selectedText ? 
+          selectedText.split('\n').map((line, i) => `${i + 1}. ${line}`).join('\n') :
+          '1. ';
+        newText = newText.substring(0, start) + numberedText + newText.substring(end);
+        newPosition = start + numberedText.length;
+        break;
+      case 'quote':
+        // Adiciona citação
+        const quoteText = selectedText ? 
+          selectedText.split('\n').map(line => `> ${line}`).join('\n') :
+          '> ';
+        newText = newText.substring(0, start) + quoteText + newText.substring(end);
+        newPosition = start + quoteText.length;
+        break;
+      case 'inline-code':
+        // Código inline
+        newText = newText.substring(0, start) + '`' + selectedText + '`' + newText.substring(end);
+        newPosition = end + 2;
+        break;
+      case 'newline':
+        newText = newText.substring(0, start) + '\n' + newText.substring(end);
+        newPosition = start + 1;
+        break;
+      default:
+        break;
+    }
+
+    updateCard(index, 'bodyText', newText);
+    if (!changedFields.includes('bodyText')) {
+      setChangedFields(prev => [...prev, 'bodyText']);
+    }
+
+    // Reposiciona o cursor
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+      }
+    }, 0);
+  };
+
+  // Render card text input panel
   const renderTextPanel = () => (
     <div className={styles.cardFieldSection}>
       <div className={styles.fieldHeader}>
         <label className={styles.fieldLabel} htmlFor={`card-${index}-text`}>
-          Texto do Card
+          Card Text
           <span className={styles.requiredMark}>*</span>
         </label>
         <div className={styles.characterCountWrapper}>
@@ -145,32 +240,112 @@ const CardTemplateEditor = ({
         </div>
       </div>
       
+      {/* Barra de ferramentas de formatação */}
+      <div className={styles.formattingToolbar}>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('bold')}
+          title="Negrito (*texto*)"
+        >
+          <FiBold size={16} />
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('italic')}
+          title="Itálico (_texto_)"
+        >
+          <FiItalic size={16} />
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('strikethrough')}
+          title="Tachado (~texto~)"
+        >
+          <span style={{ fontSize: '16px', fontWeight: 'bold' }}>~</span>
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('bullet')}
+          title="Lista com marcadores (* texto)"
+        >
+          <FiList size={16} />
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('numbered')}
+          title="Lista numerada (1. texto)"
+        >
+          <FiHash size={16} />
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('quote')}
+          title="Citação (> texto)"
+        >
+          <FiCornerUpRight size={16} />
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('inline-code')}
+          title="Código inline (`texto`)"
+        >
+          <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>`</span>
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('code')}
+          title="Bloco de código (```texto```)"
+        >
+          <FiCode size={16} />
+        </button>
+        <button 
+          type="button"
+          className={styles.formatButton}
+          onClick={() => insertFormatting('newline')}
+          title="Quebra de linha"
+        >
+          ¶
+        </button>
+      </div>
+      
       <textarea 
         id={`card-${index}-text`}
+        ref={textareaRef}
         className={`
           ${styles.textarea} 
           ${!isTextValid && card.bodyText !== '' ? styles.invalidInput : ''} 
           ${changedFields.includes('bodyText') ? styles.changedField : ''}
         `}
         rows="3"
-        value={card.bodyText}
+        value={card.bodyText || ''}
         onChange={handleBodyTextChange}
-        placeholder="Descrição do produto ou serviço que aparecerá neste card. Seja claro e conciso."
+        placeholder="Description of the product or service that will appear in this card. Be clear and concise."
         maxLength={maxTextLength}
       ></textarea>
       
       {showHints && (
         <div className={styles.textHint}>
           <div className={styles.hintIconWrapper}>
-            <FiAlertCircle className={styles.hintIcon} />
+            <FiInfo className={styles.hintIcon} />
           </div>
           <div>
-            <p><strong>Dicas para um bom texto de card:</strong></p>
+            <p><strong>Tips for good card text:</strong></p>
             <ul>
-              <li>Mantenha entre 60-120 caracteres para melhor visibilidade</li>
-              <li>Destaque benefícios ou características principais</li>
-              <li>Evite repetir informações já presentes na imagem</li>
-              <li>Use chamadas claras para ação direcionando para os botões</li>
+              <li>Keep between 60-120 characters for best visibility</li>
+              <li>Highlight key benefits or features</li>
+              <li>Avoid repeating information already visible in the image</li>
+              <li>Use clear calls to action directing to the buttons</li>
+              <li>Use formatting: *bold*, _italic_, ~strikethrough~, `code`, ```code block```</li>
+              <li>For lists use: * for bullets, 1. for numbered lists</li>
+              <li>For quotes use: {'>'} at the beginning of the line</li>
             </ul>
           </div>
         </div>
@@ -178,7 +353,7 @@ const CardTemplateEditor = ({
     </div>
   );
 
-  // Renderizar painel de botões do card
+  // Render buttons panel
   const renderButtonsPanel = () => (
     <div className={styles.buttonsSection}>
       {card.buttons.length > 0 ? (
@@ -206,7 +381,8 @@ const CardTemplateEditor = ({
         </div>
       ) : (
         <div className={styles.noButtonsMessage}>
-          Nenhum botão adicionado. Botões são obrigatórios para cada card.
+          <FiAlertCircle size={18} />
+          No buttons added. Buttons are required for each card.
         </div>
       )}
       
@@ -215,23 +391,24 @@ const CardTemplateEditor = ({
           onClick={addButton}
           className={styles.addButton}
         >
-          + Adicionar Botão
+          <FiPlus size={16} />
+          Add Button
         </button>
       )}
       
       {showHints && (
         <div className={styles.buttonHint}>
           <div className={styles.hintIconWrapper}>
-            <FiAlertCircle className={styles.hintIcon} />
+            <FiInfo className={styles.hintIcon} />
           </div>
           <div>
-            <p><strong>Boas práticas para botões:</strong></p>
+            <p><strong>Button best practices:</strong></p>
             <ul>
-              <li>Use texto claro e orientado à ação (ex: "Comprar Agora", "Saber Mais")</li>
-              <li>Mantenha o texto do botão com menos de 20 caracteres</li>
-              <li>Cada card pode ter até 2 botões</li>
-              <li>Para URLs, sempre inclua o prefixo https://</li>
-              <li>Para números de telefone, use o formato internacional (+XXXXXXXXXXX)</li>
+              <li>Use clear, action-oriented text (e.g., "Buy Now", "Learn More")</li>
+              <li>Keep button text under 20 characters</li>
+              <li>Each card can have up to 2 buttons</li>
+              <li>For URLs, always include the https:// prefix</li>
+              <li>For phone numbers, use international format (+XXXXXXXXXXX)</li>
             </ul>
           </div>
         </div>
@@ -239,23 +416,23 @@ const CardTemplateEditor = ({
     </div>
   );
 
-  // Renderizar conteúdo reduzido quando o card estiver colapsado
+  // Render collapsed card content for minimized view
   const renderCollapsedContent = () => (
     <div className={styles.collapsedPreview}>
       <div className={styles.collapsedField}>
-        <span className={styles.collapsedLabel}>Texto:</span>
+        <span className={styles.collapsedLabel}>Text:</span>
         <span className={styles.collapsedValue}>
           {card.bodyText ? 
             (card.bodyText.length > 40 ? card.bodyText.substring(0, 40) + '...' : card.bodyText) : 
-            <em className={styles.emptyText}>Não definido</em>}
+            <em className={styles.emptyText}>Not defined</em>}
         </span>
       </div>
       <div className={styles.collapsedField}>
-        <span className={styles.collapsedLabel}>Botões:</span>
+        <span className={styles.collapsedLabel}>Buttons:</span>
         <span className={styles.collapsedValue}>
           {card.buttons.length > 0 ? 
-            card.buttons.map(b => b.text || 'Sem texto').join(', ') : 
-            <em className={styles.emptyText}>Nenhum botão</em>}
+            card.buttons.map(b => b.text || 'No text').join(', ') : 
+            <em className={styles.emptyText}>No buttons</em>}
         </span>
       </div>
       {validationMessage && (
@@ -282,19 +459,19 @@ const CardTemplateEditor = ({
           
           {card.fileHandle && (
             <div className={styles.fileHandleInfo}>
-              <span className={styles.fileHandleLabel}>ID do Arquivo:</span> 
+              <span className={styles.fileHandleLabel}>File ID:</span> 
               <div className={styles.fileHandleWrapper}>
                 <span className={styles.fileHandleValue}>{card.fileHandle}</span>
                 <button 
                   className={styles.copyButton}
                   onClick={copyFileHandle}
-                  title="Copiar ID do arquivo"
-                  aria-label="Copiar ID do arquivo"
+                  title="Copy file ID"
+                  aria-label="Copy file ID"
                 >
                   {copySuccess ? (
                     <>
                       <FiCheck className={styles.copyIcon} />
-                      <span className={styles.tooltipText}>Copiado!</span>
+                      <span className={styles.tooltipText}>Copied!</span>
                     </>
                   ) : (
                     <FiLink className={styles.copyIcon} />
@@ -308,7 +485,7 @@ const CardTemplateEditor = ({
                   onClick={() => setShowImagePreview(!showImagePreview)}
                 >
                   {showImagePreview ? <FiEyeOff size={14} /> : <FiEye size={14} />}
-                  {showImagePreview ? 'Ocultar imagem' : 'Ver imagem'}
+                  {showImagePreview ? 'Hide image' : 'View image'}
                 </button>
               )}
             </div>
@@ -325,7 +502,7 @@ const CardTemplateEditor = ({
           <button 
             className={`${styles.expandButton} ${isExpanded ? styles.expanded : ''}`}
             onClick={() => setIsExpanded(!isExpanded)}
-            aria-label={isExpanded ? "Recolher card" : "Expandir card"}
+            aria-label={isExpanded ? "Collapse card" : "Expand card"}
           >
             {isExpanded ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
           </button>
@@ -343,13 +520,13 @@ const CardTemplateEditor = ({
         <div className={styles.imagePreviewContainer}>
           <img 
             src={card.fileUrl} 
-            alt={`Prévia do card ${index + 1}`} 
+            alt={`Preview of card ${index + 1}`} 
             className={styles.imagePreview}
           />
           <button 
             className={styles.closePreviewButton}
             onClick={() => setShowImagePreview(false)}
-            aria-label="Fechar prévia"
+            aria-label="Close preview"
           >
             ✕
           </button>
@@ -363,13 +540,15 @@ const CardTemplateEditor = ({
               className={`${styles.editorTab} ${activeSection === 'text' ? styles.activeTab : ''}`}
               onClick={() => setActiveSection('text')}
             >
-              Texto do Card
+              <FiMessageSquare size={16} />
+              Card Text
             </button>
             <button 
               className={`${styles.editorTab} ${activeSection === 'buttons' ? styles.activeTab : ''}`}
               onClick={() => setActiveSection('buttons')}
             >
-              Botões
+              <FiLink size={16} />
+              Buttons
               <span className={styles.buttonCount}>({card.buttons.length}/2)</span>
             </button>
           </div>

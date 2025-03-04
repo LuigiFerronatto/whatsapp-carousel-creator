@@ -1,6 +1,4 @@
-/* CarouselPreview.module.css com design de iPhone X */
-
-
+/* CarouselPreview.module.css com suporte a formatação WhatsApp */
 
 /* iPhone X mockup styling */
 .phoneMockup {
@@ -72,10 +70,9 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-image: url('../../assets/images/blippinho.png');
+  background-color: #128C7E;
   background-size: 120%;
   background-position: center center;
-  background-repeat: no-repeat center center;
   object-fit: cover;
 }
 
@@ -109,18 +106,77 @@
   position: relative;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   overflow: auto;
-  display: flex;
-  flex-direction: column;
-  max-height: 5rem;
+  max-height: 15rem;
   position: relative;
   word-wrap: break-word;
   align-self: flex-start;
-  display: -webkit-box;
-  -webkit-line-clamp: 8;
-  -webkit-box-orient: vertical;
-  line-clamp: 8; /* Standard property */
   overflow-y: auto;
-  max-height: 10rem;
+}
+
+/* WhatsApp text formatting styles */
+.messageBodyText strong, .cardBody strong {
+  font-weight: bold;
+}
+
+.messageBodyText em, .cardBody em {
+  font-style: italic;
+}
+
+.messageBodyText del, .cardBody del {
+  text-decoration: line-through;
+}
+
+.messageBodyText code, .cardBody code {
+  font-family: monospace;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 0.9em;
+}
+
+.messageBodyText code.multiline-code, .cardBody code.multiline-code {
+  display: block;
+  padding: 8px;
+  margin: 8px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background-color: #f0f0f0;
+}
+
+.messageBodyText code.inline-code, .cardBody code.inline-code {
+  display: inline;
+  padding: 2px 4px;
+  background-color: #f0f0f0;
+}
+
+.messageBodyText .blockquote, .cardBody .blockquote {
+  padding-left: 10px;
+  margin: 5px 0;
+  border-left: 3px solid #128C7E;
+  color: #555;
+}
+
+.messageBodyText .list-item, .cardBody .list-item {
+  display: flex;
+  margin: 2px 0;
+  padding-left: 5px;
+}
+
+.messageBodyText .bullet, .cardBody .bullet,
+.messageBodyText .number, .cardBody .number {
+  margin-right: 8px;
+  color: #128C7E;
+  font-weight: bold;
+}
+
+.messageBodyText .variable, .cardBody .variable {
+  display: inline-block;
+  padding: 0 4px;
+  background-color: rgba(77, 195, 255, 0.2);
+  color: #0066CC;
+  border-radius: 3px;
+  font-weight: bold;
+  font-family: monospace;
 }
 
 /* Setinha do balão de mensagem */
@@ -273,15 +329,12 @@
   font-size: 14px;
   line-height: 1.4;
   color: #111;
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: 100px;
 }
 
 .cardBody p {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 6rem;
+  margin: 0;
   word-wrap: break-word;
 }
 
@@ -311,6 +364,7 @@
   width: 100%;
   text-align: center;
   transition: background-color 0.2s ease;
+  padding: 8px 0;
 }
 
 .cardButton:hover {

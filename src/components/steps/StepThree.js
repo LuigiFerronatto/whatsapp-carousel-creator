@@ -2,9 +2,28 @@
 import React, { useState } from 'react';
 import AlertMessage from '../common/AlertMessage';
 import CarouselPreview from '../previews/CarouselPreview';
-import { FiChevronLeft, FiCopy, FiCheck, FiSend, FiCode, FiEye, FiDownload, FiRefreshCw } from 'react-icons/fi';
+import Button from '../common/Button';
+import { 
+  FiChevronLeft, 
+  FiCopy, 
+  FiCheck, 
+  FiSend, 
+  FiCode, 
+  FiEye, 
+  FiDownload, 
+  FiRefreshCw,
+  FiInfo
+} from 'react-icons/fi';
 import styles from './StepThree.module.css';
+import steps from '../../styles/Steps.module.css';
 
+/**
+ * StepThree - Template review and sharing
+ * Enhanced with better UI/UX based on the design system
+ * 
+ * @param {Object} props Component properties
+ * @returns {JSX.Element} StepThree component
+ */
 const StepThree = ({
   finalJson,
   copyToClipboard,
@@ -20,6 +39,7 @@ const StepThree = ({
   setStep,
   templateName
 }) => {
+  // Local state
   const [activeView, setActiveView] = useState('visual');
   const [justCopied, setJustCopied] = useState({
     createTemplate: false,
@@ -28,7 +48,7 @@ const StepThree = ({
   const [sendStep, setSendStep] = useState(1);
   const [showApprovalInfo, setShowApprovalInfo] = useState(false);
 
-  // Function to handle copy and show feedback
+  // Handle copy with visual feedback
   const handleCopy = (jsonType) => {
     copyToClipboard(jsonType);
     setJustCopied({
@@ -45,7 +65,7 @@ const StepThree = ({
     }, 2000);
   };
 
-  // Function to download template JSON as file
+  // Download template JSON as file
   const downloadTemplate = (jsonType) => {
     const jsonContent = JSON.stringify(finalJson[jsonType], null, 2);
     const blob = new Blob([jsonContent], { type: 'application/json' });
@@ -62,26 +82,28 @@ const StepThree = ({
     URL.revokeObjectURL(url);
   };
 
-  // Function to handle sending template
+  // Handle template sending
   const handleSendTemplate = () => {
     sendTemplate();
     setSendStep(2);
   };
 
-  // Function to toggle approval info
+  // Toggle approval info visibility
   const toggleApprovalInfo = () => {
     setShowApprovalInfo(!showApprovalInfo);
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.headerSection}>
-        <h2 className={styles.stepTitle}>Step 3: Template Created</h2>
-        <p className={styles.stepDescription}>
+    <div className={steps.container}>
+      {/* Introduction section */}
+      <div className={steps.introSection}>
+        <h2 className={steps.stepTitle}>Template Created</h2>
+        <p className={steps.stepDescription}>
           Your template has been created successfully. You can now send it for testing or copy the JSON for use in your application.
         </p>
       </div>
       
+      {/* View tabs */}
       <div className={styles.viewTabs}>
         <button 
           className={`${styles.viewTab} ${activeView === 'visual' ? styles.activeTab : ''}`}
@@ -106,7 +128,9 @@ const StepThree = ({
         </button>
       </div>
       
+      {/* Dynamic content based on active view */}
       <div className={styles.viewContent}>
+        {/* Visual Preview Section */}
         {activeView === 'visual' && (
           <div className={styles.visualPreview}>
             <div className={styles.previewHeader}>
@@ -124,6 +148,7 @@ const StepThree = ({
           </div>
         )}
         
+        {/* Code View Section */}
         {activeView === 'code' && (
           <div className={styles.codeView}>
             <div className={styles.codeSection}>
@@ -182,6 +207,7 @@ const StepThree = ({
           </div>
         )}
         
+        {/* Send Template Section */}
         {activeView === 'send' && (
           <div className={styles.sendView}>
             {sendStep === 1 ? (
@@ -273,6 +299,7 @@ const StepThree = ({
         )}
       </div>
       
+      {/* Action buttons */}
       <div className={styles.actionButtons}>
         <button 
           className={styles.backButton}
@@ -290,8 +317,9 @@ const StepThree = ({
         </button>
       </div>
       
-      {error && <AlertMessage error={error} onClose={() => {}} />}
-      {success && activeView !== 'send' && <AlertMessage success={success} onClose={() => {}} />}
+      {/* Error and success messages */}
+      {error && <AlertMessage error={error} />}
+      {success && activeView !== 'send' && <AlertMessage success={success} />}
     </div>
   );
 };

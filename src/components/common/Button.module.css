@@ -3,7 +3,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--radius-md);
   font-family: var(--font-primary);
   font-weight: var(--fw-bold);
   cursor: pointer;
@@ -68,8 +68,10 @@
   color: var(--alabaster);
 }
 
-.variant-solid.color-primary:hover:not(.disabled) {
+.variant-solid.color-primary:hover:not(.disabled):not(.loading) {
   background-color: var(--blip-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
 }
 
 .variant-outline.color-primary {
@@ -77,7 +79,7 @@
   color: var(--color-surface-primary);
 }
 
-.variant-outline.color-primary:hover:not(.disabled) {
+.variant-outline.color-primary:hover:not(.disabled):not(.loading) {
   background-color: rgba(30, 107, 241, 0.08);
 }
 
@@ -85,7 +87,7 @@
   color: var(--color-surface-primary);
 }
 
-.variant-text.color-primary:hover:not(.disabled) {
+.variant-text.color-primary:hover:not(.disabled):not(.loading) {
   background-color: rgba(30, 107, 241, 0.08);
 }
 
@@ -95,7 +97,7 @@
   color: var(--text-color-default);
 }
 
-.variant-solid.color-content:hover:not(.disabled) {
+.variant-solid.color-content:hover:not(.disabled):not(.loading) {
   background-color: var(--color-surface-3);
 }
 
@@ -104,7 +106,7 @@
   color: var(--text-color-default);
 }
 
-.variant-outline.color-content:hover:not(.disabled) {
+.variant-outline.color-content:hover:not(.disabled):not(.loading) {
   background-color: rgba(224, 224, 224, 0.16);
 }
 
@@ -112,62 +114,66 @@
   color: var(--text-color-default);
 }
 
-.variant-text.color-content:hover:not(.disabled) {
+.variant-text.color-content:hover:not(.disabled):not(.loading) {
   background-color: rgba(224, 224, 224, 0.16);
 }
 
-/* Positive */
-.variant-solid.color-positive {
-  background-color: var(--color-surface-positive);
+/* Success */
+.variant-solid.color-success {
+  background-color: var(--mountain-meadow);
   color: var(--alabaster);
 }
 
-.variant-solid.color-positive:hover:not(.disabled) {
+.variant-solid.color-success:hover:not(.disabled):not(.loading) {
   background-color: var(--jewel);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
 }
 
-.variant-outline.color-positive {
-  border-color: var(--color-surface-positive);
-  color: var(--color-surface-positive);
+.variant-outline.color-success {
+  border-color: var(--mountain-meadow);
+  color: var(--mountain-meadow);
 }
 
-.variant-outline.color-positive:hover:not(.disabled) {
-  background-color: rgba(1, 114, 62, 0.08);
+.variant-outline.color-success:hover:not(.disabled):not(.loading) {
+  background-color: rgba(27, 167, 102, 0.08);
 }
 
-.variant-text.color-positive {
-  color: var(--color-surface-positive);
+.variant-text.color-success {
+  color: var(--mountain-meadow);
 }
 
-.variant-text.color-positive:hover:not(.disabled) {
-  background-color: rgba(1, 114, 62, 0.08);
+.variant-text.color-success:hover:not(.disabled):not(.loading) {
+  background-color: rgba(27, 167, 102, 0.08);
 }
 
-/* Negative */
-.variant-solid.color-negative {
-  background-color: var(--color-surface-negative);
+/* Danger */
+.variant-solid.color-danger {
+  background-color: var(--pomegranate);
   color: var(--alabaster);
 }
 
-.variant-solid.color-negative:hover:not(.disabled) {
+.variant-solid.color-danger:hover:not(.disabled):not(.loading) {
   background-color: var(--milano-red);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
 }
 
-.variant-outline.color-negative {
-  border-color: var(--color-surface-negative);
-  color: var(--color-surface-negative);
+.variant-outline.color-danger {
+  border-color: var(--pomegranate);
+  color: var(--pomegranate);
 }
 
-.variant-outline.color-negative:hover:not(.disabled) {
-  background-color: rgba(138, 0, 0, 0.08);
+.variant-outline.color-danger:hover:not(.disabled):not(.loading) {
+  background-color: rgba(230, 15, 15, 0.08);
 }
 
-.variant-text.color-negative {
-  color: var(--color-surface-negative);
+.variant-text.color-danger {
+  color: var(--pomegranate);
 }
 
-.variant-text.color-negative:hover:not(.disabled) {
-  background-color: rgba(138, 0, 0, 0.08);
+.variant-text.color-danger:hover:not(.disabled):not(.loading) {
+  background-color: rgba(230, 15, 15, 0.08);
 }
 
 /* Button states */
@@ -191,13 +197,10 @@
 }
 
 /* Icons */
-.iconLeft {
+.iconLeft, .iconRight {
   display: flex;
-  flex-shrink: 0;
-}
-
-.iconRight {
-  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -206,6 +209,7 @@
   height: 18px;
   animation: spin 1s linear infinite;
   flex-shrink: 0;
+  margin-right: 0.25rem;
 }
 
 @keyframes spin {

@@ -1,122 +1,101 @@
 // components/common/AlertMessage.js
 import React, { useState, useEffect } from 'react';
-import { FiX, FiAlertTriangle, FiCheckCircle, FiInfo } from 'react-icons/fi';
+import { FiAlertCircle, FiCheckCircle, FiInfo, FiX } from 'react-icons/fi';
 import styles from './AlertMessage.module.css';
 
 /**
- * Componente melhorado de alertas e mensagens de status
- * Simplifica o uso comum de mensagens de alerta, erro, sucesso e informação
+ * Enhanced AlertMessage component for displaying notifications
  * 
- * @param {Object} props - Propriedades do componente
- * @param {string} props.error - Mensagem de erro (se houver)
- * @param {string} props.success - Mensagem de sucesso (se houver)
- * @param {string} props.info - Mensagem informativa (se houver)
- * @param {string} props.warning - Mensagem de aviso (se houver)
- * @param {Function} props.onClose - Callback quando o alerta é fechado
- * @param {boolean} props.autoClose - Se o alerta deve fechar automaticamente
- * @param {number} props.autoCloseDelay - Tempo para fechar automaticamente (ms)
- * @returns {JSX.Element|null} Componente de alerta ou null se não houver mensagem
+ * @param {Object} props Component properties
+ * @param {string} props.success Success message text
+ * @param {string} props.error Error message text
+ * @param {string} props.info Information message text
+ * @param {string} props.warning Warning message text
+ * @param {boolean} props.autoClose Whether the alert should auto-close
+ * @param {number} props.autoCloseTime Time in ms before auto-closing
+ * @param {Function} props.onClose Callback function when alert is closed
+ * @returns {JSX.Element|null} AlertMessage component or null if no message
  */
 const AlertMessage = ({ 
-  error, 
   success, 
+  error, 
   info, 
-  warning, 
-  onClose,
-  autoClose = false,
-  autoCloseDelay = 5000,
-  className = ''
+  warning,
+  autoClose = true,
+  autoCloseTime = 5000,
+  onClose = () => {}
 }) => {
+  // Determine message type and content
   const [visible, setVisible] = useState(true);
   
-  // Auto-close functionality
+  let type = 'info';
+  let message = info;
+  
+  if (success) {
+    type = 'success';
+    message = success;
+  } else if (error) {
+    type = 'error';
+    message = error;
+  } else if (warning) {
+    type = 'warning';
+    message = warning;
+  }
+
+  // Auto-close the alert after specified time
   useEffect(() => {
-    if (autoClose && (error || success || info || warning)) {
+    if (autoClose && visible) {
       const timer = setTimeout(() => {
-        setVisible(false);
-        if (onClose) onClose();
-      }, autoCloseDelay);
+        handleClose();
+      }, autoCloseTime);
       
       return () => clearTimeout(timer);
     }
-  }, [autoClose, autoCloseDelay, error, success, info, warning, onClose]);
+  }, [autoClose, visible, autoCloseTime]);
 
-  // Se não tiver mensagem ou não estiver visível, não renderiza
-  if (!visible || (!error && !success && !info && !warning)) {
+  // Handle manual close
+  const handleClose = () => {
+    setVisible(false);
+    onClose();
+  };
+
+  // If no message or not visible, don't render
+  if (!message || !visible) {
     return null;
   }
 
-  // Determinar o tipo de alerta
-  let alertType = 'info';
-  let message = info;
-  let title = 'Informação';
-
-  if (error) {
-    alertType = 'error';
-    message = error;
-    title = 'Erro';
-  } else if (warning) {
-    alertType = 'warning';
-    message = warning;
-    title = 'Atenção';
-  } else if (success) {
-    alertType = 'success';
-    message = success;
-    title = 'Sucesso';
-  }
-
-  // Obter ícone apropriado
+  // Get appropriate icon based on message type
   const getIcon = () => {
-    switch (alertType) {
-      case 'error':
-      case 'warning':
-        return <FiAlertTriangle className={styles.icon} />;
+    switch (type) {
       case 'success':
-        return <FiCheckCircle className={styles.icon} />;
-      case 'info':
+        return <FiCheckCircle className={styles.icon} size={20} />;
+      case 'error':
+        return <FiAlertCircle className={styles.icon} size={20} />;
+      case 'warning':
+        return <FiAlertCircle className={styles.icon} size={20} />;
       default:
-        return <FiInfo className={styles.icon} />;
+        return <FiInfo className={styles.icon} size={20} />;
     }
   };
-  
-  // Função para fechar o alerta
-  const handleClose = () => {
-    setVisible(false);
-    if (onClose) onClose();
-  };
-
-  // Classes dinâmicas
-  const alertClasses = `
-    ${styles.container} 
-    ${styles[alertType]} 
-    ${visible ? styles.visible : styles.hidden}
-    ${className}
-  `.trim();
 
   return (
-    <div 
-      className={alertClasses}
-      role="alert"
-      aria-live="assertive"
-    >
-      <div className={styles.content}>
-        <div className={styles.iconContainer}>
-          {getIcon()}
-        </div>
-        <div className={styles.messageContainer}>
-          <div className={styles.title}>{title}</div>
-          <div className={styles.message}>{message}</div>
-        </div>
+    <div className={`${styles.alertContainer} ${styles[type]}`} role="alert">
+      <div className={styles.alertContent}>
+        {getIcon()}
+        <div className={styles.message}>{message}</div>
       </div>
+      <button 
+        className={styles.closeButton} 
+        onClick={handleClose}
+        aria-label="Close alert"
+      >
+        <FiX size={18} />
+      </button>
       
-      {onClose && (
-        <button 
-          className={styles.closeButton} 
-          onClick={handleClose}
-          aria-label="Fechar"
-        >
-          <FiX />
-        </button>
+      {autoClose && (
+        <div className={styles.progressBar}>
+          <div className={styles.progress} style={{ animationDuration: `${autoCloseTime}ms` }}></div>
+        </div>
       )}
     </div>
   );
