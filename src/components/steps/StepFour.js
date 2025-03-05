@@ -1,11 +1,12 @@
 // components/steps/StepFour.js
 import React, { useState } from 'react';
 import CarouselPreview from '../previews/CarouselPreview';
-import AlertMessage from '../common/AlertMessage';
-import Button from '../common/Button';
+import AlertMessage from '../ui/AlertMessage/AlertMessage';
+import Button from '../ui/Button/Button';
 import StatusMessage from '../common/StatusMessage';
 import { FiChevronLeft, FiCheck, FiSend, FiDownload, FiCopy, FiRefreshCw } from 'react-icons/fi';
 import styles from './StepFour.module.css';
+import steps from '../../styles/Steps.module.css';
 
 /**
  * StepFour - Etapa final para envio do template
@@ -85,10 +86,11 @@ const StepFour = ({
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.headerSection}>
-        <h2 className={styles.stepTitle}>Envio do Template</h2>
-        <p className={styles.stepDescription}>
+
+   <div className={steps.container}>
+      <div className={steps.introSection}>
+        <h2 className={steps.stepTitle}>Envio do Template</h2>
+        <p className={steps.stepDescription}>
           Seu template está pronto! Envie para um número WhatsApp para testar ou baixe o JSON para usar em sua aplicação.
         </p>
       </div>

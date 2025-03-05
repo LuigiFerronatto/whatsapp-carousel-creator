@@ -1,11 +1,11 @@
 // components/editors/ButtonEditor.js
-import React, { useState } from 'react';
-import { FiLink, FiPhone, FiMessageSquare, FiInfo, FiAlertCircle, FiCheckCircle, FiExternalLink } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiLink, FiPhone, FiMessageSquare, FiInfo, FiAlertCircle, FiCheckCircle, FiExternalLink, FiLock, FiUnlock } from 'react-icons/fi';
 import styles from './ButtonEditor.module.css';
 
 /**
  * ButtonEditor - Enhanced component for editing WhatsApp template buttons
- * Improved UI/UX with standardized design system
+ * Now with button type synchronization across all cards
  * 
  * @param {Object} props Component properties
  * @param {number} props.index Card index
@@ -16,6 +16,9 @@ import styles from './ButtonEditor.module.css';
  * @param {number} props.totalButtons Total number of buttons in the card
  * @param {boolean} props.showHints Whether to show helpful hints
  * @param {string} props.validationMessage Validation error message if any
+ * @param {Array} props.cards All carousel cards
+ * @param {number} props.numCards Number of active cards
+ * @param {Function} props.syncButtonTypes Function to sync button types across all cards
  * @returns {JSX.Element} ButtonEditor component
  */
 const ButtonEditor = ({ 
@@ -26,13 +29,26 @@ const ButtonEditor = ({
   removeButton, 
   totalButtons, 
   showHints = true,
-  validationMessage 
+  validationMessage,
+  cards,
+  numCards,
+  syncButtonTypes
 }) => {
   // State for UI interactions
   const [showUrlHelp, setShowUrlHelp] = useState(false);
   const [showPhoneHelp, setShowPhoneHelp] = useState(false);
   const [urlTested, setUrlTested] = useState(false);
   const [phoneTested, setPhoneTested] = useState(false);
+  const [isTypeLocked, setIsTypeLocked] = useState(true);
+  const [showSyncWarning, setShowSyncWarning] = useState(false);
+  
+  // Effect to detect if this is the first card with this button index
+  // If not, we lock the button type selection (it should follow the first card)
+  useEffect(() => {
+    // Only lock if there are multiple cards and this isn't the first card
+    const shouldLock = numCards > 1 && index > 0;
+    setIsTypeLocked(shouldLock);
+  }, [numCards, index]);
   
   // Field validation
   const isTextValid = !!button.text;
@@ -59,7 +75,6 @@ const ButtonEditor = ({
   
     return cleaned;
   };
-  
   
   // URL validation check with proper protocol
   const isValidUrl = (url) => {
@@ -105,6 +120,42 @@ const ButtonEditor = ({
     }
   };
   
+  // Handle button type change with synchronization
+  const handleButtonTypeChange = (newType) => {
+    if (isTypeLocked && !window.confirm("Alterar o tipo deste botão irá sincronizar todos os botões nesta posição em todos os cards. Deseja continuar?")) {
+      return;
+    }
+    
+    // If first card and multiple cards exist, show warning about syncing
+    if (index === 0 && numCards > 1 && !showSyncWarning) {
+      setShowSyncWarning(true);
+      setTimeout(() => setShowSyncWarning(false), 5000);
+    }
+    
+    // Check if we need to sync across all cards
+    if (numCards > 1) {
+      // First update this button
+      updateButtonField(buttonIndex, 'type', newType);
+      
+      // Then sync with all other cards
+      if (syncButtonTypes) {
+        syncButtonTypes(buttonIndex, newType);
+      }
+    } else {
+      // Just update this button
+      updateButtonField(buttonIndex, 'type', newType);
+    }
+  };
+  
+  // Handle button removal with synchronization
+  const handleRemoveButton = () => {
+    if (numCards > 1 && !window.confirm("Remover este botão irá remover o botão correspondente em todos os cards. Deseja continuar?")) {
+      return;
+    }
+    
+    removeButton(buttonIndex);
+  };
+  
   // Button type configuration with icons and descriptions
   const buttonTypes = [
     { 
@@ -129,21 +180,51 @@ const ButtonEditor = ({
 
   return (
     <div className={`${styles.buttonContainer} ${validationMessage ? styles.invalidContainer : ''}`}>
+      {/* WhatsApp Sync Notice */}
+      {showSyncWarning && index === 0 && numCards > 1 && (
+        <div className={styles.syncWarning}>
+          <FiInfo size={16} />
+          <span>
+            WhatsApp requires all cards to have the same button types in the same positions. 
+            Changes to this button will be synchronized across all cards.
+          </span>
+        </div>
+      )}
+    
       {/* Button Type Selector */}
       <div className={styles.buttonTypeSelector}>
         {buttonTypes.map(type => (
           <div 
             key={type.value}
-            className={`${styles.typeOption} ${button.type === type.value ? styles.selectedType : ''}`}
-            onClick={() => updateButtonField(buttonIndex, 'type', type.value)}
+            className={`
+              ${styles.typeOption} 
+              ${button.type === type.value ? styles.selectedType : ''} 
+              ${isTypeLocked && type.value !== button.type ? styles.disabledType : ''}
+            `}
+            onClick={() => handleButtonTypeChange(type.value)}
           >
             <div className={styles.typeIconWrapper}>
               {type.icon}
+              {isTypeLocked && index > 0 && (
+                <div className={styles.lockIndicator}>
+                  <FiLock size={12} />
+                </div>
+              )}
             </div>
             <span className={styles.typeLabel}>{type.label}</span>
           </div>
         ))}
       </div>
+      
+      {/* WhatsApp Requirement Notice */}
+      {isTypeLocked && index > 0 && showHints && (
+        <div className={styles.syncNotice}>
+          <FiInfo size={14} />
+          <span>
+            Button type follows Card 1 per WhatsApp requirements.
+          </span>
+        </div>
+      )}
       
       {/* Type Description */}
       {showHints && (
@@ -360,9 +441,9 @@ const ButtonEditor = ({
           <button
             type="button"
             className={styles.removeButton}
-            onClick={() => removeButton(buttonIndex)}
+            onClick={handleRemoveButton}
           >
-            Remove Button
+            {numCards > 1 ? "Remove Button in All Cards" : "Remove Button"}
           </button>
         </div>
       )}

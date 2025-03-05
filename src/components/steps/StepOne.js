@@ -1,7 +1,7 @@
 // components/steps/StepOne.js
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CardUploadInput from '../editors/CardUploadInput';
-import AlertMessage from '../common/AlertMessage';
+import AlertMessage from '../ui/AlertMessage/AlertMessage';
 import Button from '../ui/Button/Button';
 import { 
   FiUpload, 

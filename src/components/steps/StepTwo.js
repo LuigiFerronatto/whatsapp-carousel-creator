@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
-import AlertMessage from '../common/AlertMessage';
+import AlertMessage from '../ui/AlertMessage/AlertMessage';
 import { FiSave, FiCheck, FiChevronRight, FiChevronLeft, FiEye, FiEyeOff, FiInfo } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
@@ -320,6 +320,7 @@ const StepTwo = ({
                   cards={cards}
                   updateCard={updateCard}
                   showHints={showHints}
+                  numCards={numCards}
                   validationMessage={
                     validationMessages[`card-${activeCard}`] || 
                     validationMessages[`card-${activeCard}-buttons`]

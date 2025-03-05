@@ -5,8 +5,8 @@ import StepOne from './steps/StepOne';
 import StepTwo from './steps/StepTwo';
 import StepThree from './steps/StepThree';
 import StepFour from './steps/StepFour';
-import ProgressHeader from './common/ProgressHeader';
-import IntroductionGuide from './common/IntroductionGuide';
+import ProgressHeader from './ui/ProgressHeader/ProgressHeader';
+import IntroductionGuide from './ui/IntroductionGuide/IntroductionGuide';
 import { FiArrowUp, FiInfo } from 'react-icons/fi';
 import styles from './WhatsAppCarouselCreator.module.css';
 
@@ -85,7 +85,7 @@ const WhatsAppCarouselCreator = () => {
       <div className={styles.header}>
         <h1 className={styles.title}>WhatsApp Carousel Creator</h1>
         <p className={styles.subtitle}>
-          Create interactive carousel templates for your WhatsApp Business API messages
+          Create interactive carousel templates for your Router in Blip through WhatsApp Business API messages
         </p>
 
 

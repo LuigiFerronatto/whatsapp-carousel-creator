@@ -1,6 +1,6 @@
 // components/steps/StepThree.js (Modified)
 import React, { useState } from 'react';
-import AlertMessage from '../common/AlertMessage';
+import AlertMessage from '../ui/AlertMessage/AlertMessage';
 import CarouselPreview from '../previews/CarouselPreview';
 import Button from '../ui/Button/Button';
 import { 

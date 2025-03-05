@@ -4,14 +4,14 @@
 .phoneMockup {
   position: relative;
   width: 20dvw;
-  height: 80dvh;
+  height: 78dvh;
   background-color: #075e54;
   border-radius: 40px;
-  box-shadow: 0px 0px 0px 11px #1f1f1f, 0px 0px 0px 13px #191919, 0px 0px 0px 20px #111;
+  box-shadow: 0px 0px 0px 8px #1f1f1f, 0px 0px 0px 11px #191919, 0px 0px 0px 15px #111;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin: 2rem 2rem 0rem 3rem;
+  margin: 2rem;
 }
 
 .phoneMockup:after {
@@ -71,6 +71,7 @@
   height: 36px;
   border-radius: 50%;
   background-color: #128C7E;
+  background-image: url('/src/assets/images/blippinho.png');
   background-size: 120%;
   background-position: center center;
   object-fit: cover;
@@ -275,9 +276,9 @@
 }
 
 .cardHeader {
-  height: 165px;
-  scale: 0.98;
-  top: 2px;
+  height: 10rem;
+  scale: 1;
+  margin: 3px;
   position: relative;
   background-color: #f0f0f0;
   display: flex;

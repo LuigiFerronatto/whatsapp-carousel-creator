@@ -1,7 +1,7 @@
 // components/common/EmptyState.js
 import React from 'react';
 import { FiSearch, FiAlertTriangle, FiCheckCircle, FiFileText } from 'react-icons/fi';
-import Button from './Button';
+import Button from '../ui/Button/Button';
 import styles from './EmptyState.module.css';
 
 /**

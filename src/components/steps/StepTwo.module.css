@@ -626,18 +626,18 @@
 
 /* Preview Container */
 .previewContainer {
-  flex: 0 0 38%;
+  flex: 0 0 30%;
   position: sticky;
   top: 1rem;
   align-self: flex-start;
 }
 
 .previewWrapper {
-  background-color: var(--color-surface-0);
+  background-color: var(--color-surface-1);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-1);
   overflow: hidden;
-  height: 97dvh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--wave);
@@ -730,4 +730,49 @@
   .container {
     padding: 1rem;
   }
+}
+
+/* Adicione ao seu StepTwo.module.css */
+.whatsappRequirement {
+  margin: 0.75rem 0 1.25rem 0;
+  padding: 0.75rem 1rem;
+  background-color: var(--blip-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: var(--fs-p3);
+  color: var(--blip-dark);
+  border-left: 3px solid var(--color-surface-primary);
+}
+
+.whatsappRequirement strong {
+  font-weight: var(--fw-bold);
+}
+
+.infoIcon {
+  flex-shrink: 0;
+  color: var(--blip-dark);
+}
+
+/* Adicione ao seu CardTemplateEditor.module.css */
+.whatsappRequirement {
+  margin: 0 0 1rem 0;
+  padding: 0.75rem;
+  background-color: var(--blip-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: var(--fs-p3);
+  color: var(--blip-dark);
+  border-left: 3px solid var(--color-surface-primary);
+}
+
+.whatsappRequirement strong {
+  font-weight: var(--fw-bold);
+}
+
+.infoIcon {
+  flex-shrink: 0;
 }

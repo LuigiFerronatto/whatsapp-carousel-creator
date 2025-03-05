@@ -1,7 +1,7 @@
 // components/common/ErrorBoundary.js
 import React, { Component } from 'react';
 import { FiAlertTriangle, FiRefreshCw, FiArrowLeft } from 'react-icons/fi';
-import Button from './Button';
+import Button from '../ui/Button/Button';
 import styles from './ErrorBoundary.module.css';
 
 /**

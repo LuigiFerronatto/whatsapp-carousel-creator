@@ -2,9 +2,9 @@
 import React, { useEffect, Suspense, lazy } from 'react';
 import { WhatsAppTemplateProvider } from './contexts/WhatsAppTemplateContext';
 import { TextContentProvider } from './contexts/TextContentContext';
-import { ToastProvider } from './components/ui/Feedback';
+import { ToastProvider } from './components/ui/Feedback/Feedback';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import Loading from './components/common/Loading';
+import Loading from './components/ui/Loading/Loading';
 import { createAzureBlobService } from './services/storage/azureBlobService';
 import './styles/design-system.css';
 

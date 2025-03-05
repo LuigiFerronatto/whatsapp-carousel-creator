@@ -32,6 +32,7 @@ import styles from './CardTemplateEditor.module.css';
  * @param {Function} props.updateCard Function to update card data
  * @param {boolean} props.showHints Whether to show helpful hints
  * @param {string} props.validationMessage Validation error message if any
+ * @param {number} props.numCards Number of active cards
  * @returns {JSX.Element} Card Template Editor component
  */
 const CardTemplateEditor = ({ 
@@ -41,7 +42,8 @@ const CardTemplateEditor = ({
   cards, 
   updateCard,
   showHints = true,
-  validationMessage 
+  validationMessage,
+  numCards = 2 // Por padrão, assumimos 2 cards
 }) => {
   // Local state
   const [isExpanded, setIsExpanded] = useState(true);
@@ -86,26 +88,101 @@ const CardTemplateEditor = ({
     }
   }, [updateCard, index, changedFields]);
 
-  // Add a new button to the card
+  // Sincroniza os tipos de botões entre todos os cards
+  const syncButtonTypes = useCallback((buttonIndex, newType) => {
+    // Só sincroniza se este for o primeiro card
+    if (index === 0 && numCards > 1) {
+      // Atualizar o tipo de botão em todos os outros cards
+      for (let cardIndex = 1; cardIndex < numCards; cardIndex++) {
+        const otherCard = cards[cardIndex];
+        
+        // Verificar se o card tem um botão neste índice
+        if (otherCard.buttons.length > buttonIndex) {
+          // Obter os botões atuais do card
+          const cardButtons = [...otherCard.buttons];
+          
+          // Preservar campos específicos do botão existente, só mudando o tipo
+          const existingButton = cardButtons[buttonIndex];
+          cardButtons[buttonIndex] = {
+            ...existingButton,
+            type: newType,
+            // Adicionar campos específicos se necessário
+            ...(newType === 'URL' && !existingButton.url ? { url: '' } : {}),
+            ...(newType === 'PHONE_NUMBER' && !existingButton.phoneNumber ? { phoneNumber: '' } : {}),
+            ...(newType === 'QUICK_REPLY' && !existingButton.payload ? { payload: '' } : {})
+          };
+          
+          // Atualizar o card com os botões modificados
+          updateCard(cardIndex, 'buttons', cardButtons);
+        }
+      }
+    }
+  }, [index, cards, numCards, updateCard]);
+
+  // Add a new button to the card and sync with other cards
   const addButton = useCallback(() => {
     if (card.buttons.length < 2) {
-      const newButtons = [...card.buttons, { type: 'QUICK_REPLY', text: '' }];
+      // Primeiro obtém o tipo de botão (use Quick Reply como padrão)
+      const buttonType = card.buttons[0]?.type || 'QUICK_REPLY';
+      
+      // Adiciona o botão a este card
+      const newButtons = [...card.buttons, { type: buttonType, text: '' }];
       updateButtons(newButtons);
+      
+      // Se este for o primeiro card, sincroniza com os demais
+      if (index === 0 && numCards > 1) {
+        for (let cardIndex = 1; cardIndex < numCards; cardIndex++) {
+          // Pegar os botões atuais do card
+          const cardButtons = [...cards[cardIndex].buttons];
+          // Adicionar o novo botão com o mesmo tipo
+          cardButtons.push({ type: buttonType, text: '' });
+          // Atualizar o card
+          updateCard(cardIndex, 'buttons', cardButtons);
+        }
+      }
+      // Se não for o primeiro card, avisa o usuário
+      else if (index > 0) {
+        alert("Para manter a consistência do WhatsApp, adicionaremos este botão em todos os cards.");
+        // Adicionar em todos os cards (incluindo o Card 1)
+        for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
+          if (cardIndex !== index) {
+            const cardButtons = [...cards[cardIndex].buttons];
+            cardButtons.push({ type: buttonType, text: '' });
+            updateCard(cardIndex, 'buttons', cardButtons);
+          }
+        }
+      }
     }
-  }, [card.buttons, updateButtons]);
+  }, [card.buttons, updateButtons, cards, updateCard, index, numCards]);
 
-  // Remove a button from the card
+  // Remove a button from the card and sync with other cards
   const removeButton = useCallback((buttonIndex) => {
+    // Remove o botão deste card
     const newButtons = card.buttons.filter((_, i) => i !== buttonIndex);
     updateButtons(newButtons);
-  }, [card.buttons, updateButtons]);
+    
+    // Se tiver mais de um card, sincroniza a remoção com os outros
+    if (numCards > 1) {
+      for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
+        if (cardIndex !== index) {
+          const cardButtons = cards[cardIndex].buttons.filter((_, i) => i !== buttonIndex);
+          updateCard(cardIndex, 'buttons', cardButtons);
+        }
+      }
+    }
+  }, [card.buttons, updateButtons, cards, updateCard, index, numCards]);
 
   // Update a specific field of a button
   const updateButtonField = useCallback((buttonIndex, field, value) => {
     const newButtons = [...card.buttons];
     newButtons[buttonIndex] = { ...newButtons[buttonIndex], [field]: value };
     updateButtons(newButtons);
-  }, [card.buttons, updateButtons]);
+    
+    // Se o campo for "type" e este for o primeiro card, sincroniza com os outros
+    if (field === 'type' && index === 0 && numCards > 1) {
+      syncButtonTypes(buttonIndex, value);
+    }
+  }, [card.buttons, updateButtons, syncButtonTypes, index, numCards]);
 
   // Generate color based on card index for visual distinction
   const getCardColor = useCallback(() => {
@@ -356,6 +433,16 @@ const CardTemplateEditor = ({
   // Render buttons panel
   const renderButtonsPanel = () => (
     <div className={styles.buttonsSection}>
+      {index === 0 && numCards > 1 && (
+        <div className={styles.whatsappRequirement}>
+          <FiInfo size={16} className={styles.infoIcon} />
+          <div>
+            <strong>Requisito do WhatsApp:</strong> Todos os cards devem ter o mesmo número e tipos de botões.
+            Alterações feitas no Card 1 serão sincronizadas automaticamente com os outros cards.
+          </div>
+        </div>
+      )}
+    
       {card.buttons.length > 0 ? (
         <div className={styles.buttonsList}>
           {card.buttons.map((button, buttonIndex) => (
@@ -375,6 +462,9 @@ const CardTemplateEditor = ({
                 removeButton={() => removeButton(buttonIndex)}
                 totalButtons={card.buttons.length}
                 showHints={showHints}
+                cards={cards}
+                numCards={numCards}
+                syncButtonTypes={syncButtonTypes}
               />
             </div>
           ))}
@@ -392,7 +482,7 @@ const CardTemplateEditor = ({
           className={styles.addButton}
         >
           <FiPlus size={16} />
-          Add Button
+          {numCards > 1 ? "Add Button to All Cards" : "Add Button"}
         </button>
       )}
       
@@ -409,6 +499,7 @@ const CardTemplateEditor = ({
               <li>Each card can have up to 2 buttons</li>
               <li>For URLs, always include the https:// prefix</li>
               <li>For phone numbers, use international format (+XXXXXXXXXXX)</li>
+              <li><strong>WhatsApp requirement:</strong> All cards must have the same button types in the same order</li>
             </ul>
           </div>
         </div>

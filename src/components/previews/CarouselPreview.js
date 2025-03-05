@@ -299,7 +299,7 @@ const CarouselPreview = ({
           </div>
           
           <div className={styles.contactInfo}>
-            <div className={styles.contactAvatar} />
+            <div className={styles.contactAvatar}>  </div>
             <div className={styles.contactName}>{contactName}</div>
           </div>
           

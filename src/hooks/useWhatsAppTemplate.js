@@ -243,6 +243,253 @@ export const useWhatsAppTemplate = () => {
   }, [validateStepOne, validateStepTwo, validateStepThree]);
   
   /**
+   * Verifica a consistência dos botões entre todos os cards
+   * @returns {Object} Informações sobre a consistência dos botões
+   */
+  const checkButtonConsistency = useCallback(() => {
+    const activeCards = cards.slice(0, numCards);
+    
+    // Retorna consistente se houver apenas um card
+    if (activeCards.length <= 1) {
+      return { 
+        isConsistent: true,
+        message: "Consistente: Apenas um card no carrossel."
+      };
+    }
+    
+    // Coletar informações de botões do primeiro card para referência
+    const referenceButtons = activeCards[0].buttons;
+    const referenceCount = referenceButtons.length;
+    const referenceTypes = referenceButtons.map(button => button.type);
+    
+    // Verificar consistência em todos os cards
+    let allSameCount = true;
+    let allSameTypes = true;
+    let inconsistentCards = [];
+    
+    activeCards.forEach((card, index) => {
+      if (index === 0) return; // Pular o primeiro card (referência)
+      
+      // Verificar quantidade de botões
+      if (card.buttons.length !== referenceCount) {
+        allSameCount = false;
+        inconsistentCards.push({
+          cardIndex: index,
+          issue: `Quantidade diferente de botões: ${card.buttons.length} vs ${referenceCount}`
+        });
+      }
+      
+      // Verificar tipos de botões se a quantidade for a mesma
+      if (card.buttons.length === referenceCount) {
+        for (let i = 0; i < referenceCount; i++) {
+          if (card.buttons[i].type !== referenceTypes[i]) {
+            allSameTypes = false;
+            inconsistentCards.push({
+              cardIndex: index,
+              buttonIndex: i,
+              issue: `Tipo de botão diferente: ${card.buttons[i].type} vs ${referenceTypes[i]}`
+            });
+          }
+        }
+      }
+    });
+    
+    // Determinar status geral
+    const isConsistent = allSameCount && allSameTypes;
+    
+    // Formatar mensagem detalhada
+    let message = isConsistent 
+      ? "Consistente: Todos os cards têm a mesma quantidade e tipos de botões."
+      : "Inconsistente: ";
+      
+    if (!allSameCount) {
+      message += "Alguns cards têm números diferentes de botões. ";
+    }
+    
+    if (!allSameTypes) {
+      message += "Alguns cards têm tipos diferentes de botões. ";
+    }
+    
+    // Incluir informações sobre o que será padronizado
+    if (!isConsistent) {
+      // Encontrar o card com mais botões
+      const maxButtonCount = Math.max(...activeCards.map(card => card.buttons.length));
+      const templateCard = activeCards.find(card => card.buttons.length === maxButtonCount);
+      const templateIndex = activeCards.indexOf(templateCard);
+      
+      message += `A padronização usará como modelo o Card ${templateIndex + 1} com ${maxButtonCount} botões.`;
+    }
+    
+    return {
+      isConsistent,
+      message,
+      inconsistentCards,
+      allSameCount,
+      allSameTypes
+    };
+  }, [cards, numCards]);
+
+  /**
+   * Padroniza os botões em todos os cards para garantir consistência
+   * @returns {Array} Array de cards com botões padronizados
+   */
+  const standardizeButtons = useCallback(() => {
+    const activeCards = cards.slice(0, numCards);
+    
+    // Se tiver apenas um card, não precisa padronizar
+    if (activeCards.length <= 1) {
+      return cards;
+    }
+    
+    // Encontrar o card com mais botões para usar como modelo
+    const maxButtonCount = Math.max(...activeCards.map(card => card.buttons.length));
+    const templateCard = activeCards.find(card => card.buttons.length === maxButtonCount);
+    const templateButtons = templateCard.buttons;
+    
+    // Criar cópia dos cards para modificação
+    const standardizedCards = [...cards];
+    
+    // Padronizar todos os cards ativos
+    for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
+      const card = standardizedCards[cardIndex];
+      
+      // Se já é o card template, pular
+      if (card === templateCard) continue;
+      
+      const newButtons = [];
+      
+      // Para cada botão no card modelo
+      for (let btnIndex = 0; btnIndex < templateButtons.length; btnIndex++) {
+        const templateButton = templateButtons[btnIndex];
+        
+        if (btnIndex < card.buttons.length) {
+          // Card já tem este botão, atualizar apenas o tipo
+          const existingButton = card.buttons[btnIndex];
+          newButtons.push({
+            ...existingButton,
+            type: templateButton.type,
+            // Garantir campos específicos do tipo
+            ...(templateButton.type === 'URL' && !existingButton.url ? { url: '' } : {}),
+            ...(templateButton.type === 'PHONE_NUMBER' && !existingButton.phoneNumber ? { phoneNumber: '' } : {}),
+            ...(templateButton.type === 'QUICK_REPLY' && !existingButton.payload ? { payload: '' } : {})
+          });
+        } else {
+          // Card não tem este botão, criar novo baseado no template
+          newButtons.push({
+            type: templateButton.type,
+            text: '', // Texto vazio para o usuário preencher
+            ...(templateButton.type === 'URL' ? { url: '' } : {}),
+            ...(templateButton.type === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
+            ...(templateButton.type === 'QUICK_REPLY' ? { payload: '' } : {})
+          });
+        }
+      }
+      
+      standardizedCards[cardIndex] = { ...card, buttons: newButtons };
+    }
+    
+    return standardizedCards;
+  }, [cards, numCards]);
+
+  /**
+   * Aplica a padronização dos botões diretamente nos cards
+   */
+  const applyButtonStandardization = useCallback(() => {
+    const standardizedCards = standardizeButtons();
+    setCards(standardizedCards);
+    
+    // Exibir mensagem de sucesso
+    setSuccess('Botões padronizados com sucesso em todos os cards!');
+    setTimeout(() => setSuccess(''), 3000);
+  }, [standardizeButtons]);
+
+  /**
+   * Sincroniza um tipo de botão em todos os cards
+   * @param {number} buttonIndex Índice do botão a ser sincronizado
+   * @param {string} newType Novo tipo de botão
+   */
+  const syncButtonType = useCallback((buttonIndex, newType) => {
+    // Atualizar o tipo do botão em todos os cards ativos
+    setCards(prev => {
+      const newCards = [...prev];
+      
+      // Percorrer todos os cards ativos
+      for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
+        // Verificar se o card tem um botão nesse índice
+        if (newCards[cardIndex].buttons.length > buttonIndex) {
+          const cardButtons = [...newCards[cardIndex].buttons];
+          const existingButton = cardButtons[buttonIndex];
+          
+          // Atualizar o tipo do botão mantendo os outros campos
+          cardButtons[buttonIndex] = {
+            ...existingButton,
+            type: newType,
+            // Adicionar campos específicos do tipo se não existirem
+            ...(newType === 'URL' && !existingButton.url ? { url: '' } : {}),
+            ...(newType === 'PHONE_NUMBER' && !existingButton.phoneNumber ? { phoneNumber: '' } : {}),
+            ...(newType === 'QUICK_REPLY' && !existingButton.payload ? { payload: '' } : {})
+          };
+          
+          // Atualizar o card
+          newCards[cardIndex] = {
+            ...newCards[cardIndex],
+            buttons: cardButtons
+          };
+        }
+      }
+      
+      return newCards;
+    });
+  }, [numCards]);
+
+  /**
+   * Sincroniza a adição de botões em todos os cards
+   * @param {number} cardIndex Índice do card onde o botão foi adicionado
+   * @param {Object} buttonType Tipo do novo botão
+   */
+  const syncAddButton = useCallback((cardIndex, buttonType = 'QUICK_REPLY') => {
+    setCards(prev => {
+      const newCards = [...prev];
+      
+      // Adicionar novo botão em todos os cards ativos
+      for (let i = 0; i < numCards; i++) {
+        if (i !== cardIndex) {
+          const newButton = { 
+            type: buttonType, 
+            text: '',
+            ...(buttonType === 'URL' ? { url: '' } : {}),
+            ...(buttonType === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
+            ...(buttonType === 'QUICK_REPLY' ? { payload: '' } : {})
+          };
+          
+          const cardButtons = [...newCards[i].buttons, newButton];
+          newCards[i] = { ...newCards[i], buttons: cardButtons };
+        }
+      }
+      
+      return newCards;
+    });
+  }, [numCards]);
+
+  /**
+   * Sincroniza a remoção de botões em todos os cards
+   * @param {number} buttonIndex Índice do botão a ser removido
+   */
+  const syncRemoveButton = useCallback((buttonIndex) => {
+    setCards(prev => {
+      const newCards = [...prev];
+      
+      // Remover o botão em todos os cards ativos
+      for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
+        const cardButtons = newCards[cardIndex].buttons.filter((_, idx) => idx !== buttonIndex);
+        newCards[cardIndex] = { ...newCards[cardIndex], buttons: cardButtons };
+      }
+      
+      return newCards;
+    });
+  }, [numCards]);
+  
+  /**
    * Adiciona um novo card ao template
    */
   const handleAddCard = useCallback(() => {
@@ -301,6 +548,11 @@ export const useWhatsAppTemplate = () => {
       return newCards;
     });
     
+    // Se estiver alterando o tipo do botão e for o primeiro card, sincronizar com os outros
+    if (field === 'type' && cardIndex === 0 && numCards > 1) {
+      syncButtonType(buttonIndex, value);
+    }
+    
     // Limpar erro de validação relacionado a este campo
     if (validationErrors[`card_${cardIndex}_button_${buttonIndex}_${field}`]) {
       setValidationErrors(prev => {
@@ -309,20 +561,34 @@ export const useWhatsAppTemplate = () => {
         return newErrors;
       });
     }
-  }, [validationErrors]);
+  }, [validationErrors, numCards, syncButtonType]);
   
   /**
    * Adiciona um novo botão a um card
    * @param {number} cardIndex - Índice do card
    */
   const addButton = useCallback((cardIndex) => {
+    // Obter o tipo de botão padrão (usar o tipo do primeiro botão do primeiro card, ou QUICK_REPLY)
+    const defaultButtonType = cards[0]?.buttons[0]?.type || 'QUICK_REPLY';
+    
     setCards(prev => {
       const newCards = [...prev];
-      const newButtons = [...newCards[cardIndex].buttons, { type: 'QUICK_REPLY', text: '', payload: '' }];
+      const newButtons = [...newCards[cardIndex].buttons, { 
+        type: defaultButtonType, 
+        text: '',
+        ...(defaultButtonType === 'URL' ? { url: '' } : {}),
+        ...(defaultButtonType === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
+        ...(defaultButtonType === 'QUICK_REPLY' ? { payload: '' } : {})
+      }];
       newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
       return newCards;
     });
-  }, []);
+    
+    // Se tiver mais de um card, sincronizar a adição com os outros cards
+    if (numCards > 1) {
+      syncAddButton(cardIndex, defaultButtonType);
+    }
+  }, [cards, numCards, syncAddButton]);
   
   /**
    * Remove um botão de um card
@@ -336,7 +602,12 @@ export const useWhatsAppTemplate = () => {
       newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
       return newCards;
     });
-  }, []);
+    
+    // Se tiver mais de um card, sincronizar a remoção com os outros cards
+    if (numCards > 1) {
+      syncRemoveButton(buttonIndex);
+    }
+  }, [numCards, syncRemoveButton]);
   
   /**
    * Faz o upload dos arquivos dos cards para a API
@@ -381,6 +652,7 @@ export const useWhatsAppTemplate = () => {
   
   /**
    * Cria o template baseado nas informações fornecidas
+   * com padronização automática de botões para atender aos requisitos do WhatsApp
    */
   const handleCreateTemplate = useCallback(async () => {
     // Validar antes de prosseguir
@@ -389,13 +661,53 @@ export const useWhatsAppTemplate = () => {
       return;
     }
     
+    // Verificar consistência de botões
+    const consistency = checkButtonConsistency();
+    
+    // Se não for consistente, padronizar os botões antes de prosseguir
+    if (!consistency.isConsistent) {
+      // Padronizar botões
+      const standardizedCards = standardizeButtons();
+      
+      // Verificar se a padronização criou campos vazios obrigatórios
+      const hasEmptyRequiredFields = standardizedCards.slice(0, numCards).some(card => 
+        card.buttons.some(button => {
+          if (!button.text) return true;
+          if (button.type === 'URL' && !button.url) return true;
+          if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) return true;
+          return false;
+        })
+      );
+      
+      if (hasEmptyRequiredFields) {
+        // Atualizar os cards com a versão padronizada
+        setCards(standardizedCards);
+        
+        // Informar ao usuário que precisa preencher os campos
+        setError('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.');
+        return;
+      }
+      
+      // Se não tiver campos vazios obrigatórios, prosseguir com os cards padronizados
+      setCards(standardizedCards);
+      
+      // Informar ao usuário sobre a padronização
+      setSuccess('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.');
+      
+      // Pequena pausa para o usuário ver a mensagem
+      await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+    
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
+      // Usar a versão mais recente dos cards (possivelmente padronizada)
+      const cardsToUse = cards.slice(0, numCards);
+      
       // Validar informações do template
-      validateTemplate(templateName, bodyText, authKey, cards.slice(0, numCards));
+      validateTemplate(templateName, bodyText, authKey, cardsToUse);
       
       setSuccess('Validações concluídas. Criando template...');
       
@@ -404,7 +716,7 @@ export const useWhatsAppTemplate = () => {
         templateName, 
         language, 
         bodyText, 
-        cards.slice(0, numCards), 
+        cardsToUse, 
         authKey
       );
 
@@ -427,7 +739,7 @@ export const useWhatsAppTemplate = () => {
     } finally {
       setLoading(false);
     }
-  }, [templateName, language, bodyText, authKey, cards, numCards, validateStepTwo, saveCurrentState]);
+  }, [templateName, language, bodyText, authKey, cards, numCards, validateStepTwo, saveCurrentState, checkButtonConsistency, standardizeButtons]);
   
   /**
    * Envia o template para um número de telefone
@@ -582,7 +894,7 @@ export const useWhatsAppTemplate = () => {
     loading,
     error,
     success,
-    cards,
+    cards, setCards,
     validationErrors,
     unsavedChanges,
     lastSavedTime,
@@ -603,6 +915,14 @@ export const useWhatsAppTemplate = () => {
     clearMessages,
     isStepValid,
     handleInputChange,
-    saveDraftManually
+    saveDraftManually,
+    
+    // Novas funções para sincronização de botões
+    checkButtonConsistency,
+    standardizeButtons,
+    applyButtonStandardization,
+    syncButtonType,
+    syncAddButton,
+    syncRemoveButton
   };
-}
+};
