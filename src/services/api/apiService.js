@@ -236,7 +236,7 @@ export const createTemplate = async (templateName, language, bodyText, cards, au
   // Gerar JSON para envio do template
   const sendTemplateJson = {
     id: `send_${templateName.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}`,
-    to: "", 
+    to: "numero@wa.gw.msging.net", 
     type: "application/json",
     content: {
       type: "template",
@@ -298,7 +298,67 @@ export const createTemplate = async (templateName, language, bodyText, cards, au
     }
   };
 
-  return { templateJson, sendTemplateJson };
+  // Gerar JSON para uso no Builder da Blip como conteúdo dinâmico
+const builderTemplateJson = {
+  type: "template",
+  template: {
+    name: templateName,
+    language: {
+      code: language,
+      policy: "deterministic"
+    },
+    components: [
+      {
+        type: "CAROUSEL",
+        cards: cards.map((card, index) => ({
+          card_index: index,
+          components: [
+            {
+              type: "HEADER",
+              parameters: [
+                {
+                  type: card.fileType.toUpperCase(),
+                  [card.fileType.toLowerCase()]: {
+                    link: card.fileUrl
+                  }
+                }
+              ]
+            },
+            ...card.buttons.map((button, btnIndex) => {
+              if (button.type === 'URL') {
+                return {
+                  type: "BUTTON",
+                  sub_type: button.type,
+                  index: btnIndex
+                };
+              } else if (button.type === 'QUICK_REPLY') {
+                return {
+                  type: "BUTTON",
+                  sub_type: button.type,
+                  index: btnIndex,
+                  parameters: [
+                    {
+                      type: "PAYLOAD",
+                      payload: button.payload || button.text
+                    }
+                  ]
+                };
+              } else {
+                return {
+                  type: "BUTTON",
+                  sub_type: button.type,
+                  index: btnIndex
+                };
+              }
+            })
+          ]
+        }))
+      }
+    ]
+  }
+};
+
+  return { templateJson, sendTemplateJson, builderTemplateJson };
 };
 
 /**

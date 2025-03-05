@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import AlertMessage from '../ui/AlertMessage/AlertMessage';
 import CarouselPreview from '../previews/CarouselPreview';
 import Button from '../ui/Button/Button';
+import JsonViewer from '../ui/JsonViewer/JsonViewer';
 import { 
   FiChevronLeft, 
   FiCopy, 
@@ -12,7 +13,8 @@ import {
   FiEye,
   FiDownload,
   FiRefreshCw,
-  FiInfo
+  FiInfo,
+  FiCheckCircle
 } from 'react-icons/fi';
 import styles from './StepThree.module.css';
 import steps from '../../styles/Steps.module.css';
@@ -39,7 +41,8 @@ const StepThree = ({
   const [activeView, setActiveView] = useState('visual');
   const [justCopied, setJustCopied] = useState({
     createTemplate: false,
-    sendTemplate: false
+    sendTemplate: false,
+    builderTemplate: false
   });
   const [sendSuccess, setSendSuccess] = useState(false);
   
@@ -62,6 +65,31 @@ const StepThree = ({
       });
     }, 2000);
   };
+
+  // Handle download JSON
+const handleDownload = (jsonType) => {
+  // Verifica se há um JSON válido para download
+  if (!finalJson || !finalJson[jsonType]) {
+    console.error(`JSON type "${jsonType}" not available for download`);
+    return;
+  }
+  
+  // Cria um blob com o conteúdo JSON formatado
+  const jsonContent = JSON.stringify(finalJson[jsonType], null, 2);
+  const blob = new Blob([jsonContent], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  // Cria um elemento de link e ativa o download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${templateName}_${jsonType}.json`;
+  document.body.appendChild(link);
+  link.click();
+  
+  // Limpeza
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
   // Send template functionality
   const handleSendTemplate = async () => {
@@ -168,10 +196,90 @@ const StepThree = ({
         
         {/* Code View Tab - Existing functionality */}
         {activeView === 'code' && (
-          <div className={styles.codeView}>
-            {/* Existing code view implementation */}
-          </div>
-        )}
+  <div className={styles.codeView}>
+    <div className={styles.codeSection}>
+      <div className={styles.codeSectionHeader}>
+        <h3 className={styles.codeSectionTitle}>Template JSON para Envio</h3>
+        <div className={styles.codeActions}>
+          <button 
+            className={styles.codeActionButton}
+            onClick={() => handleCopy('sendTemplate')}
+            title="Copiar JSON"
+          >
+            {justCopied.sendTemplate ? <FiCheckCircle /> : <FiCopy />}
+          </button>
+          <button 
+            className={styles.codeActionButton}
+            onClick={() => handleDownload('sendTemplate')}
+            title="Baixar JSON"
+          >
+            <FiDownload />
+          </button>
+        </div>
+      </div>
+      <JsonViewer 
+        json={finalJson.sendTemplate}
+        collapsible={true}
+        initiallyExpanded={true}
+      />
+    </div>
+    
+    <div className={styles.codeSection}>
+      <div className={styles.codeSectionHeader}>
+        <h3 className={styles.codeSectionTitle}>Template JSON para Criação</h3>
+        <div className={styles.codeActions}>
+          <button 
+            className={styles.codeActionButton}
+            onClick={() => handleCopy('createTemplate')}
+            title="Copiar JSON"
+          >
+            {justCopied.createTemplate ? <FiCheckCircle /> : <FiCopy />}
+          </button>
+          <button 
+            className={styles.codeActionButton}
+            onClick={() => handleDownload('createTemplate')}
+            title="Baixar JSON"
+          >
+            <FiDownload />
+          </button>
+        </div>
+      </div>
+      <JsonViewer 
+        json={finalJson.createTemplate}
+        collapsible={true}
+        initiallyExpanded={true}
+      />
+    </div>
+    
+    {/* Novo formato para Builder Blip */}
+    <div className={styles.codeSection}>
+      <div className={styles.codeSectionHeader}>
+        <h3 className={styles.codeSectionTitle}>JSON para Conteúdo Dinâmico (Builder Blip)</h3>
+        <div className={styles.codeActions}>
+          <button 
+            className={styles.codeActionButton}
+            onClick={() => handleCopy('builderTemplate')}
+            title="Copiar JSON"
+          >
+            {justCopied.builderTemplate ? <FiCheckCircle /> : <FiCopy />}
+          </button>
+          <button 
+            className={styles.codeActionButton}
+            onClick={() => handleDownload('builderTemplate')}
+            title="Baixar JSON"
+          >
+            <FiDownload />
+          </button>
+        </div>
+      </div>
+      <JsonViewer 
+        json={finalJson.builderTemplate}
+        collapsible={true}
+        initiallyExpanded={true}
+      />
+    </div>
+  </div>
+)}
         
         {/* Send Template Tab - From Step Four */}
         {activeView === 'send' && (
