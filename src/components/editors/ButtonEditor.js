@@ -161,23 +161,24 @@ const ButtonEditor = ({
   const buttonTypes = [
     { 
       value: 'URL', 
-      label: 'Link URL', 
+      label: 'Abrir Link', 
       icon: <FiLink size={20} />,
-      description: 'Opens a link in an external browser when clicked'
+      description: 'Leva o usuário para um site externo.'
     },
     { 
       value: 'QUICK_REPLY', 
-      label: 'Quick Reply', 
+      label: 'Resposta Rápida', 
       icon: <FiMessageSquare size={20} />,
-      description: 'Sends a pre-defined response when clicked'
+      description: 'Envia uma mensagem pronta ao clicar.'
     },
     { 
       value: 'PHONE_NUMBER', 
-      label: 'Phone', 
+      label: 'Ligação', 
       icon: <FiPhone size={20} />,
-      description: 'Initiates a phone call when clicked'
+      description: 'Inicia uma chamada telefônica instantaneamente.'
     }
   ];
+  
 
   return (
     <div className={`${styles.buttonContainer} ${validationMessage ? styles.invalidContainer : ''}`}>
@@ -186,8 +187,7 @@ const ButtonEditor = ({
         <div className={styles.syncWarning}>
           <FiInfo size={16} />
           <span>
-            WhatsApp requires all cards to have the same button types in the same positions. 
-            Changes to this button will be synchronized across all cards.
+          O WhatsApp exige que todos os cards tenham os mesmos botões na mesma posição. Se alterar este botão, todas as outras versões serão ajustadas automaticamente.
           </span>
         </div>
       )}
@@ -222,7 +222,7 @@ const ButtonEditor = ({
         <div className={styles.syncNotice}>
           <FiInfo size={14} />
           <span>
-            Button type follows Card 1 per WhatsApp requirements.
+          O tipo deste botão segue a configuração do primeiro card, conforme as regras do WhatsApp.
           </span>
         </div>
       )}
@@ -234,40 +234,26 @@ const ButtonEditor = ({
         </div>
       )}
       
-      {/* Button Text Field */}
-      <div className={styles.formGroup}>
-        <div className={styles.labelWithProgress}>
-          <label className={styles.label}>
-            Button Text
-            <span className={styles.requiredMark}>*</span>
-          </label>
-          <div className={styles.characterProgressWrapper}>
-            <div 
-              className={`${styles.characterProgress} ${isTextWarning ? styles.warningProgress : ''}`}
-              style={{ width: `${textPercentage}%` }}
-            ></div>
-            <span className={`${styles.charCount} ${isTextWarning ? styles.warningCount : ''}`}>
-              {textLength}/{maxTextLength}
-            </span>
-          </div>
-        </div>
-        <div className={styles.inputWrapper}>
-          <input 
-            type="text"
-            className={`${styles.input} ${!isTextValid && button.text !== '' ? styles.invalidInput : ''}`}
-            value={button.text}
-            onChange={(e) => updateButtonField(buttonIndex, 'text', e.target.value)}
-            placeholder="Example: Learn More, Buy Now, etc."
-            maxLength={maxTextLength}
-          />
-        </div>
-        {showHints && (
-          <div className={styles.fieldHint}>
-            <FiInfo className={styles.infoIcon} />
-            <span>Keep text short and clear. Buttons with 1-2 words look best.</span>
-          </div>
-        )}
-      </div>
+
+         <Input
+          id="buttonText"
+          name="ButtonText"
+          label="Texto do Botão"
+          value={button.text || ''}
+          onChange={(e) => updateButtonField(buttonIndex, 'text', e.target.value)}
+          placeholder="Exemplos: Saiba mais, Comprar agora, etc."
+          required
+          minLength={1}
+          maxLength={maxTextLength}
+          error={false}
+          hint="Texto exibido no botão. Máximo de 25 caracteres."
+          // icon={showHints ? <FiInfo /> : null}
+          allowFormatting={false}
+          textFormatting={false} // Habilita a barra de formatação
+          textFormattingCompact={false} // Opcional: tamanho normal
+          textFormattingDarkMode={false} // Opcional: tema claro
+          showCharCounter
+        />
       
       {/* URL Field - only shown for URL type buttons */}
       {button.type === 'URL' && (
@@ -345,23 +331,18 @@ const ButtonEditor = ({
       {/* Quick Reply Payload Field */}
       {button.type === 'QUICK_REPLY' && (
         <div className={styles.formGroup}>
-          <label className={styles.label}>
-            Payload
-            <span className={styles.optionalBadge}>Optional</span>
-          </label>
-          <input 
+        
+          <Input
             type="text"
-            className={styles.input}
+            name="OptinalPayload"
+            label="Payload"
+            hint="The payload is the text that will be sent to your system when the user clicks the button."
+            useHintComponent={true}
+            hintVariant="detailed"
             value={button.payload || ''}
             onChange={(e) => updateButtonField(buttonIndex, 'payload', e.target.value)}
             placeholder="Leave empty to use the button text as payload"
           />
-          {showHints && (
-            <div className={styles.fieldHint}>
-              <FiInfo className={styles.infoIcon} />
-              <span>The payload is the text that will be sent to your system when the user clicks the button.</span>
-            </div>
-          )}
         </div>
       )}
       

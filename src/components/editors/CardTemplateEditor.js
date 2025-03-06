@@ -212,48 +212,46 @@ const CardTemplateEditor = ({
     <div className={styles.cardFieldSection}>
 
       <Input
-  id={`card-${index}-text`}
-  name="cardText"
-  label="Card Text"
-  ref={textareaRef}
-  type="textarea"
-  className={`
-    ${!isTextValid && card.bodyText !== '' ? styles.invalidInput : ''} 
-    ${changedFields.includes('bodyText') ? styles.changedField : ''}
-  `}
-  rows={3}
-  value={card.bodyText || ''}
-  onChange={handleBodyTextChange}
-  placeholder="Description of the product or service that will appear in this card. Be clear and concise."
-  maxLength={maxTextLength}
-  allowFormatting={true}
-  textFormatting={true} // Habilita a barra de formatação
-  textFormattingCompact={true} // Opcional: tamanho normal
-  textFormattingDarkMode={false} // Opcional: tema claro
-  showCharCounter
-  required
-  hint= {showHints && (
-    <div className={styles.textHint}>
-      <div className={styles.hintIconWrapper}>
-        <FiInfo className={styles.hintIcon} />
-      </div>
-      <div>
-        <p><strong>Tips for good card text:</strong></p>
-        <ul>
-          <li>Keep between 60-120 characters for best visibility</li>
-          <li>Highlight key benefits or features</li>
-          <li>Avoid repeating information already visible in the image</li>
-          <li>Use clear calls to action directing to the buttons</li>
-          <li>Use formatting: *bold*, _italic_, ~strikethrough~, `code`, ```code block```</li>
-          <li>For lists use: * for bullets, 1. for numbered lists</li>
-          <li>For quotes use: {'>'} at the beginning of the line</li>
-        </ul>
-      </div>
+id={`card-${index}-text`}
+name="cardText"
+label="Texto do card"
+ref={textareaRef}
+type="textarea"
+className={`
+  ${!isTextValid && card.bodyText !== '' ? styles.invalidInput : ''} 
+  ${changedFields.includes('bodyText') ? styles.changedField : ''}
+`}
+rows={3}
+value={card.bodyText || ''}
+onChange={handleBodyTextChange}
+placeholder="Descreva o produto ou serviço de forma clara e objetiva."
+maxLength={maxTextLength}
+allowFormatting={true}
+textFormatting={true} // Habilita a barra de formatação
+textFormattingCompact={true} // Opcional: tamanho normal
+textFormattingDarkMode={false} // Opcional: tema claro
+showCharCounter
+required
+hint={showHints && (
+  <div className={styles.textHint}>
+    <div className={styles.hintIconWrapper}>
+      <FiInfo className={styles.hintIcon} />
     </div>
-  )}
-/>
-      
-    
+    <div>
+      <p><strong>Dicas para um bom texto:</strong></p>
+      <ul>
+        <li>Mantenha entre <strong>60-120 caracteres</strong> para melhor legibilidade.</li>
+        <li>Foque nos <strong>principais benefícios</strong> ou diferenciais.</li>
+        <li>Evite repetir informações que já estão na imagem.</li>
+        <li>Use frases diretas e insira <strong>chamadas para ação</strong>.</li>
+        <li>Use formatação para destaque: <strong>*negrito*</strong>, <em>_itálico_</em>, <del>~tachado~</del>, `código`.</li>
+        <li>Para listas: <strong>*</strong> para tópicos, <strong>1.</strong> para numeração.</li>
+        <li>Para citações, comece a linha com <strong>{'>'}</strong>.</li>
+      </ul>
+    </div>
+  </div>
+)}
+/>    
     </div>
   );
 

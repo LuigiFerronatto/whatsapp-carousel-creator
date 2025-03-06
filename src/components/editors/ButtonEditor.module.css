@@ -93,26 +93,6 @@
   margin-bottom: 0;
 }
 
-.labelWithProgress {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.label {
-  display: block;
-  font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
-  margin-bottom: 0.5rem;
-  color: var(--text-color-default);
-}
-
-.requiredMark {
-  color: var(--color-surface-negative);
-  margin-left: 0.25rem;
-}
-
 .optionalBadge {
   font-size: var(--fs-p4);
   color: var(--dove-gray-2);
@@ -121,25 +101,6 @@
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-pill);
   margin-left: 0.5rem;
-}
-
-.characterProgressWrapper {
-  position: relative;
-  width: 100px;
-  height: 4px;
-  background-color: var(--color-surface-2);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.characterProgress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background-color: var(--color-surface-primary);
-  border-radius: 2px;
-  transition: width var(--transition-normal);
 }
 
 .warningProgress {

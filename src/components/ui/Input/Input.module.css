@@ -268,3 +268,31 @@
   .visibilityToggle:hover {
     color: var(--blip-dark);
   }
+
+
+  /* Add these styles to your Input.module.css file */
+
+.optionalBadge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: var(--optional-badge-color, #666);
+  background-color: var(--optional-badge-bg, #f0f0f0);
+  padding: 2px 6px;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+/* You can add alternative styles or themes */
+.optionalBadgeSubtle {
+  border: 1px solid var(--optional-badge-border, #ddd);
+  background-color: transparent;
+}
+
+.optionalBadgeOutlined {
+  border: 1px solid var(--optional-badge-border, #ddd);
+  background-color: transparent;
+  border-radius: 12px;
+  padding: 1px 8px;
+}

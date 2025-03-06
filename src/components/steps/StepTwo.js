@@ -202,23 +202,32 @@ const StepTwo = ({
             <Input
   id="templateName"
   name="templateName"
-  label="Template Name"
+  label="Nome do Template"
   value={templateName}
   onChange={(e) => setTemplateName(e.target.value)}
-  placeholder="my_carousel_template"
+  placeholder="exemplo: meu_carrossel_promocional"
   required
   minLength={3}
   maxLength={64}
-  error={!isTemplateNameValid && templateName ? "Template name must be at least 3 characters" : ""}
-  hint={showHints ? "Use a descriptive name without spaces, minimum 3 characters. Example: 'summer_promo' or 'product_launch'" : ""}
-  icon={showHints ? <FiInfo /> : null}
+  error={!isTemplateNameValid && templateName ? "O nome do template deve ter pelo menos 3 caracteres." : ""}
+   hint={showHints ? "Escolha um nome descritivo, sem espaços. Exemplo: 'promo_verao' ou 'lançamento_produto'." : ""}
+  // icon={showHints ? <FiInfo /> : null}
   variant="templateName"
   allowFormatting={false}
   textFormatting={false} // Habilita a barra de formatação
   textFormattingCompact={false} // Opcional: tamanho normal
   textFormattingDarkMode={false} // Opcional: tema claro
   showCharCounter
+  useHintsComponent={showHints}
+  hintVariant="simple"
 />
+
+  {/* useHintsComponent: PropTypes.bool,
+  hintVariant: PropTypes.oneOf(['simple', 'detailed', 'whatsapp', 'warning', 'success']),
+  hintTitle: PropTypes.string,
+  hintList: PropTypes.arrayOf(PropTypes.string),
+  hintClassName: PropTypes.string,
+  inlineHintsComponent: PropTypes.bool, */}
 
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="language">
@@ -249,21 +258,21 @@ const StepTwo = ({
             </div>
 
             <Input
-              id="bodyText"
-              name="bodyText"
-              type="textarea"
-              label="Message Body Text"
-              value={bodyText}
-              onChange={(e) => setBodyText(e.target.value)}
-              placeholder="This text will appear before the carousel. Be clear and engaging for your customers."
-              maxLength={1024}
-              showCharCounter
-              rows={3}
-              required
-              hint={showHints ? "Write clearly and concisely. This text introduces your carousel and appears above it in the conversation." : ""}
-              icon={showHints ? <FiInfo /> : null}
-              textFormatting
-            />
+  id="bodyText"
+  name="bodyText"
+  type="textarea"
+  label="Mensagem de introdução"
+  value={bodyText}
+  onChange={(e) => setBodyText(e.target.value)}
+  placeholder="Esse texto aparecerá antes do carrossel. Seja claro e envolvente para seus clientes."
+  maxLength={1024}
+  showCharCounter
+  rows={3}
+  required
+  hint={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
+  icon={showHints ? <FiInfo /> : null}
+  textFormatting
+/>
           </div>
 
           <div className={styles.cardEditorSection}>
