@@ -210,54 +210,33 @@ const StepTwo = ({
   minLength={3}
   maxLength={64}
   error={!isTemplateNameValid && templateName ? "O nome do template deve ter pelo menos 3 caracteres." : ""}
-   hint={showHints ? "Escolha um nome descritivo, sem espaços. Exemplo: 'promo_verao' ou 'lançamento_produto'." : ""}
-  // icon={showHints ? <FiInfo /> : null}
+  hint={showHints ? "Escolha um nome descritivo, sem espaços. Exemplo: 'promo_verao' ou 'lançamento_produto'." : ""}
   variant="templateName"
-  allowFormatting={false}
-  textFormatting={false} // Habilita a barra de formatação
-  textFormattingCompact={false} // Opcional: tamanho normal
-  textFormattingDarkMode={false} // Opcional: tema claro
   showCharCounter
   useHintsComponent={showHints}
   hintVariant="simple"
 />
 
-  {/* useHintsComponent: PropTypes.bool,
-  hintVariant: PropTypes.oneOf(['simple', 'detailed', 'whatsapp', 'warning', 'success']),
-  hintTitle: PropTypes.string,
-  hintList: PropTypes.arrayOf(PropTypes.string),
-  hintClassName: PropTypes.string,
-  inlineHintsComponent: PropTypes.bool, */}
+<Input
+  id="language"
+  name="language"
+  label="Idioma do Template"
+  value={language}
+  onChange={(e) => setLanguage(e.target.value)}
+  placeholder="Escolha um idioma"
+  required
+  isDropdown = {true}
+  options={languageOptions}
+  optionLabelKey="name"
+  optionValueKey="code"
+  searchable = {false}
+  hint={showHints ? "Selecione o idioma principal do seu template. O idioma correto facilita a aprovação pelo WhatsApp." : ""}
+  useHintsComponent={showHints}
+  hintVariant="simple"
+/>
 
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="language">
-                Template Language
-                <span className={styles.requiredMark}>*</span>
-              </label>
-              <div className={styles.customSelect}>
-                <select
-                  id="language"
-                  className={styles.select}
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                >
-                  {languageOptions.map(option => (
-                    <option key={option.code} value={option.code}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-                <div className={styles.selectArrow}></div>
-              </div>
-              {showHints && (
-                <div className={styles.hint}>
-                  <FiInfo className={styles.hintIcon} />
-                  Choose the main language for your template. This will affect approval by WhatsApp.
-                </div>
-              )}
-            </div>
 
-            <Input
+  <Input
   id="bodyText"
   name="bodyText"
   type="textarea"
@@ -270,9 +249,10 @@ const StepTwo = ({
   rows={3}
   required
   hint={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
-  icon={showHints ? <FiInfo /> : null}
   textFormatting
-/>
+  useHintsComponent={showHints}
+  hintVariant="simple"
+  />
           </div>
 
           <div className={styles.cardEditorSection}>

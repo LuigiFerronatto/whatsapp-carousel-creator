@@ -55,13 +55,7 @@ const ButtonEditor = ({
   const isTextValid = !!button.text;
   const isUrlValid = button.type !== 'URL' || !!button.url;
   const isPhoneValid = button.type !== 'PHONE_NUMBER' || !!button.phoneNumber;
-  
-  // Character count tracking
-  const textLength = button.text ? button.text.length : 0;
-  const maxTextLength = 25;
-  const isTextWarning = textLength > 15;
-  const textPercentage = Math.min((textLength / maxTextLength) * 100, 100);
-  
+    
   // Phone number formatting helper
   const formatPhoneNumber = (value) => {
     // Remove todos os caracteres que não sejam números ou "+"
@@ -244,10 +238,10 @@ const ButtonEditor = ({
           placeholder="Exemplos: Saiba mais, Comprar agora, etc."
           required
           minLength={1}
-          maxLength={maxTextLength}
+          maxLength={25}
           error={false}
-          hint="Texto exibido no botão. Máximo de 25 caracteres."
-          // icon={showHints ? <FiInfo /> : null}
+          hint= {showHints ? "Texto exibido no botão. Máximo de 25 caracteres." : ""}
+          useHintComponent={true}
           allowFormatting={false}
           textFormatting={false} // Habilita a barra de formatação
           textFormattingCompact={false} // Opcional: tamanho normal
@@ -255,78 +249,76 @@ const ButtonEditor = ({
           showCharCounter
         />
       
-      {/* URL Field - only shown for URL type buttons */}
       {button.type === 'URL' && (
-        <div className={styles.formGroup}>
-          <div className={styles.labelWithHelp}>
-            <label className={styles.label}>
-              Destination URL
-              <span className={styles.requiredMark}>*</span>
-            </label>
-            <button 
-              type="button" 
-              className={styles.helpButton}
-              onClick={() => setShowUrlHelp(!showUrlHelp)}
-            >
-              {showUrlHelp ? "Hide Help" : "Show Help"}
-            </button>
-          </div>
-          <div className={styles.urlInputWrapper}>
-            <input 
-              type="url"
-              className={`${styles.input} ${!isUrlValid && button.url !== '' ? styles.invalidInput : ''}`}
-              value={button.url || ''}
-              onChange={(e) => updateButtonField(buttonIndex, 'url', e.target.value)}
-              placeholder="https://example.com/page"
-            />
-            {button.url && (
-              <button 
-                type="button"
-                className={styles.testActionButton}
-                onClick={testUrl}
-                disabled={!isValidUrl(button.url)}
-                title={isValidUrl(button.url) ? "Test this URL" : "Invalid URL format"}
-              >
-                {urlTested ? (
-                  <>
-                    <FiCheckCircle size={14} />
-                    <span>Opened</span>
-                  </>
-                ) : (
-                  <>
-                    <FiExternalLink size={14} />
-                    <span>Test</span>
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-          {/* URL Validation Warning */}
-          {button.url && !isValidUrl(button.url) && (
-            <div className={styles.urlWarning}>
-              <FiAlertCircle size={14} />
-              Invalid URL. Make sure to include "https://" or "http://"
-            </div>
+  <div className={styles.formGroup}>
+    <div className={styles.labelWithHelp}>
+      <label className={styles.label}>
+        Destination URL
+        <span className={styles.requiredMark}>*</span>
+      </label>
+      <button 
+        type="button" 
+        className={styles.helpButton}
+        onClick={() => setShowUrlHelp(!showUrlHelp)}
+      >
+        {showUrlHelp ? "Hide Help" : "Show Help"}
+      </button>
+    </div>
+    
+    <Input
+      id={`button-${buttonIndex}-url`}
+      name={`button-${buttonIndex}-url`}
+      type="url"
+      value={button.url || ''}
+      onChange={(e) => updateButtonField(buttonIndex, 'url', e.target.value)}
+      placeholder="https://example.com/page"
+      required
+      error={button.url && !isValidUrl(button.url) ? "Invalid URL. Make sure to include 'https://' or 'http://'" : ""}
+      hint={showUrlHelp ? "Use a secure URL starting with https:// for better security and user experience." : ""}
+      variant="url"
+      validateOnChange
+      rightElement={button.url && (
+        <button 
+          type="button"
+          className={styles.testActionButton}
+          onClick={testUrl}
+          disabled={!isValidUrl(button.url)}
+          title={isValidUrl(button.url) ? "Test this URL" : "Invalid URL format"}
+        >
+          {urlTested ? (
+            <>
+              <FiCheckCircle size={14} />
+              <span>Opened</span>
+            </>
+          ) : (
+            <>
+              <FiExternalLink size={14} />
+              <span>Test</span>
+            </>
           )}
-          {/* URL Help Section */}
-          {showUrlHelp && (
-            <div className={styles.helpContent}>
-              <h4>How to create a good link:</h4>
-              <ul>
-                <li>Always use HTTPS when possible (more secure)</li>
-                <li>Full URL must include "https://" at the beginning</li>
-                <li>Avoid unreliable URL shorteners</li>
-                <li>Test the link before saving</li>
-              </ul>
-              <div className={styles.exampleBox}>
-                <strong>Valid examples:</strong>
-                <code>https://www.example.com</code>
-                <code>https://example.com/product?id=123</code>
-              </div>
-            </div>
-          )}
-        </div>
+        </button>
       )}
+      icon={button.url && !isValidUrl(button.url) ? <FiAlertCircle size={14} /> : null}
+      iconPosition="left"
+      useHintsComponent={showUrlHelp}
+      hintTitle="How to create a good link:"
+      hintList={[
+        "Always use HTTPS when possible (more secure)",
+        "Full URL must include 'https://' at the beginning",
+        "Avoid unreliable URL shorteners",
+        "Test the link before saving",
+        <React.Fragment>
+          <strong>Valid examples:</strong><br />
+          <code>https://www.example.com</code><br />
+          <code>https://example.com/product?id=123</code>
+        </React.Fragment>
+      ]}
+      hintVariant="detailed"
+    />
+  
+  
+  </div>
+)}
       
       {/* Quick Reply Payload Field */}
       {button.type === 'QUICK_REPLY' && (
@@ -338,7 +330,7 @@ const ButtonEditor = ({
             label="Payload"
             hint="The payload is the text that will be sent to your system when the user clicks the button."
             useHintComponent={true}
-            hintVariant="detailed"
+            hintVariant="simple"
             value={button.payload || ''}
             onChange={(e) => updateButtonField(buttonIndex, 'payload', e.target.value)}
             placeholder="Leave empty to use the button text as payload"
