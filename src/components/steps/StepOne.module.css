@@ -90,27 +90,6 @@
   position: relative;
 }
 
-.visibilityToggle {
-  position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--color-surface-primary);
-  font-size: var(--fs-p3);
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  transition: color var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.visibilityToggle:hover {
-  color: var(--blip-dark);
-}
-
 .authOptions {
   display: flex;
   justify-content: space-between;

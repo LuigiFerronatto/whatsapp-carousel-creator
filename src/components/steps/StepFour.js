@@ -105,8 +105,7 @@ const StepFour = ({
           <div className={styles.previewContainer}>
             <CarouselPreview 
               cards={cards} 
-              bodyText={bodyText} 
-              contactName="WhatsApp"
+              bodyText={bodyText}
             />
           </div>
           

@@ -1,0 +1,323 @@
+/* TextFormatter.module.css */
+.formattingToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+    background-color: var(--color-surface-1);
+    border: 1px solid var(--wave);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-3);
+    position: relative;
+    box-shadow: var(--shadow-1);
+    transition: all var(--transition-fast);
+  }
+  
+  .formattingToolbar:hover {
+    box-shadow: var(--shadow-2);
+  }
+  
+  .compact {
+    padding: var(--spacing-2);
+    gap: var(--spacing-1);
+  }
+  
+  .toolbarGroup {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+  
+  .formatButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    min-width: 36px;
+    height: 36px;
+    padding: 0 var(--spacing-2);
+    background-color: var(--color-surface-0);
+    border: 1px solid var(--wave);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--color-content-default);
+    font-weight: var(--fw-normal);
+  }
+  
+  .compact .formatButton {
+    min-width: 32px;
+    height: 32px;
+  }
+  
+  .formatButton:hover {
+    background-color: var(--color-surface-2);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-1);
+    color: var(--blip-action);
+  }
+  
+  .formatButton:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+  
+  .formatButton.active {
+    background-color: var(--blip-light);
+    border-color: var(--blip-action);
+    color: var(--blip-dark);
+  }
+  
+  .buttonLabel {
+    font-size: var(--fs-p3);
+    white-space: nowrap;
+  }
+  
+  .divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--wave);
+    margin: 0 var(--spacing-1);
+    align-self: center;
+  }
+  
+  .compact .divider {
+    height: 20px;
+  }
+  
+  /* Tema escuro */
+  .dark {
+    background-color: var(--mine-shaft-2);
+    border-color: var(--mine-shaft);
+  }
+  
+  .dark .formatButton {
+    background-color: var(--mine-shaft);
+    border-color: var(--dove-gray);
+    color: var(--wild-sand);
+  }
+  
+  .dark .formatButton:hover {
+    background-color: var(--mine-shaft-3);
+    color: var(--blip-light);
+  }
+  
+  .dark .formatButton.active {
+    background-color: var(--blip-night);
+    border-color: var(--blip-action);
+    color: var(--wild-sand);
+  }
+  
+  .dark .divider {
+    background-color: var(--dove-gray);
+  }
+  
+  /* Dica de formatação */
+  .formatHint {
+    position: relative;
+    margin-left: auto;
+  }
+  
+  .helpButton {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-circle);
+    background-color: transparent;
+    color: var(--blip-action);
+    border: 1px solid var(--wave);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+  }
+  
+  .helpButton:hover {
+    background-color: var(--blip-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-1);
+  }
+  
+  .compact .helpButton {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .dark .helpButton {
+    color: var(--blip-light);
+    border-color: var(--dove-gray);
+  }
+  
+  .dark .helpButton:hover {
+    background-color: var(--blip-night);
+  }
+  
+  .formatHintContent {
+    position: absolute;
+    right: 0;
+    top: 44px;
+    width: 280px;
+    background-color: var(--color-surface-0);
+    border: 1px solid var(--wave);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    box-shadow: var(--shadow-2);
+    z-index: var(--z-popover);
+    font-size: var(--fs-p2);
+    animation: fadeIn var(--transition-fast);
+  }
+  
+  .dark .formatHintContent {
+    background-color: var(--mine-shaft-2);
+    border-color: var(--mine-shaft);
+    color: var(--wild-sand);
+  }
+  
+  .formatHintContent h4 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-3);
+    font-size: var(--fs-p1);
+    color: var(--blip-action);
+    border-bottom: 1px solid var(--wave);
+    padding-bottom: var(--spacing-2);
+  }
+  
+  .dark .formatHintContent h4 {
+    color: var(--blip-light);
+    border-color: var(--dove-gray);
+  }
+  
+  .hintGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  .hintItem {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  
+  .hintItem strong {
+    font-size: var(--fs-p2);
+    color: var(--color-content-default);
+  }
+  
+  .dark .hintItem strong {
+    color: var(--wild-sand);
+  }
+  
+  .hintItem code {
+    background-color: var(--color-surface-1);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: var(--fs-p3);
+    color: var(--blip-action);
+  }
+  
+  .dark .hintItem code {
+    background-color: var(--mine-shaft);
+    color: var(--blip-light);
+  }
+  
+  /* Estilos para ícones especiais */
+  .inlineCode {
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .strikethrough {
+    text-decoration: line-through;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  /* Responsividade e menu móvel */
+  .moreOptionsWrapper {
+    position: relative;
+  }
+  
+  .moreButton {
+    background-color: var(--color-surface-2);
+  }
+  
+  .moreOptionsMenu {
+    position: absolute;
+    top: 44px;
+    left: 0;
+    z-index: var(--z-dropdown);
+    background-color: var(--color-surface-0);
+    border: 1px solid var(--wave);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-2);
+    padding: var(--spacing-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    min-width: 180px;
+    animation: fadeIn var(--transition-fast);
+  }
+  
+  .dark .moreOptionsMenu {
+    background-color: var(--mine-shaft-2);
+    border-color: var(--mine-shaft);
+  }
+  
+  .moreOptionsMenu .formatButton {
+    justify-content: flex-start;
+    width: 100%;
+    border-radius: var(--radius-sm);
+  }
+  
+  /* Animações */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .formattingToolbar {
+      padding: var(--spacing-2);
+    }
+    
+    .formatButton {
+      min-width: 32px;
+      height: 32px;
+      padding: 0;
+    }
+    
+    .formatHintContent {
+      width: 250px;
+      right: -70px;
+    }
+    
+    .formatHintContent::before {
+      right: 80px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .toolbarGroup {
+      flex: 1;
+      justify-content: space-between;
+    }
+    
+    .formatHint {
+      margin-left: var(--spacing-1);
+    }
+    
+    .formatHintContent {
+      right: -100px;
+      width: 230px;
+    }
+    
+    .hintGrid {
+      grid-template-columns: 1fr;
+    }
+  }

@@ -113,7 +113,6 @@
   padding: 0.25rem 0.5rem;
   border-radius: var(--radius-sm);
   font-weight: var(--fw-bold);
-  font-family: monospace;
   font-size: var(--fs-p3);
   flex-shrink: 0;
 }
@@ -252,40 +251,6 @@
   border-bottom: 1px solid var(--wave);
 }
 
-/* Progress Bar */
-.progressContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.progressBarWrapper {
-  flex: 1;
-  margin-right: 1rem;
-}
-
-.progressBar {
-  height: 8px;
-  background-color: var(--color-surface-2);
-  border-radius: var(--radius-pill);
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-
-.progressFill {
-  height: 100%;
-  background-color: var(--mountain-meadow);
-  border-radius: var(--radius-pill);
-  transition: width var(--transition-normal);
-}
-
-.progressText {
-  font-size: var(--fs-p3);
-  color: var(--dove-gray-2);
-  display: block;
-  text-align: right;
-}
 
 /* Form Elements */
 .formGroup {
@@ -310,7 +275,6 @@
   padding: 0.75rem;
   border: 1px solid var(--wave);
   border-radius: var(--radius-md);
-  font-family: inherit;
   font-size: var(--fs-p2);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   background-color: var(--color-surface-0);
@@ -356,18 +320,6 @@
 .textarea {
   resize: vertical;
   min-height: 100px;
-}
-
-.characterCount {
-  font-size: var(--fs-p3);
-  color: var(--dove-gray-2);
-  margin-top: 0.5rem;
-  text-align: right;
-}
-
-.almostFull {
-  color: var(--chilean-fire);
-  font-weight: var(--fw-bold);
 }
 
 .hint {
@@ -481,8 +433,8 @@
 }
 
 .activeCardEditor {
-  max-height: 70vh;
-  overflow-y: auto;
+  max-height: auto;
+  overflow: visible;
   padding-right: 0.5rem;
   scrollbar-width: thin;
 }

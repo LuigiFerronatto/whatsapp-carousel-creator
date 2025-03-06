@@ -20,6 +20,7 @@ import {
   FiCornerUpRight
 } from 'react-icons/fi';
 import styles from './CardTemplateEditor.module.css';
+import Input from '../ui/Input/Input';
 
 /**
  * Enhanced Card Template Editor Component
@@ -65,11 +66,7 @@ const CardTemplateEditor = ({
   }, [changedFields]);
   
   // Basic text validations with visual feedback
-  const textLength = card.bodyText ? card.bodyText.length : 0;
   const maxTextLength = 160;
-  const textPercentage = Math.min((textLength / maxTextLength) * 100, 100);
-  const isTextWarning = textLength > 120;
-  const isTextDanger = textLength > 150;
   const isTextValid = !!card.bodyText;
   
   // Update card text with change tracking
@@ -209,224 +206,54 @@ const CardTemplateEditor = ({
         });
     }
   }, [card.fileHandle]);
-  
-  // Inserir formatação no texto selecionado
-  const insertFormatting = (format) => {
-    if (!textareaRef.current) return;
-
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    const selectedText = card.bodyText ? card.bodyText.substring(start, end) : '';
-    let newText = card.bodyText || '';
-    let newPosition = end;
-
-    switch (format) {
-      case 'bold':
-        newText = newText.substring(0, start) + '*' + selectedText + '*' + newText.substring(end);
-        newPosition = end + 2;
-        break;
-      case 'italic':
-        newText = newText.substring(0, start) + '_' + selectedText + '_' + newText.substring(end);
-        newPosition = end + 2;
-        break;
-      case 'strikethrough':
-        newText = newText.substring(0, start) + '~' + selectedText + '~' + newText.substring(end);
-        newPosition = end + 2;
-        break;
-      case 'code':
-        newText = newText.substring(0, start) + '```' + selectedText + '```' + newText.substring(end);
-        newPosition = end + 6;
-        break;
-      case 'bullet':
-        // Adiciona lista com marcadores
-        const bulletText = selectedText ? 
-          selectedText.split('\n').map(line => `* ${line}`).join('\n') :
-          '* ';
-        newText = newText.substring(0, start) + bulletText + newText.substring(end);
-        newPosition = start + bulletText.length;
-        break;
-      case 'numbered':
-        // Adiciona lista numerada
-        const numberedText = selectedText ? 
-          selectedText.split('\n').map((line, i) => `${i + 1}. ${line}`).join('\n') :
-          '1. ';
-        newText = newText.substring(0, start) + numberedText + newText.substring(end);
-        newPosition = start + numberedText.length;
-        break;
-      case 'quote':
-        // Adiciona citação
-        const quoteText = selectedText ? 
-          selectedText.split('\n').map(line => `> ${line}`).join('\n') :
-          '> ';
-        newText = newText.substring(0, start) + quoteText + newText.substring(end);
-        newPosition = start + quoteText.length;
-        break;
-      case 'inline-code':
-        // Código inline
-        newText = newText.substring(0, start) + '`' + selectedText + '`' + newText.substring(end);
-        newPosition = end + 2;
-        break;
-      case 'newline':
-        newText = newText.substring(0, start) + '\n' + newText.substring(end);
-        newPosition = start + 1;
-        break;
-      default:
-        break;
-    }
-
-    updateCard(index, 'bodyText', newText);
-    if (!changedFields.includes('bodyText')) {
-      setChangedFields(prev => [...prev, 'bodyText']);
-    }
-
-    // Reposiciona o cursor
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newPosition, newPosition);
-      }
-    }, 0);
-  };
 
   // Render card text input panel
   const renderTextPanel = () => (
     <div className={styles.cardFieldSection}>
-      <div className={styles.fieldHeader}>
-        <label className={styles.fieldLabel} htmlFor={`card-${index}-text`}>
-          Card Text
-          <span className={styles.requiredMark}>*</span>
-        </label>
-        <div className={styles.characterCountWrapper}>
-          <div 
-            className={`
-              ${styles.characterProgress} 
-              ${isTextWarning ? styles.warningProgress : ''} 
-              ${isTextDanger ? styles.dangerProgress : ''}
-            `}
-            style={{ width: `${textPercentage}%` }}
-          ></div>
-          <span 
-            className={`
-              ${styles.characterCount} 
-              ${isTextWarning ? styles.warningCount : ''} 
-              ${isTextDanger ? styles.dangerCount : ''}
-            `}
-          >
-            {textLength}/{maxTextLength}
-          </span>
-        </div>
+
+      <Input
+  id={`card-${index}-text`}
+  name="cardText"
+  label="Card Text"
+  ref={textareaRef}
+  type="textarea"
+  className={`
+    ${!isTextValid && card.bodyText !== '' ? styles.invalidInput : ''} 
+    ${changedFields.includes('bodyText') ? styles.changedField : ''}
+  `}
+  rows={3}
+  value={card.bodyText || ''}
+  onChange={handleBodyTextChange}
+  placeholder="Description of the product or service that will appear in this card. Be clear and concise."
+  maxLength={maxTextLength}
+  allowFormatting={true}
+  textFormatting={true} // Habilita a barra de formatação
+  textFormattingCompact={true} // Opcional: tamanho normal
+  textFormattingDarkMode={false} // Opcional: tema claro
+  showCharCounter
+  required
+  hint= {showHints && (
+    <div className={styles.textHint}>
+      <div className={styles.hintIconWrapper}>
+        <FiInfo className={styles.hintIcon} />
       </div>
-      
-      {/* Barra de ferramentas de formatação */}
-      <div className={styles.formattingToolbar}>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('bold')}
-          title="Negrito (*texto*)"
-        >
-          <FiBold size={16} />
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('italic')}
-          title="Itálico (_texto_)"
-        >
-          <FiItalic size={16} />
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('strikethrough')}
-          title="Tachado (~texto~)"
-        >
-          <span style={{ fontSize: '16px', fontWeight: 'bold' }}>~</span>
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('bullet')}
-          title="Lista com marcadores (* texto)"
-        >
-          <FiList size={16} />
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('numbered')}
-          title="Lista numerada (1. texto)"
-        >
-          <FiHash size={16} />
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('quote')}
-          title="Citação (> texto)"
-        >
-          <FiCornerUpRight size={16} />
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('inline-code')}
-          title="Código inline (`texto`)"
-        >
-          <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>`</span>
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('code')}
-          title="Bloco de código (```texto```)"
-        >
-          <FiCode size={16} />
-        </button>
-        <button 
-          type="button"
-          className={styles.formatButton}
-          onClick={() => insertFormatting('newline')}
-          title="Quebra de linha"
-        >
-          ¶
-        </button>
+      <div>
+        <p><strong>Tips for good card text:</strong></p>
+        <ul>
+          <li>Keep between 60-120 characters for best visibility</li>
+          <li>Highlight key benefits or features</li>
+          <li>Avoid repeating information already visible in the image</li>
+          <li>Use clear calls to action directing to the buttons</li>
+          <li>Use formatting: *bold*, _italic_, ~strikethrough~, `code`, ```code block```</li>
+          <li>For lists use: * for bullets, 1. for numbered lists</li>
+          <li>For quotes use: {'>'} at the beginning of the line</li>
+        </ul>
       </div>
+    </div>
+  )}
+/>
       
-      <textarea 
-        id={`card-${index}-text`}
-        ref={textareaRef}
-        className={`
-          ${styles.textarea} 
-          ${!isTextValid && card.bodyText !== '' ? styles.invalidInput : ''} 
-          ${changedFields.includes('bodyText') ? styles.changedField : ''}
-        `}
-        rows="3"
-        value={card.bodyText || ''}
-        onChange={handleBodyTextChange}
-        placeholder="Description of the product or service that will appear in this card. Be clear and concise."
-        maxLength={maxTextLength}
-      ></textarea>
-      
-      {showHints && (
-        <div className={styles.textHint}>
-          <div className={styles.hintIconWrapper}>
-            <FiInfo className={styles.hintIcon} />
-          </div>
-          <div>
-            <p><strong>Tips for good card text:</strong></p>
-            <ul>
-              <li>Keep between 60-120 characters for best visibility</li>
-              <li>Highlight key benefits or features</li>
-              <li>Avoid repeating information already visible in the image</li>
-              <li>Use clear calls to action directing to the buttons</li>
-              <li>Use formatting: *bold*, _italic_, ~strikethrough~, `code`, ```code block```</li>
-              <li>For lists use: * for bullets, 1. for numbered lists</li>
-              <li>For quotes use: {'>'} at the beginning of the line</li>
-            </ul>
-          </div>
-        </div>
-      )}
+    
     </div>
   );
 

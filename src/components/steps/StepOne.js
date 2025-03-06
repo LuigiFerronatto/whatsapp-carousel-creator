@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fi';
 import styles from './StepOne.module.css';
 import steps from '../../styles/Steps.module.css';
+import Input from '../ui/Input/Input';
 
 /**
  * StepOne - Initial step for file configuration
@@ -110,7 +111,8 @@ const StepOne = ({
       </div>
 
       {/* Authentication section */}
-      <div className={styles.authSection}>
+       {/* Authentication section */}
+       <div className={styles.authSection}>
         <div className={styles.authCard}>
           <div className={styles.authHeader}>
             <div className={styles.authIconContainer}>
@@ -119,41 +121,27 @@ const StepOne = ({
             <h3>Authentication</h3>
           </div>
           
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Authorization Key (Router Key)</label>
-            <div className={styles.authInputContainer}>
+          <Input 
+            id="authKey"
+            name="authKey"
+            label="Authorization Key (Router Key)"
+            type={authKeyVisible ? "text" : "password"}
+            value={authKey}
+            onChange={(e) => setAuthKey(e.target.value)}
+            placeholder="Key=xxxxxxxxx"
+            hint="This key is required to send files and create templates. You can find it in the Blip portal."
+          />
+
+          <div className={styles.authOptions}>
+            <label className={styles.rememberKeyLabel}>
               <input 
-                type={authKeyVisible ? "text" : "password"}
-                className={styles.input}
-                value={authKey}
-                onChange={(e) => setAuthKey(e.target.value)}
-                placeholder="Key=xxxxxxxxx"
+                type="checkbox" 
+                className={styles.rememberKeyCheckbox}
+                checked={rememberKey}
+                onChange={(e) => setRememberKey(e.target.checked)}
               />
-              <button 
-                className={styles.visibilityToggle}
-                onClick={toggleAuthKeyVisibility}
-                type="button"
-                aria-label={authKeyVisible ? "Hide key" : "Show key"}
-              >
-                {authKeyVisible ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-                <span>{authKeyVisible ? "Hide" : "Show"}</span>
-              </button>
-            </div>
-            <div className={styles.authOptions}>
-              <label className={styles.rememberKeyLabel}>
-                <input 
-                  type="checkbox" 
-                  className={styles.rememberKeyCheckbox}
-                  checked={rememberKey}
-                  onChange={(e) => setRememberKey(e.target.checked)}
-                />
-                Remember my key
-              </label>
-              <p className={styles.helpText}>
-                This key is required to send files and create templates.
-                You can find it in the Blip portal.
-              </p>
-            </div>
+              Remember my key
+            </label>
           </div>
         </div>
       </div>

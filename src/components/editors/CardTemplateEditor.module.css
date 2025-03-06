@@ -125,7 +125,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: monospace;
   font-size: var(--fs-p3);
   color: var(--color-surface-primary);
 }
@@ -328,108 +327,6 @@
   font-weight: var(--fw-bold);
   font-size: var(--fs-p2);
   color: var(--text-color-default);
-}
-
-.requiredMark {
-  color: var(--color-surface-negative);
-  margin-left: 0.25rem;
-}
-
-.characterCountWrapper {
-  position: relative;
-  width: 100px;
-  height: 4px;
-  background-color: var(--color-surface-2);
-  border-radius: 2px;
-  margin-right: 0.5rem;
-}
-
-.characterProgress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background-color: var(--mountain-meadow);
-  border-radius: 2px;
-  transition: width var(--transition-normal);
-}
-
-.warningProgress {
-  background-color: var(--marigold-yellow);
-}
-
-.dangerProgress {
-  background-color: var(--color-surface-negative);
-}
-
-.characterCount {
-  position: absolute;
-  top: -18px;
-  right: 0;
-  font-size: var(--fs-p3);
-  color: var(--dove-gray-2);
-}
-
-.warningCount {
-  color: var(--buddha-gold);
-}
-
-.dangerCount {
-  color: var(--color-surface-negative);
-}
-
-/* Barra de formatação de texto */
-.formattingToolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background-color: var(--color-surface-1);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--wave);
-}
-
-.formatButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background-color: var(--color-surface-0);
-  border: 1px solid var(--wave);
-  border-radius: var(--radius-sm);
-  color: var(--text-color-default);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.formatButton:hover {
-  background-color: var(--hover-light);
-  color: var(--color-surface-primary);
-  transform: translateY(-2px);
-}
-
-.formatButton:active {
-  transform: translateY(0);
-}
-
-.textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--wave);
-  border-radius: var(--radius-md);
-  font-family: inherit;
-  font-size: var(--fs-p2);
-  resize: vertical;
-  min-height: 100px;
-  transition: all var(--transition-fast);
-}
-
-.textarea:focus {
-  outline: none;
-  border-color: var(--color-surface-primary);
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
 }
 
 .invalidInput {
@@ -657,51 +554,26 @@
   .editorTab {
     width: 100%;
     justify-content: flex-start;
+    }
+    
+    .fieldHeader {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
   
-  .fieldHeader {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .characterCountWrapper {
-    width: 100%;
-    margin-top: 0.5rem;
-  }
-  
-  .formattingToolbar {
-    padding: 0.5rem 0.25rem;
-    justify-content: center;
-  }
-  
-  .formatButton {
-    width: 28px;
-    height: 28px;
-  }
-}
 
 @media (max-width: 480px) {
   .cardTitle {
     font-size: var(--fs-p1);
   }
-  
-  .textHint, .buttonHint {
-    flex-direction: column;
-  }
+
   
   .fileHandleWrapper {
     max-width: 100%;
     width: 100%;
   }
   
-  .formattingToolbar {
-    gap: 0.25rem;
-  }
-  
-  .formatButton {
-    width: 26px;
-    height: 26px;
-  }
 }
 
 /* Adicione ao seu StepTwo.module.css */

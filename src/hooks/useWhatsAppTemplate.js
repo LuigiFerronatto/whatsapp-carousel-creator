@@ -712,7 +712,7 @@ export const useWhatsAppTemplate = () => {
       setSuccess('Validações concluídas. Criando template...');
       
       // Criar template na API
-      const { templateJson, sendTemplateJson } = await createTemplate(
+      const { templateJson, sendTemplateJson, builderTemplateJson } = await createTemplate(
         templateName, 
         language, 
         bodyText, 
@@ -723,7 +723,8 @@ export const useWhatsAppTemplate = () => {
       // Armazenar os JSONs gerados
       setFinalJson({
         createTemplate: templateJson,
-        sendTemplate: sendTemplateJson
+        sendTemplate: sendTemplateJson,
+        builderTemplate: builderTemplateJson
       });
 
       setSuccess('Template criado com sucesso!');

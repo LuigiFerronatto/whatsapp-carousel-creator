@@ -1,108 +1,101 @@
-// components/ui/JsonViewer/JsonViewer.js
-import React, { useState, useEffect } from 'react';
-import { FiCopy, FiDownload, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { 
+  FiCopy, 
+  FiDownload, 
+  FiCheckCircle, 
+  FiEye, 
+  FiEyeOff, 
+  FiMaximize, 
+  FiMinimize,
+  FiCode,
+  FiAlertTriangle
+} from 'react-icons/fi';
 import styles from './JsonViewer.module.css';
 
-/**
- * JsonViewer component para visualização interativa de JSON
- * Com funcionalidades de cópia, download e código formatado
- * 
- * @param {Object} props - Component properties
- * @param {Object} props.json - O objeto JSON a ser exibido
- * @param {Function} props.onCopy - Função para cópia (opcional)
- * @param {Function} props.onDownload - Função para download (opcional)
- * @param {string} props.fileName - Nome do arquivo (default: "data.json")
- * @param {boolean} props.collapsible - Se é expansível/recolhível (default: false)
- * @param {boolean} props.initiallyExpanded - Se inicia expandido (default: true)
- * @param {string} props.title - Título opcional para o visualizador
- * @returns {JSX.Element|null} Componente de visualização do JSON
- */
-const JsonViewer = ({ 
+function JsonViewer({ 
   json, 
   onCopy, 
   onDownload, 
   fileName = "data.json",
-  collapsible = false,
+  collapsible = true,
   initiallyExpanded = true,
-  title
-}) => {
+  title,
+  minHeight = '20dvh',
+  maxHeight = '50dvh'
+}) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(initiallyExpanded);
   const [formattedJson, setFormattedJson] = useState('');
   const [syntaxHighlighted, setSyntaxHighlighted] = useState('');
+  const [fullscreen, setFullscreen] = useState(false);
+  const [error, setError] = useState(null);
   
-  // Formatar JSON com indentação
+  const containerRef = useRef(null);
+  
+  // Memoized syntax highlighting function
+  const formatJsonSyntax = useMemo(() => {
+    return (jsonString) => {
+      if (!jsonString) return '';
+      
+      return jsonString
+        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+          let cls = styles.number;
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+              cls = styles.key;
+            } else {
+              cls = styles.string;
+            }
+          } else if (/true|false/.test(match)) {
+            cls = styles.boolean;
+          } else if (/null/.test(match)) {
+            cls = styles.null;
+          }
+          return `<span class="${cls}">${match}</span>`;
+        });
+    };
+  }, []);
+  
+  // Format JSON with indentation
   useEffect(() => {
     if (json) {
       try {
         const formatted = JSON.stringify(json, null, 2);
         setFormattedJson(formatted);
-        
-        // Aplicar highlight de sintaxe básico
-        const highlighted = formatJsonSyntax(formatted);
-        setSyntaxHighlighted(highlighted);
+        setSyntaxHighlighted(formatJsonSyntax(formatted));
+        setError(null);
       } catch (error) {
-        console.error('Erro ao formatar JSON:', error);
-        setFormattedJson(JSON.stringify(json));
-        setSyntaxHighlighted(JSON.stringify(json));
+        console.error('Error formatting JSON:', error);
+        setError(`Error formatting JSON: ${error instanceof Error ? error.message : String(error)}`);
       }
+    } else {
+      setFormattedJson('');
+      setSyntaxHighlighted('');
     }
-  }, [json]);
-
-  // Se não há JSON, mostrar estado vazio
-  if (!json) {
-    return (
-      <div className={styles.emptyContainer}>
-        JSON não disponível
-      </div>
-    );
-  }
-
-  // Função simples para highlight de sintaxe
-  function formatJsonSyntax(jsonString) {
-    return jsonString
-      .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-        let cls = styles.number;
-        if (/^"/.test(match)) {
-          if (/:$/.test(match)) {
-            cls = styles.key;
-            match = match.replace(/:/g, '');
-          } else {
-            cls = styles.string;
-          }
-        } else if (/true|false/.test(match)) {
-          cls = styles.boolean;
-        } else if (/null/.test(match)) {
-          cls = styles.null;
-        }
-        return `<span class="${cls}">${match}</span>`;
-      });
-  }
-
-  // Manipular cópia com feedback visual
+  }, [json, formatJsonSyntax]);
+  
+  // Handle copy with visual feedback
   const handleCopy = () => {
-    // Se uma função de cópia personalizada foi fornecida, usá-la
     if (onCopy) {
       onCopy();
     } else {
-      // Caso contrário, copiar diretamente para o clipboard
       navigator.clipboard.writeText(formattedJson)
         .then(() => {
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         })
         .catch(err => {
-          console.error('Erro ao copiar para clipboard:', err);
+          console.error('Error copying to clipboard:', err);
+          alert('Failed to copy to clipboard. Please try again.');
         });
     }
   };
 
-  // Manipular download
+  // Handle download
   const handleDownload = () => {
     if (onDownload) {
       onDownload();
     } else {
-      // Criar um blob e download
       const blob = new Blob([formattedJson], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -115,49 +108,105 @@ const JsonViewer = ({
     }
   };
 
-  // Alternar estado expandido
+  // Toggle expanded state
   const toggleExpanded = () => {
     setExpanded(!expanded);
   };
+  
+  // Toggle fullscreen mode
+  const toggleFullscreen = () => {
+    setFullscreen(!fullscreen);
+    if (!fullscreen && !expanded) {
+      setExpanded(true);
+    }
+  };
+
+  // Render empty state
+  if (!json) {
+    return (
+      <div className={styles.emptyContainer}>
+        <FiCode className={styles.emptyIcon} />
+        <p>No JSON data available</p>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.jsonContainer}>
+    <div 
+      className={`${styles.jsonContainer} ${fullscreen ? styles.fullscreen : ''}`}
+      ref={containerRef}
+      style={{ 
+        maxHeight: fullscreen ? '100%' : maxHeight , minHeight
+      }}
+    >
+      {/* Title Bar */}
       {title && (
         <div className={styles.titleBar}>
-          <h4 className={styles.title}>{title}</h4>
+          <h4 className={styles.title}>
+            <FiCode className={styles.titleIcon} />
+            {title}
+          </h4>
         </div>
       )}
       
+      {/* Toolbar */}
       <div className={styles.toolBar}>
+        {/* Collapsible Toggle */}
         {collapsible && (
           <button
-            className={styles.toolButton}
+            className={`${styles.toolButton} ${!expanded ? styles.collapsed : ''}`}
             onClick={toggleExpanded}
-            title={expanded ? "Recolher" : "Expandir"}
+            title={expanded ? "Collapse" : "Expand"}
           >
             {expanded ? <FiEyeOff /> : <FiEye />}
           </button>
         )}
         
+        {/* Fullscreen Toggle */}
         <button
-          className={styles.toolButton}
+          className={`${styles.toolButton} ${fullscreen ? styles.active : ''}`}
+          onClick={toggleFullscreen}
+          title={fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+        >
+          {fullscreen ? <FiMinimize /> : <FiMaximize />}
+        </button>
+        
+        {/* Copy Button */}
+        <button
+          className={`${styles.toolButton} ${copied ? styles.copied : ''}`}
           onClick={handleCopy}
-          title="Copiar JSON"
+          title="Copy JSON"
         >
           {copied ? <FiCheckCircle className={styles.successIcon} /> : <FiCopy />}
         </button>
         
+        {/* Download Button */}
         <button
           className={styles.toolButton}
           onClick={handleDownload}
-          title="Baixar JSON"
+          title="Download JSON"
         >
           <FiDownload />
         </button>
       </div>
       
-      {expanded && (
-        <div className={styles.codeContainer}>
+      {/* Error Handling */}
+      {error && (
+        <div className={styles.errorContainer}>
+          <FiAlertTriangle className={styles.errorIcon} />
+          <span>{error}</span>
+        </div>
+      )}
+      
+      {/* JSON Content */}
+      {expanded && !error && (
+        <div 
+          className={styles.codeContainer}
+          style={{ 
+            maxHeight: fullscreen ? '100%' : maxHeight,
+            overflowY: 'auto'
+          }}
+        >
           <pre 
             className={styles.jsonContent}
             dangerouslySetInnerHTML={{ __html: syntaxHighlighted }}
@@ -166,6 +215,6 @@ const JsonViewer = ({
       )}
     </div>
   );
-};
+}
 
 export default JsonViewer;

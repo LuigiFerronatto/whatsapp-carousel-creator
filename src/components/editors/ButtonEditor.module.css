@@ -271,7 +271,6 @@
 }
 
 .exampleBox code {
-  font-family: monospace;
   background-color: var(--color-surface-1);
   padding: 0.25rem 0.5rem;
   border-radius: var(--radius-sm);
@@ -334,7 +333,6 @@
   background-color: var(--whisper);
   border-radius: var(--radius-sm);
   text-align: center;
-  font-family: monospace;
   font-weight: var(--fw-bold);
 }
 

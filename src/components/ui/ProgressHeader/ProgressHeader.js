@@ -32,12 +32,6 @@ const ProgressHeader = ({ step, setStep, isStepValid }) => {
       name: 'Template Review',
       icon: <FiCheckCircle />,
       description: 'Review and generate template JSON'
-    },
-    {
-      id: 4,
-      name: 'Send Template',
-      icon: <FiSend />,
-      description: 'Send the template for testing'
     }
   ];
 

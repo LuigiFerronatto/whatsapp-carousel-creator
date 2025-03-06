@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiLink, FiPhone, FiMessageSquare, FiInfo, FiAlertCircle, FiCheckCircle, FiExternalLink, FiLock, FiUnlock } from 'react-icons/fi';
 import styles from './ButtonEditor.module.css';
+import Input from '../ui/Input/Input';
 
 /**
  * ButtonEditor - Enhanced component for editing WhatsApp template buttons

@@ -3,9 +3,19 @@ import React, { useState, useEffect } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
 import AlertMessage from '../ui/AlertMessage/AlertMessage';
-import { FiSave, FiCheck, FiChevronRight, FiChevronLeft, FiEye, FiEyeOff, FiInfo } from 'react-icons/fi';
+import Input from '../ui/Input/Input'; // Already imported in your original code
+import { 
+  FiSave, 
+  FiCheck, 
+  FiChevronRight, 
+  FiChevronLeft, 
+  FiEye, 
+  FiEyeOff, 
+  FiInfo 
+} from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
+import progressbar from '../ui/ProgressBar/ProgressBar.module.css';
 
 const StepTwo = ({
   templateName,
@@ -39,7 +49,7 @@ const StepTwo = ({
         return newMessages;
       });
     }
-    
+
     if (bodyText) {
       setValidationMessages(prev => {
         const newMessages = { ...prev };
@@ -52,23 +62,23 @@ const StepTwo = ({
   // Check if required fields are filled
   const isTemplateNameValid = templateName.length >= 3;
   const isBodyTextValid = bodyText.length > 0;
-  
+
   // Validate all cards have at least basic info
   const validateCards = () => {
     const messages = {};
     let allValid = true;
-    
+
     cards.slice(0, numCards).forEach((card, index) => {
       if (!card.bodyText) {
         messages[`card-${index}`] = `Card ${index + 1} text is required`;
         allValid = false;
       }
-      
+
       if (card.buttons.some(button => !button.text)) {
         messages[`card-${index}-buttons`] = `All buttons in card ${index + 1} must have text`;
         allValid = false;
       }
-      
+
       card.buttons.forEach((button, btnIndex) => {
         if (button.type === 'URL' && !button.url) {
           messages[`card-${index}-button-${btnIndex}`] = `URL is required for button ${btnIndex + 1}`;
@@ -80,21 +90,21 @@ const StepTwo = ({
         }
       });
     });
-    
+
     setValidationMessages(messages);
     return allValid;
   };
-  
+
   const handleContinue = () => {
     if (validateCards()) {
       handleCreateTemplate();
     }
   };
-  
+
   const handleSaveDraft = () => {
     saveDraftManually();
     setJustSaved(true);
-    
+
     // Reset saved flag after 3 seconds
     setTimeout(() => {
       setJustSaved(false);
@@ -108,9 +118,9 @@ const StepTwo = ({
       setActiveCard(activeCard - 1);
     }
   };
-  
+
   const isAllValid = isTemplateNameValid && isBodyTextValid && Object.keys(validationMessages).length === 0;
-  
+
   // Calculate completion percentage
   const completionPercentage = [
     isTemplateNameValid,
@@ -118,7 +128,7 @@ const StepTwo = ({
     cards.slice(0, numCards).every(card => card.bodyText),
     cards.slice(0, numCards).every(card => card.buttons.every(button => button.text)),
   ].filter(Boolean).length * 25;
-  
+
   // Languages with proper formatting
   const languageOptions = [
     { code: "pt_BR", name: "Português (Brasil)" },
@@ -144,7 +154,7 @@ const StepTwo = ({
 
 
         <div className={styles.viewControls}>
-          <button 
+          <button
             className={styles.viewToggle}
             onClick={() => setShowPreview(!showPreview)}
             aria-label={showPreview ? "Hide preview" : "Show preview"}
@@ -152,8 +162,8 @@ const StepTwo = ({
             {showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
             {showPreview ? "Hide preview" : "Show preview"}
           </button>
-          
-          <button 
+
+          <button
             className={styles.hintsToggle}
             onClick={() => setShowHints(!showHints)}
             aria-label={showHints ? "Hide hints" : "Show hints"}
@@ -163,64 +173,60 @@ const StepTwo = ({
           </button>
         </div>
       </div>
-      
+
       <div className={styles.contentWrapper}>
         <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
           <div className={styles.basicDetailsSection}>
 
             <h3 className={styles.sectionTitle}>Basic Template Information</h3>
-            
 
-            <div className={styles.progressContainer}>
-          <div className={styles.progressBarWrapper}>
-            <div className={styles.progressBar}>
-              <div 
-                className={styles.progressFill} 
-                style={{ width: `${completionPercentage}%` }}
-              />
-            </div>
-            
-            <span className={styles.progressText}>
-              {completionPercentage === 100 ? 
-                '✓ All fields completed!' : 
-                `${completionPercentage}% completed`}
-            </span>
-          </div>
-        </div>
-            
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="templateName">
-                Template Name
-                <span className={styles.requiredMark}>*</span>
-              </label>
-              <input 
-                id="templateName"
-                type="text" 
-                className={`${styles.input} ${!isTemplateNameValid && templateName ? styles.invalidInput : ''}`}
-                value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
-                placeholder="my_carousel_template"
-              />
-              {showHints && (
-                <div className={styles.hint}>
-                  <FiInfo className={styles.hintIcon} />
-                  Use a descriptive name without spaces, minimum 3 characters. Example: "summer_promo" or "product_launch"
+
+            <div className={progressbar.progressContainer}>
+              <div className={progressbar.progressBarWrapper}>
+                <div className={progressbar.progressBar}>
+                  <div
+                    className={progressbar.progressFill}
+                    style={{ width: `${completionPercentage}%` }}
+                  />
                 </div>
-              )}
-              {!isTemplateNameValid && templateName && (
-                <div className={styles.errorMessage}>
-                  Template name must be at least 3 characters
-                </div>
-              )}
+
+                <span className={progressbar.progressText}>
+                  {completionPercentage === 100 ?
+                    '✓ All fields completed!' :
+                    `${completionPercentage}% completed`}
+                </span>
+              </div>
             </div>
-            
+
+
+            <Input
+  id="templateName"
+  name="templateName"
+  label="Template Name"
+  value={templateName}
+  onChange={(e) => setTemplateName(e.target.value)}
+  placeholder="my_carousel_template"
+  required
+  minLength={3}
+  maxLength={64}
+  error={!isTemplateNameValid && templateName ? "Template name must be at least 3 characters" : ""}
+  hint={showHints ? "Use a descriptive name without spaces, minimum 3 characters. Example: 'summer_promo' or 'product_launch'" : ""}
+  icon={showHints ? <FiInfo /> : null}
+  variant="templateName"
+  allowFormatting={false}
+  textFormatting={false} // Habilita a barra de formatação
+  textFormattingCompact={false} // Opcional: tamanho normal
+  textFormattingDarkMode={false} // Opcional: tema claro
+  showCharCounter
+/>
+
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="language">
                 Template Language
                 <span className={styles.requiredMark}>*</span>
               </label>
               <div className={styles.customSelect}>
-                <select 
+                <select
                   id="language"
                   className={styles.select}
                   value={language}
@@ -241,43 +247,28 @@ const StepTwo = ({
                 </div>
               )}
             </div>
-            
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="bodyText">
-                Message Body Text
-                <span className={styles.requiredMark}>*</span>
-              </label>
-              <textarea 
-                id="bodyText"
-                className={`${styles.textarea} ${!isBodyTextValid && bodyText !== '' ? styles.invalidInput : ''}`}
-                rows="3"
-                value={bodyText}
-                onChange={(e) => setBodyText(e.target.value)}
-                placeholder="This text will appear before the carousel. Be clear and engaging for your customers."
-                maxLength={1024}
-              ></textarea>
-              <div className={`${styles.characterCount} ${bodyText.length > 900 ? styles.almostFull : ''}`}>
-                {bodyText.length}/1024 characters
-                {bodyText.length > 900 && " - Approaching limit!"}
-              </div>
-              {showHints && (
-                <div className={styles.hint}>
-                  <FiInfo className={styles.hintIcon} />
-                  Write clearly and concisely. This text introduces your carousel and appears above it in the conversation.
-                </div>
-              )}
-              {!isBodyTextValid && bodyText !== '' && (
-                <div className={styles.errorMessage}>
-                  Message body text is required
-                </div>
-              )}
-            </div>
+
+            <Input
+              id="bodyText"
+              name="bodyText"
+              type="textarea"
+              label="Message Body Text"
+              value={bodyText}
+              onChange={(e) => setBodyText(e.target.value)}
+              placeholder="This text will appear before the carousel. Be clear and engaging for your customers."
+              maxLength={1024}
+              showCharCounter
+              rows={3}
+              required
+              hint={showHints ? "Write clearly and concisely. This text introduces your carousel and appears above it in the conversation." : ""}
+              icon={showHints ? <FiInfo /> : null}
+              textFormatting
+            />
           </div>
 
           <div className={styles.cardEditorSection}>
-            <div className={styles.cardNavigation}>
               <h3 className={styles.sectionTitle}>Card Content</h3>
-              
+
               <div className={styles.cardTabs}>
                 {cards.slice(0, numCards).map((_, index) => (
                   <button
@@ -290,46 +281,26 @@ const StepTwo = ({
                   </button>
                 ))}
               </div>
-              
-              <div className={styles.cardNavigationButtons}>
-                <button
-                  className={styles.cardNavButton}
-                  onClick={() => navigateToCard('prev')}
-                  disabled={activeCard === 0}
-                >
-                  <FiChevronLeft />
-                  Previous
-                </button>
-                <button
-                  className={styles.cardNavButton}
-                  onClick={() => navigateToCard('next')}
-                  disabled={activeCard === numCards - 1}
-                >
-                  Next
-                  <FiChevronRight />
-                </button>
-              </div>
-            </div>
-            
+
             <div className={styles.activeCardEditor}>
               {cards[activeCard] && (
-                <CardTemplateEditor 
+                <CardTemplateEditor
                   id={`card-${activeCard}`}
-                  index={activeCard} 
-                  card={cards[activeCard]} 
+                  index={activeCard}
+                  card={cards[activeCard]}
                   cards={cards}
                   updateCard={updateCard}
                   showHints={showHints}
                   numCards={numCards}
                   validationMessage={
-                    validationMessages[`card-${activeCard}`] || 
+                    validationMessages[`card-${activeCard}`] ||
                     validationMessages[`card-${activeCard}-buttons`]
                   }
                 />
               )}
             </div>
           </div>
-          
+
           <div className={styles.fixedButtonGroup}>
             <div className={styles.actionStatus}>
               {justSaved && (
@@ -339,15 +310,15 @@ const StepTwo = ({
                 </div>
               )}
             </div>
-            
-            <button 
+
+            <button
               className={styles.backButton}
               onClick={() => setStep(1)}
             >
               <FiChevronLeft className={styles.buttonIcon} />
               Back
             </button>
-            
+
             <button
               className={styles.saveButton}
               onClick={handleSaveDraft}
@@ -355,8 +326,8 @@ const StepTwo = ({
               <FiSave className={styles.buttonIcon} />
               Save Draft
             </button>
-            
-            <button 
+
+            <button
               className={styles.nextButton}
               onClick={handleContinue}
               disabled={loading}
@@ -374,7 +345,7 @@ const StepTwo = ({
               )}
             </button>
           </div>
-          
+
           {error && <AlertMessage error={error} />}
         </div>
 
@@ -386,9 +357,9 @@ const StepTwo = ({
                 Live preview of how your carousel will appear in WhatsApp
               </p>
               <div className={styles.previewContent}>
-                <CarouselPreview 
-                  cards={cards.slice(0, numCards)} 
-                  bodyText={bodyText} 
+                <CarouselPreview
+                  cards={cards.slice(0, numCards)}
+                  bodyText={bodyText}
                 />
               </div>
             </div>

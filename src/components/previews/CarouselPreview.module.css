@@ -128,7 +128,6 @@
 }
 
 .messageBodyText code, .cardBody code {
-  font-family: monospace;
   background-color: #f0f0f0;
   border-radius: 3px;
   padding: 2px 4px;
@@ -150,11 +149,20 @@
   background-color: #f0f0f0;
 }
 
-.messageBodyText .blockquote, .cardBody .blockquote {
-  padding-left: 10px;
-  margin: 5px 0;
-  border-left: 3px solid #128C7E;
-  color: #555;
+span .blockquote {
+  padding: 5px 0 5px 10px;
+  border-left: 3px solid var(--dove-gray-2); /* Cor verde do WhatsApp fixa */
+  color: var(--dove-gray);
+  display: block; /* Importante: deve ser block, não inline */
+  width: 100%; /* Alterado de 100% para auto */
+  margin: 8px 0;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.messageBodyText br, .cardBody br {
+  content: "";
+  display: block;
+  margin-top: 0.15em; /* Espaçamento extra para simular quebra de linha do WhatsApp */
 }
 
 .messageBodyText .list-item, .cardBody .list-item {
@@ -177,7 +185,6 @@
   color: #0066CC;
   border-radius: 3px;
   font-weight: bold;
-  font-family: monospace;
 }
 
 /* Setinha do balão de mensagem */
@@ -341,12 +348,13 @@
   line-height: 1.4;
   color: #111;
   overflow-y: auto;
-  max-height: 100px;
+  word-wrap: break-word;
 }
 
 .cardBody p {
   margin: 0;
-  word-wrap: break-word;
+  max-height: 8rem;
+  position: relative;
 }
 
 .placeholderText {

@@ -72,11 +72,12 @@ const formatWhatsAppText = (text) => {
   // Lista numerada: 1. texto
   formattedText = formattedText.replace(/^(\d+)\.\s(.+)$/gm, '<div class="list-item"><span class="number">$1.</span> $2</div>');
   
-  // Citação: > texto
-  formattedText = formattedText.replace(/^>\s(.+)$/gm, '<div class="blockquote">$1</div>');
-  
+// Citação: > texto
+  formattedText = formattedText.replace(/^>\s(.+)$/gm, '<span class="blockquote" style="padding: 5px 0 5px 10px; border-left: 3px solid #128C7E; border-radius: 3px; color: #272727; display: block; width: 100%; margin: 5px 0; background-color: rgba(0, 0, 0, 0.04);">$1</span>');
+  formattedText = formattedText.replace(/&gt;\s(.+)/g, '<span class="blockquote" style="padding: 5px 0 5px 10px; border-left: 3px solid #128C7E; border-radius: 3px; color: #272727; display: block; width: 100%; margin: 5px 0; background-color: rgba(0, 0, 0, 0.04);">$1</span>');
+
   // Quebra de linha
-  formattedText = formattedText.replace(/\n/g, '<br />');
+  formattedText = formattedText.replace(/\n/g, '<br/>');
   
   return formattedText;
 };

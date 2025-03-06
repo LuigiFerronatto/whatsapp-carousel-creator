@@ -160,7 +160,6 @@
   max-width: 300px;
   width: 100%;
   color: var(--blip-blue-brand);
-  font-family: monospace;
 }
 
 .successNote {

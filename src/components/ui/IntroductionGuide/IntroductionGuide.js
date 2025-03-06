@@ -27,31 +27,26 @@ const IntroductionGuide = ({ onClose }) => {
   
   // Guide steps data
   const steps = [
-    {
-      title: 'Welcome to WhatsApp Carousel Creator',
-      icon: <FiInfo size={28} />,
-      content: 'This tool helps you create interactive carousel templates for WhatsApp Business API. Follow this quick guide to learn how it works.'
-    },
-    {
-      title: '1. File Configuration',
-      icon: <FiUpload size={28} />,
-      content: 'First, you\'ll upload images or videos for each card in your carousel. You can add up to 10 cards, each with its own media and interactive buttons.'
-    },
-    {
-      title: '2. Template Creation',
-      icon: <FiEdit3 size={28} />,
-      content: 'Next, you\'ll configure your template with text content and interactive buttons. Each card can have up to 2 buttons with different action types like links and quick replies.'
-    },
-    {
-      title: '3. Template Review',
-      icon: <FiCheckCircle size={28} />,
-      content: 'Preview your carousel and generate the template JSON. You can download or copy this JSON for use in your WhatsApp Business API integration.'
-    },
-    {
-      title: '4. Send Template',
-      icon: <FiSend size={28} />,
-      content: 'Finally, you can test your template by sending it to a WhatsApp number. This helps you see how it will appear to your customers.'
-    }
+      {
+        "title": "Bem-vindo ao Criador de Carrosséis do WhatsApp",
+        "icon": "<FiInfo size={28} />",
+        "content": "Crie carrosséis interativos para o WhatsApp de forma simples e rápida. Siga este passo a passo para começar."
+      },
+      {
+        "title": "1. Adicione arquivos",
+        "icon": "<FiUpload size={28} />",
+        "content": "Envie imagens ou vídeos para cada card do seu carrossel. Você pode adicionar até 10 cards, cada um com mídia e botões interativos."
+      },
+      {
+        "title": "2. Personalize seu template",
+        "icon": "<FiEdit3 size={28} />",
+        "content": "Adicione textos e botões interativos a cada card. Você pode incluir até 2 botões por card, com ações como links ou respostas rápidas."
+      },
+      {
+        "title": "3. Revise e teste seu carrossel",
+        "icon": "<FiCheckCircle size={28} />",
+        "content": "Seu template foi criado com sucesso! Agora, você pode visualizar a prévia, obter o código JSON ou enviá-lo para testes."
+      }
   ];
   
   // Move to next step
