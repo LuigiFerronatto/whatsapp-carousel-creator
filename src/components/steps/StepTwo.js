@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
 import AlertMessage from '../ui/AlertMessage/AlertMessage';
-import Input from '../ui/Input/Input'; // Already imported in your original code
+import Input from '../ui/Input/Input';
+import Hints, { HintsGroup } from '../ui/Hints/Hints';
 import { 
   FiSave, 
   FiCheck, 
@@ -40,7 +41,6 @@ const StepTwo = ({
   const [activeCard, setActiveCard] = useState(0);
   const [justSaved, setJustSaved] = useState(false);
 
-  // Reset validation messages when fields change
   useEffect(() => {
     if (templateName) {
       setValidationMessages(prev => {
@@ -59,33 +59,31 @@ const StepTwo = ({
     }
   }, [templateName, bodyText]);
 
-  // Check if required fields are filled
   const isTemplateNameValid = templateName.length >= 3;
   const isBodyTextValid = bodyText.length > 0;
 
-  // Validate all cards have at least basic info
   const validateCards = () => {
     const messages = {};
     let allValid = true;
 
     cards.slice(0, numCards).forEach((card, index) => {
       if (!card.bodyText) {
-        messages[`card-${index}`] = `Card ${index + 1} text is required`;
+        messages[`card-${index}`] = `O texto do Card ${index + 1} é obrigatório`;
         allValid = false;
       }
 
       if (card.buttons.some(button => !button.text)) {
-        messages[`card-${index}-buttons`] = `All buttons in card ${index + 1} must have text`;
+        messages[`card-${index}-buttons`] = `Todos os botões do Card ${index + 1} devem ter texto`;
         allValid = false;
       }
 
       card.buttons.forEach((button, btnIndex) => {
         if (button.type === 'URL' && !button.url) {
-          messages[`card-${index}-button-${btnIndex}`] = `URL is required for button ${btnIndex + 1}`;
+          messages[`card-${index}-button-${btnIndex}`] = `URL é obrigatório para o botão ${btnIndex + 1}`;
           allValid = false;
         }
         if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) {
-          messages[`card-${index}-button-${btnIndex}`] = `Phone number is required for button ${btnIndex + 1}`;
+          messages[`card-${index}-button-${btnIndex}`] = `Número de telefone é obrigatório para o botão ${btnIndex + 1}`;
           allValid = false;
         }
       });
@@ -105,23 +103,13 @@ const StepTwo = ({
     saveDraftManually();
     setJustSaved(true);
 
-    // Reset saved flag after 3 seconds
     setTimeout(() => {
       setJustSaved(false);
     }, 3000);
   };
 
-  const navigateToCard = (direction) => {
-    if (direction === 'next' && activeCard < numCards - 1) {
-      setActiveCard(activeCard + 1);
-    } else if (direction === 'prev' && activeCard > 0) {
-      setActiveCard(activeCard - 1);
-    }
-  };
-
   const isAllValid = isTemplateNameValid && isBodyTextValid && Object.keys(validationMessages).length === 0;
 
-  // Calculate completion percentage
   const completionPercentage = [
     isTemplateNameValid,
     isBodyTextValid,
@@ -129,7 +117,6 @@ const StepTwo = ({
     cards.slice(0, numCards).every(card => card.buttons.every(button => button.text)),
   ].filter(Boolean).length * 25;
 
-  // Languages with proper formatting
   const languageOptions = [
     { code: "pt_BR", name: "Português (Brasil)" },
     { code: "en_US", name: "English (United States)" },
@@ -146,30 +133,28 @@ const StepTwo = ({
   return (
     <div className={steps.container}>
       <div className={steps.introSection}>
-
-        <h2 className={steps.stepTitle}>Template Creation</h2>
+        <h2 className={steps.stepTitle}>Criação de Template</h2>
         <p className={steps.stepDescription}>
-          Configure your template details, including name, language, and content for each card.
+          Configure os detalhes do seu template,
         </p>
-
 
         <div className={styles.viewControls}>
           <button
             className={styles.viewToggle}
             onClick={() => setShowPreview(!showPreview)}
-            aria-label={showPreview ? "Hide preview" : "Show preview"}
+            aria-label={showPreview ? "Ocultar visualização" : "Mostrar visualização"}
           >
             {showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-            {showPreview ? "Hide preview" : "Show preview"}
+            {showPreview ? "Ocultar visualização" : "Mostrar visualização"}
           </button>
 
           <button
             className={styles.hintsToggle}
             onClick={() => setShowHints(!showHints)}
-            aria-label={showHints ? "Hide hints" : "Show hints"}
+            aria-label={showHints ? "Ocultar dicas" : "Mostrar dicas"}
           >
             <FiInfo size={16} />
-            {showHints ? "Hide hints" : "Show hints"}
+            {showHints ? "Ocultar dicas" : "Mostrar dicas"}
           </button>
         </div>
       </div>
@@ -177,9 +162,7 @@ const StepTwo = ({
       <div className={styles.contentWrapper}>
         <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
           <div className={styles.basicDetailsSection}>
-
-            <h3 className={styles.sectionTitle}>Basic Template Information</h3>
-
+            <h3 className={styles.sectionTitle}>Informações Básicas do Template</h3>
 
             <div className={progressbar.progressContainer}>
               <div className={progressbar.progressBarWrapper}>
@@ -192,84 +175,92 @@ const StepTwo = ({
 
                 <span className={progressbar.progressText}>
                   {completionPercentage === 100 ?
-                    '✓ All fields completed!' :
-                    `${completionPercentage}% completed`}
+                    '✓ Todos os campos preenchidos!' :
+                    `${completionPercentage}% concluído`}
                 </span>
               </div>
             </div>
 
+            <Input
+              id="templateName"
+              name="templateName"
+              label="Nome do Template"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              placeholder="Exemplo: meu_carrossel_promocional"
+              required
+              minLength={3}
+              maxLength={64}
+              error={!isTemplateNameValid && templateName ? "O nome do template deve ter pelo menos 3 caracteres." : ""}
+              hintMessage={showHints ? "Escolha um nome descritivo, sem espaços." : ""}
+              hintVariant="simple"
+              hintList={["Use _ para separar palavras", "Exemplo: 'promo_verao' ou 'lancamento_produto'"]}
+              size="medium"
+              fullWidth
+              clearable
+              variant="templateName"
+              allowFormatting
+              validateOnChange
+              hintIsCompact={true}
+            />
 
             <Input
-  id="templateName"
-  name="templateName"
-  label="Nome do Template"
-  value={templateName}
-  onChange={(e) => setTemplateName(e.target.value)}
-  placeholder="exemplo: meu_carrossel_promocional"
-  required
-  minLength={3}
-  maxLength={64}
-  error={!isTemplateNameValid && templateName ? "O nome do template deve ter pelo menos 3 caracteres." : ""}
-  hint={showHints ? "Escolha um nome descritivo, sem espaços. Exemplo: 'promo_verao' ou 'lançamento_produto'." : ""}
-  variant="templateName"
-  showCharCounter
-  useHintsComponent={showHints}
-  hintVariant="simple"
-/>
+              id="language"
+              name="language"
+              label="Idioma do Template"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              placeholder="Escolha um idioma"
+              required
+              isDropdown={true}
+              options={languageOptions}
+              optionLabelKey="name"
+              optionValueKey="code"
+              hintMessage={showHints ? "Selecione o idioma principal do seu template. O idioma correto facilita a aprovação pelo WhatsApp." : ""}
+              hintVariant="simple"
+              size="medium"
+              fullWidth
+              hintIsCompact={true}
+              searchable
+            />
 
-<Input
-  id="language"
-  name="language"
-  label="Idioma do Template"
-  value={language}
-  onChange={(e) => setLanguage(e.target.value)}
-  placeholder="Escolha um idioma"
-  required
-  isDropdown = {true}
-  options={languageOptions}
-  optionLabelKey="name"
-  optionValueKey="code"
-  searchable = {false}
-  hint={showHints ? "Selecione o idioma principal do seu template. O idioma correto facilita a aprovação pelo WhatsApp." : ""}
-  useHintsComponent={showHints}
-  hintVariant="simple"
-/>
-
-
-  <Input
-  id="bodyText"
-  name="bodyText"
-  type="textarea"
-  label="Mensagem de introdução"
-  value={bodyText}
-  onChange={(e) => setBodyText(e.target.value)}
-  placeholder="Esse texto aparecerá antes do carrossel. Seja claro e envolvente para seus clientes."
-  maxLength={1024}
-  showCharCounter
-  rows={3}
-  required
-  hint={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
-  textFormatting
-  useHintsComponent={showHints}
-  hintVariant="simple"
-  />
+            <Input
+              id="bodyText"
+              name="bodyText"
+              type="textarea"
+              label="Mensagem de introdução"
+              value={bodyText}
+              onChange={(e) => setBodyText(e.target.value)}
+              placeholder="Esse texto aparecerá antes do carrossel. Seja claro e envolvente para seus clientes."
+              maxLength={1024}
+              rows={3}
+              required
+              hintMessage={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
+              textFormatting
+              hintVariant="simple"
+              size="medium"
+              fullWidth
+              showCharCounter
+              clearable
+              hintIsCompact={true}
+            />
           </div>
 
           <div className={styles.cardEditorSection}>
-              <h3 className={styles.sectionTitle}>Card Content</h3>
+            <h3 className={styles.sectionTitle}>Conteúdo dos Cards</h3>
 
-              <div className={styles.cardTabs}>
-                {cards.slice(0, numCards).map((_, index) => (
-                  <button
-                    key={index}
-                    className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''}`}
-                    onClick={() => setActiveCard(index)}
-                  >
-                    Card {index + 1}
-                    {!cards[index].bodyText && <span className={styles.incompleteIndicator}>!</span>}
-                  </button>
-                ))}
-              </div>
+            <div className={styles.cardTabs}>
+              {cards.slice(0, numCards).map((_, index) => (
+                <button
+                  key={index}
+                  className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''}`}
+                  onClick={() => setActiveCard(index)}
+                >
+                  Card {index + 1}
+                  {!cards[index].bodyText && <span className={styles.incompleteIndicator}>!</span>}
+                </button>
+              ))}
+            </div>
 
             <div className={styles.activeCardEditor}>
               {cards[activeCard] && (
@@ -295,7 +286,7 @@ const StepTwo = ({
               {justSaved && (
                 <div className={styles.savedIndicator}>
                   <FiCheck size={16} />
-                  Draft saved!
+                  Rascunho salvo!
                 </div>
               )}
             </div>
@@ -305,7 +296,7 @@ const StepTwo = ({
               onClick={() => setStep(1)}
             >
               <FiChevronLeft className={styles.buttonIcon} />
-              Back
+              Voltar
             </button>
 
             <button
@@ -313,7 +304,7 @@ const StepTwo = ({
               onClick={handleSaveDraft}
             >
               <FiSave className={styles.buttonIcon} />
-              Save Draft
+              Salvar Rascunho
             </button>
 
             <button
@@ -324,11 +315,11 @@ const StepTwo = ({
               {loading ? (
                 <>
                   <div className={styles.loadingSpinner}></div>
-                  Processing...
+                  Processando...
                 </>
               ) : (
                 <>
-                  Create Template
+                  Criar Template
                   <FiChevronRight className={styles.buttonIcon} />
                 </>
               )}
@@ -341,9 +332,9 @@ const StepTwo = ({
         {showPreview && (
           <div className={styles.previewContainer}>
             <div className={styles.previewWrapper}>
-              <h3 className={styles.previewTitle}>Carousel Preview</h3>
+              <h3 className={styles.previewTitle}>Pré-visualização do Carrossel</h3>
               <p className={styles.previewSubtitle}>
-                Live preview of how your carousel will appear in WhatsApp
+                Visualização ao vivo de como seu carrossel aparecerá no WhatsApp
               </p>
               <div className={styles.previewContent}>
                 <CarouselPreview

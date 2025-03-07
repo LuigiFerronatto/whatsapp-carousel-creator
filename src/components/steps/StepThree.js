@@ -1,5 +1,4 @@
-// components/steps/StepThree.js
-import React, { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import AlertMessage from '../ui/AlertMessage/AlertMessage';
 import CarouselPreview from '../previews/CarouselPreview';
 import Button from '../ui/Button/Button';
@@ -29,6 +28,11 @@ import steps from '../../styles/Steps.module.css';
 // Initialize FFmpeg
 const ffmpeg = new FFmpeg();
 
+/**
+ * StepThree - Visualização final, exportação JSON e envio do template
+ * @param {Object} props - Props do componente
+ * @returns {JSX.Element} Componente StepThree
+ */
 const StepThree = ({
   // Existing props
   finalJson,
@@ -41,26 +45,23 @@ const StepThree = ({
   setStep,
   templateName,
 
-  // Step Four props (now integrated)
-  phoneNumber,
-  setPhoneNumber,
+  // Send-related props
   sendTemplate,
   loading
 }) => {
   // State
-  const [activeView, setActiveView] = useState('visual');
+  const [activeView, setActiveView] = useState('send');
   const [justCopied, setJustCopied] = useState({
     createTemplate: false,
     sendTemplate: false,
     builderTemplate: false
   });
+  
+  // Send-related state
   const [sendSuccess, setSendSuccess] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
 
-  // Add new state for send functionality
-  const [isPhoneValid, setIsPhoneValid] = useState(true);
-  const [phoneError, setPhoneError] = useState('');
-
-  // Add new state for preview animation
+  // Preview-related state
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [previewFormat, setPreviewFormat] = useState('mp4');
   const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
@@ -83,17 +84,37 @@ const StepThree = ({
           workerURL: await toBlobURL(`${baseURL}ffmpeg-core.worker.js`, 'text/javascript')
         });
         
-        console.log('FFmpeg loaded successfully');
+        console.log('FFmpeg carregado com sucesso');
         setFfmpegLoaded(true);
       } catch (error) {
-        console.error('FFmpeg Loading Error:', error);
-        setFfmpegError(error.message || 'Failed to load video generation tool');
+        console.error('Erro ao carregar FFmpeg:', error);
+        setFfmpegError(error.message || 'Não foi possível carregar a ferramenta de geração de vídeo');
         setFfmpegLoaded(false);
       }
     };
   
     loadFFmpeg();
   }, []);
+
+  // Formatar telefone para exibição
+  const formatPhoneDisplay = (phone) => {
+    if (!phone) return '';
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length < 7) return phone;
+    
+    // Tenta formatar com código do país, área e número
+    try {
+      const countryCode = cleaned.substring(0, 2);
+      const areaCode = cleaned.substring(2, 4);
+      const firstPart = cleaned.substring(4, 9);
+      const secondPart = cleaned.substring(9);
+      
+      return `+${countryCode} (${areaCode}) ${firstPart}-${secondPart}`;
+    } catch (error) {
+      // Em caso de erro, retorna o número limpo
+      return cleaned;
+    }
+  };
 
   // Handle copy with visual feedback
   const handleCopy = (jsonType) => {
@@ -115,7 +136,7 @@ const StepThree = ({
   const handleDownload = (jsonType) => {
     // Verifica se há um JSON válido para download
     if (!finalJson || !finalJson[jsonType]) {
-      console.error(`JSON type "${jsonType}" not available for download`);
+      console.error(`Tipo de JSON "${jsonType}" não disponível para download`);
       return;
     }
   
@@ -138,46 +159,9 @@ const StepThree = ({
         URL.revokeObjectURL(url);
       }, 100);
     } catch (error) {
-      console.error('Error downloading JSON:', error);
-      alert('Failed to download JSON. Please try again.');
+      console.error('Erro ao fazer download do JSON:', error);
+      alert('Falha ao baixar o JSON. Por favor, tente novamente.');
     }
-  };
-
-  // Send template functionality
-  const handleSendTemplate = async () => {
-    // Validate phone number
-    if (!phoneNumber || phoneNumber.length < 10) {
-      setIsPhoneValid(false);
-      setPhoneError('Please enter a valid phone number');
-      return;
-    }
-  
-    try {
-      await sendTemplate();
-      setSendSuccess(true);
-    } catch (err) {
-      console.error('Error sending template:', err);
-    }
-  };
-
-  // Send another template
-  const handleSendAnother = () => {
-    setSendSuccess(false);
-    setPhoneNumber('');
-  };
-
-  // Format phone for display
-  const formatPhoneDisplay = (phone) => {
-    if (!phone) return '';
-    const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length < 7) return phone;
-  
-    const countryCode = cleaned.substring(0, 2);
-    const areaCode = cleaned.substring(2, 4);
-    const firstPart = cleaned.substring(4, 9);
-    const secondPart = cleaned.substring(9);
-  
-    return `+${countryCode} (${areaCode}) ${firstPart}-${secondPart}`;
   };
 
   // Capture carousel frames for animation
@@ -185,12 +169,12 @@ const StepThree = ({
     if (!carouselRef.current) {
       setDownloadStatus({ 
         status: 'error', 
-        message: 'Preview container not found. Please try again.' 
+        message: 'Container de pré-visualização não encontrado. Tente novamente.' 
       });
       return [];
     }
   
-    setDownloadStatus({ status: 'capturing', message: 'Capturing frames...' });
+    setDownloadStatus({ status: 'capturing', message: 'Capturando imagens...' });
     const frames = [];
     const numCards = cards.length;
   
@@ -221,13 +205,13 @@ const StepThree = ({
         frames.push(frame);
       }
     
-      setDownloadStatus({ status: 'processing', message: 'Processing frames...' });
+      setDownloadStatus({ status: 'processing', message: 'Processando imagens...' });
       return frames;
     } catch (error) {
-      console.error('Error capturing carousel frames:', error);
+      console.error('Erro ao capturar frames do carrossel:', error);
       setDownloadStatus({ 
         status: 'error', 
-        message: 'Failed to capture frames. Please try again.' 
+        message: 'Falha ao capturar imagens. Tente novamente.' 
       });
       return [];
     }
@@ -236,12 +220,12 @@ const StepThree = ({
   // Generate animated preview
   const generateAnimatedPreview = async () => {
     setIsGeneratingPreview(true);
-    setDownloadStatus({ status: 'starting', message: 'Starting generation...' });
+    setDownloadStatus({ status: 'starting', message: 'Iniciando geração...' });
   
     try {
       // Check if FFmpeg is loaded
       if (!ffmpegLoaded) {
-        setDownloadStatus({ status: 'loading', message: 'Loading video tools...' });
+        setDownloadStatus({ status: 'loading', message: 'Carregando ferramentas de vídeo...' });
         
         // Try to load FFmpeg again
         const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/';
@@ -259,7 +243,7 @@ const StepThree = ({
       previewFramesRef.current = frames;
     
       if (frames.length === 0) {
-        throw new Error('Failed to capture carousel frames');
+        throw new Error('Falha ao capturar frames do carrossel');
       }
     
       // Generate the appropriate format
@@ -269,7 +253,7 @@ const StepThree = ({
         await generateMp4(frames);
       }
     
-      setDownloadStatus({ status: 'success', message: 'Download complete!' });
+      setDownloadStatus({ status: 'success', message: 'Download concluído!' });
       
       // Reset status after a delay
       setTimeout(() => {
@@ -277,10 +261,10 @@ const StepThree = ({
       }, 3000);
       
     } catch (error) {
-      console.error('Error generating preview:', error);
+      console.error('Erro ao gerar pré-visualização:', error);
       setDownloadStatus({ 
         status: 'error', 
-        message: `Failed to generate ${previewFormat.toUpperCase()}: ${error.message}` 
+        message: `Falha ao gerar ${previewFormat.toUpperCase()}: ${error.message}` 
       });
     } finally {
       setIsGeneratingPreview(false);
@@ -290,7 +274,7 @@ const StepThree = ({
   // Generate GIF from frames
   const generateGif = async (frames) => {
     try {
-      setDownloadStatus({ status: 'processing', message: 'Creating GIF...' });
+      setDownloadStatus({ status: 'processing', message: 'Criando GIF...' });
       
       // Create a temporary directory
       await ffmpeg.createDir('frames');
@@ -299,7 +283,7 @@ const StepThree = ({
       for (let i = 0; i < frames.length; i++) {
         setDownloadStatus({ 
           status: 'processing', 
-          message: `Processing frame ${i+1}/${frames.length}...` 
+          message: `Processando frame ${i+1}/${frames.length}...` 
         });
         
         const dataUrl = frames[i].toDataURL('image/png');
@@ -307,7 +291,7 @@ const StepThree = ({
         await ffmpeg.writeFile(fileName, await fetchFile(dataUrl));
       }
     
-      setDownloadStatus({ status: 'encoding', message: 'Encoding GIF...' });
+      setDownloadStatus({ status: 'encodingGif', message: 'Criando GIF...' });
       
       // Generate GIF using FFmpeg
       await ffmpeg.exec([
@@ -318,7 +302,7 @@ const StepThree = ({
         'output.gif'
       ]);
     
-      setDownloadStatus({ status: 'downloading', message: 'Preparing download...' });
+      setDownloadStatus({ status: 'downloading', message: 'Preparando download...' });
       
       // Read the output file
       const data = await ffmpeg.readFile('output.gif');
@@ -328,7 +312,7 @@ const StepThree = ({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${templateName || 'carousel'}_preview.gif`;
+      link.download = `${templateName || 'carrossel'}_preview.gif`;
       
       // Trigger download
       document.body.appendChild(link);
@@ -341,15 +325,15 @@ const StepThree = ({
       }, 100);
       
     } catch (error) {
-      console.error('Error generating GIF:', error);
-      throw new Error(`GIF generation failed: ${error.message}`);
+      console.error('Erro ao gerar GIF:', error);
+      throw new Error(`Falha na geração do GIF: ${error.message}`);
     }
   };
   
   // Generate MP4 from frames
   const generateMp4 = async (frames) => {
     try {
-      setDownloadStatus({ status: 'processing', message: 'Creating MP4...' });
+      setDownloadStatus({ status: 'processing', message: 'Criando MP4...' });
       
       // Create a temporary directory
       await ffmpeg.createDir('frames');
@@ -358,7 +342,7 @@ const StepThree = ({
       for (let i = 0; i < frames.length; i++) {
         setDownloadStatus({ 
           status: 'processing', 
-          message: `Processing frame ${i+1}/${frames.length}...` 
+          message: `Processando frame ${i+1}/${frames.length}...` 
         });
         
         const dataUrl = frames[i].toDataURL('image/png');
@@ -366,7 +350,7 @@ const StepThree = ({
         await ffmpeg.writeFile(fileName, await fetchFile(dataUrl));
       }
     
-      setDownloadStatus({ status: 'encoding', message: 'Encoding MP4...' });
+      setDownloadStatus({ status: 'encodingMp4', message: 'Codificando vídeo...' });
       
       // Generate MP4 using FFmpeg
       await ffmpeg.exec([
@@ -380,7 +364,7 @@ const StepThree = ({
         'output.mp4'
       ]);
     
-      setDownloadStatus({ status: 'downloading', message: 'Preparing download...' });
+      setDownloadStatus({ status: 'downloading', message: 'Preparando download...' });
       
       // Read the output file
       const data = await ffmpeg.readFile('output.mp4');
@@ -390,7 +374,7 @@ const StepThree = ({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${templateName || 'carousel'}_preview.mp4`;
+      link.download = `${templateName || 'carrossel'}_preview.mp4`;
       
       // Trigger download
       document.body.appendChild(link);
@@ -403,8 +387,8 @@ const StepThree = ({
       }, 100);
       
     } catch (error) {
-      console.error('Error generating MP4:', error);
-      throw new Error(`MP4 generation failed: ${error.message}`);
+      console.error('Erro ao gerar MP4:', error);
+      throw new Error(`Falha na geração do MP4: ${error.message}`);
     }
   };
 
@@ -413,7 +397,7 @@ const StepThree = ({
     if (!carouselRef.current) return;
     
     setIsGeneratingPreview(true);
-    setDownloadStatus({ status: 'capturing', message: 'Capturing preview...' });
+    setDownloadStatus({ status: 'capturing', message: 'Capturando pré-visualização...' });
     
     try {
       html2canvas(carouselRef.current, {
@@ -423,11 +407,11 @@ const StepThree = ({
         useCORS: true,
         allowTaint: true
       }).then(canvas => {
-        setDownloadStatus({ status: 'downloading', message: 'Preparing download...' });
+        setDownloadStatus({ status: 'downloading', message: 'Preparando download...' });
         
         // Convert to PNG and download
         const link = document.createElement('a');
-        link.download = `${templateName || 'carousel'}_preview.png`;
+        link.download = `${templateName || 'carrossel'}_preview.png`;
         link.href = canvas.toDataURL('image/png');
         document.body.appendChild(link);
         link.click();
@@ -435,7 +419,7 @@ const StepThree = ({
         // Clean up
         setTimeout(() => {
           document.body.removeChild(link);
-          setDownloadStatus({ status: 'success', message: 'Download complete!' });
+          setDownloadStatus({ status: 'success', message: 'Download concluído!' });
           
           // Reset status after a delay
           setTimeout(() => {
@@ -444,10 +428,10 @@ const StepThree = ({
         }, 100);
       });
     } catch (error) {
-      console.error('Error capturing preview:', error);
+      console.error('Erro ao capturar pré-visualização:', error);
       setDownloadStatus({ 
         status: 'error', 
-        message: 'Failed to capture preview. Please try again.' 
+        message: 'Falha ao capturar pré-visualização. Tente novamente.' 
       });
     } finally {
       setIsGeneratingPreview(false);
@@ -458,265 +442,322 @@ const StepThree = ({
     <div className={steps.container}>
       {/* Introduction section */}
       <div className={steps.introSection}>
-        <h2 className={steps.stepTitle}>Template Completed</h2>
+        <h2 className={steps.stepTitle}>Template Concluído</h2>
         <p className={steps.stepDescription}>
-          Your template has been created successfully. You can now preview it, get the JSON code, or send it for testing.
+          Seu template foi criado com sucesso! Veja abaixo a prévia de como ficará para seus clientes, 
+          faça download para compartilhar com sua equipe ou envie para um número de teste.
         </p>
       </div>
     
       {/* View tabs */}
       <div className={styles.viewTabs}>
         <button 
-          className={`${styles.viewTab} ${activeView === 'visual' ? styles.activeTab : ''}`}
-          onClick={() => setActiveView('visual')}
+          className={`${styles.viewTab} ${activeView === 'send' ? styles.activeTab : ''}`}
+          onClick={() => setActiveView('send')}
         >
-          <FiEye className={styles.tabIcon} />
-          Visual Preview
+          <FiSend className={styles.tabIcon} />
+          Visualização e Envio
         </button>
         <button 
           className={`${styles.viewTab} ${activeView === 'code' ? styles.activeTab : ''}`}
           onClick={() => setActiveView('code')}
         >
           <FiCode className={styles.tabIcon} />
-          JSON Code
-        </button>
-        <button 
-          className={`${styles.viewTab} ${activeView === 'send' ? styles.activeTab : ''}`}
-          onClick={() => setActiveView('send')}
-        >
-          <FiSend className={styles.tabIcon} />
-          Send Template
+          Código JSON
         </button>
       </div>
     
       {/* Content based on active tab */}
       <div className={styles.viewContent}>
-        {/* Visual Preview Tab */}
-        {activeView === 'visual' && (
-          <div className={styles.visualPreview}>
-            <div className={styles.previewHeader}>
-              <h3 className={styles.previewTitle}>Template Preview</h3>
-              <p className={styles.previewSubtitle}>This is how your carousel will appear in WhatsApp</p>
-            </div>
-          
-            <div className={styles.previewContainer} ref={carouselRef}>
-              <CarouselPreview 
-                cards={cards} 
-                bodyText={bodyText}
-              />
-            </div>
-          
-            <div className={styles.templateInfo}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Template Name:</span>
-                <span className={styles.infoValue}>{templateName}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Cards:</span>
-                <span className={styles.infoValue}>{cards.length}</span>
-              </div>
-            </div>
-          
-            <div className={styles.previewActions}>
-              {ffmpegError ? (
-                <div className={styles.ffmpegError}>
-                  <FiAlertTriangle className={styles.errorIcon} />
-                  <p>Video generation tool couldn't be loaded. You can still download a static image.</p>
-                  <Button 
-                    variant="solid" 
-                    color="primary"
-                    onClick={handleSimpleDownload}
-                    loading={isGeneratingPreview}
-                    disabled={isGeneratingPreview}
-                    iconLeft={<FiDownload />}
-                  >
-                    Download Static Preview
-                  </Button>
+        {/* Send Template Tab com Visualização Integrada */}
+        {activeView === 'send' && (
+          <div className={styles.sendView}>
+            <div className={styles.contentWrapper}>
+              {/* Coluna de Visualização */}
+              <div className={styles.previewSection}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Visualização Final</h3>
+                  <p className={styles.previewDescription}>
+                    Este é o carrossel que seus clientes verão no WhatsApp. Deslize para ver todos os cartões.
+                  </p>
                 </div>
-              ) : (
-                <>
-                  <div className={styles.formatSelector}>
-                    <span className={styles.formatLabel}>Download Preview As:</span>
-                    <div className={styles.formatOptions}>
-                      <button 
-                        className={`${styles.formatOption} ${previewFormat === 'mp4' ? styles.activeFormat : ''}`}
-                        onClick={() => setPreviewFormat('mp4')}
+                
+                <div className={styles.previewContainer} ref={carouselRef}>
+                  <CarouselPreview 
+                    cards={cards} 
+                    bodyText={bodyText}
+                  />
+                </div>
+                
+                <div className={styles.templateInfo}>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Template:</span>
+                    <span className={styles.infoValue}>{templateName}</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Cartões:</span>
+                    <span className={styles.infoValue}>{cards.length}</span>
+                  </div>
+                </div>
+                
+                <div className={styles.previewActions}>
+                  <div className={styles.downloadOptions}>
+                    <h4 className={styles.downloadTitle}>Salvar Visualização</h4>
+                    
+                    {ffmpegError ? (
+                      <div className={styles.ffmpegError}>
+                        <FiAlertTriangle className={styles.errorIcon} />
+                        <p>Não foi possível carregar a ferramenta de geração de vídeo. Você ainda pode baixar uma imagem estática.</p>
+                        <Button 
+                          variant="outline" 
+                          color="primary"
+                          onClick={handleSimpleDownload}
+                          loading={isGeneratingPreview}
+                          disabled={isGeneratingPreview}
+                          iconLeft={<FiDownload />}
+                        >
+                          Baixar Imagem Estática
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className={styles.formatSelector}>
+                          <span className={styles.formatLabel}>Formato:</span>
+                          <div className={styles.formatOptions}>
+                            <button 
+                              className={`${styles.formatOption} ${previewFormat === 'mp4' ? styles.activeFormat : ''}`}
+                              onClick={() => setPreviewFormat('mp4')}
+                            >
+                              <FiFilm className={styles.formatIcon} />
+                              Vídeo MP4
+                            </button>
+                            <button 
+                              className={`${styles.formatOption} ${previewFormat === 'gif' ? styles.activeFormat : ''}`}
+                              onClick={() => setPreviewFormat('gif')}
+                            >
+                              <FiImage className={styles.formatIcon} />
+                              Animação GIF
+                            </button>
+                          </div>
+                        </div>
+                      
+                        <Button 
+                          variant="outline" 
+                          color="primary"
+                          onClick={generateAnimatedPreview}
+                          loading={isGeneratingPreview}
+                          disabled={isGeneratingPreview}
+                          iconLeft={<FiDownload />}
+                        >
+                          {isGeneratingPreview ? 
+                            `${downloadStatus.message || 'Processando...'}` : 
+                            `Baixar ${previewFormat === 'mp4' ? 'Vídeo' : 'GIF'}`
+                          }
+                        </Button>
+                        
+                        {downloadStatus.status === 'error' && (
+                          <div className={styles.downloadError}>
+                            <FiAlertTriangle className={styles.errorIcon} />
+                            <p>{downloadStatus.message}</p>
+                            <button 
+                              className={styles.fallbackButton}
+                              onClick={handleSimpleDownload}
+                            >
+                              Usar Imagem Estática
+                            </button>
+                          </div>
+                        )}
+                        
+                        {downloadStatus.status === 'success' && (
+                          <div className={styles.downloadSuccess}>
+                            <FiCheck className={styles.successIcon} />
+                            <p>{downloadStatus.message}</p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  
+                  <div className={styles.jsonActions}>
+                    <h4 className={styles.jsonActionsTitle}>JSON do Template</h4>
+                    <div className={styles.actionsContainer}>
+                      <Button 
+                        variant="outline" 
+                        color="content"
+                        onClick={() => handleCopy('sendTemplate')}
+                        iconLeft={justCopied.sendTemplate ? <FiCheck /> : <FiCopy />}
                       >
-                        <FiFilm className={styles.formatIcon} />
-                        MP4 Video
-                      </button>
-                      <button 
-                        className={`${styles.formatOption} ${previewFormat === 'gif' ? styles.activeFormat : ''}`}
-                        onClick={() => setPreviewFormat('gif')}
+                        {justCopied.sendTemplate ? 'Copiado!' : 'Copiar JSON'}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        color="content"
+                        onClick={() => handleDownload('sendTemplate')}
+                        iconLeft={<FiDownload />}
                       >
-                        <FiImage className={styles.formatIcon} />
-                        GIF Animation
-                      </button>
+                        Baixar JSON
+                      </Button>
                     </div>
                   </div>
-                
-                  <Button 
-                    variant="solid" 
-                    color="primary"
-                    onClick={generateAnimatedPreview}
-                    loading={isGeneratingPreview}
-                    disabled={isGeneratingPreview}
-                    iconLeft={<FiDownload />}
-                  >
-                    {isGeneratingPreview ? 
-                      `${downloadStatus.message || 'Processing...'}` : 
-                      `Download ${previewFormat.toUpperCase()} Preview`
-                    }
-                  </Button>
-                  
-                  {downloadStatus.status === 'error' && (
-                    <div className={styles.downloadError}>
-                      <FiAlertTriangle className={styles.errorIcon} />
-                      <p>{downloadStatus.message}</p>
-                      <button 
-                        className={styles.fallbackButton}
-                        onClick={handleSimpleDownload}
+                </div>
+              </div>
+              
+              {/* Coluna de Envio */}
+              <div className={styles.sendSection}>
+                {!sendSuccess ? (
+                  <>
+                    <div className={styles.sectionHeader}>
+                      <h3 className={styles.sectionTitle}>Testar Template</h3>
+                      <p className={styles.sendDescription}>
+                        Envie seu template para um número WhatsApp para confirmar como ele será exibido para seus clientes
+                      </p>
+                    </div>
+                    
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Número com código do país</label>
+                      <div className={styles.phoneInputWrapper}>
+                        <span className={styles.phonePrefix}>+</span>
+                        <input 
+                          type="tel" 
+                          className={styles.phoneInput}
+                          value={phoneNumber || ''}
+                          onChange={(e) => {
+                            // Extrai apenas os dígitos do valor inserido
+                            const digitsOnly = e.target.value.replace(/\D/g, '');
+                            setPhoneNumber(digitsOnly);
+                          }}
+                          placeholder="5521999999999"
+                        />
+                      </div>
+                      <span className={styles.inputHelp}>
+                        Digite o número completo com código do país (ex: 5521999999999)
+                      </span>
+                    </div>
+                    
+                    <div className={styles.sendButtonContainer}>
+                      <Button 
+                        variant="solid"
+                        color="primary"
+                        onClick={async () => {
+                          try {
+                            await sendTemplate(phoneNumber);
+                            setSendSuccess(true);
+                          } catch (error) {
+                            console.error('Erro ao enviar template:', error);
+                          }
+                        }}
+                        disabled={!phoneNumber || loading}
+                        loading={loading}
+                        iconLeft={<FiSend />}
+                        fullWidth
                       >
-                        Try Static Image Instead
-                      </button>
+                        Enviar Template
+                      </Button>
                     </div>
-                  )}
-                  
-                  {downloadStatus.status === 'success' && (
-                    <div className={styles.downloadSuccess}>
-                      <FiCheck className={styles.successIcon} />
-                      <p>{downloadStatus.message}</p>
+                    
+                    <div className={styles.sendInfoBox}>
+                      <FiInfo className={styles.infoIcon} />
+                      <p className={styles.infoText}>
+                        O número de destino precisa ter iniciado uma conversa com seu WhatsApp Business 
+                        nas últimas 24 horas ou estar na sua lista de contatos para receber este template.
+                      </p>
                     </div>
-                  )}
-                </>
-              )}
+                  </>
+                ) : (
+                  <div className={styles.successContainer}>
+                    <div className={styles.successIcon}>
+                      <FiCheckCircle size={40} />
+                    </div>
+                    
+                    <h3 className={styles.successTitle}>Template Enviado!</h3>
+                    
+                    <p className={styles.successMessage}>
+                      Template enviado com sucesso para:
+                    </p>
+                    
+                    <div className={styles.phoneDisplay}>
+                      {formatPhoneDisplay(phoneNumber)}
+                    </div>
+                    
+                    <p className={styles.successNote}>
+                      Verifique o recebimento no dispositivo. Se não receber em alguns instantes, 
+                      confirme se o número está correto e se o contato já enviou mensagem para sua 
+                      conta WhatsApp Business.
+                    </p>
+                    
+                    <Button 
+                      variant="outline"
+                      color="primary"
+                      onClick={() => {
+                        setSendSuccess(false);
+                        setPhoneNumber('');
+                      }}
+                      iconLeft={<FiRefreshCw />}
+                    >
+                      Enviar para outro número
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
       
         {/* Code View Tab - Existing functionality */}
         {activeView === 'code' && (
-  <div className={styles.codeView}>
-    <div className={styles.codeSection}>
-      <div className={styles.codeSectionHeader}>
-        <h3 className={styles.codeSectionTitle}>Template JSON para Envio</h3>
-      </div>
-      <div className={styles.jsonViewerWrapper}>
-        <JsonViewer 
-          json={finalJson.sendTemplate}
-          fileName={`${templateName || 'template'}_sendTemplate.json`}
-          onCopy={() => handleCopy('sendTemplate')}
-          onDownload={() => handleDownload('sendTemplate')}
-        />
-      </div>
-    </div>
-    
-    <div className={styles.codeSection}>
-      <div className={styles.codeSectionHeader}>
-        <h3 className={styles.codeSectionTitle}>Template JSON para Criação</h3>
-      </div>
-      <div className={styles.jsonViewerWrapper}>
-        <JsonViewer 
-          json={finalJson.createTemplate}
-          fileName={`${templateName || 'template'}_createTemplate.json`}
-          onCopy={() => handleCopy('createTemplate')}
-          onDownload={() => handleDownload('createTemplate')}
-        />
-      </div>
-    </div>
-    
-    {/* Novo formato para Builder Blip */}
-    <div className={styles.codeSection}>
-      <div className={styles.codeSectionHeader}>
-        <h3 className={styles.codeSectionTitle}>JSON para Conteúdo Dinâmico (Builder Blip)</h3>
-      </div>
-      <div className={styles.jsonViewerWrapper}>
-        <JsonViewer 
-          json={finalJson.builderTemplate}
-          fileName={`${templateName || 'template'}_builderTemplate.json`}
-          onCopy={() => handleCopy('builderTemplate')}
-          onDownload={() => handleDownload('builderTemplate')}
-        />
-      </div>
-    </div>
-  </div>
-)}
-      
-        {/* Send Template Tab - From Step Four */}
-        {activeView === 'send' && (
-          <div className={styles.sendView}>
-            {!sendSuccess ? (
-              <div className={styles.sendForm}>
-                <h3 className={styles.sendTitle}>Send Template</h3>
-                <p className={styles.sendDescription}>
-                  Send your template directly to a WhatsApp number to test it before submission.
+          <div className={styles.codeView}>
+            <div className={styles.codeSection}>
+              <div className={styles.codeSectionHeader}>
+                <h3 className={styles.codeSectionTitle}>JSON para Envio do Template</h3>
+                <p className={styles.codeSectionDescription}>
+                  Use este JSON para enviar seu template através da API do WhatsApp.
                 </p>
-              
-                <div className={styles.formGroup}>
-                  <label className={styles.formLabel}>WhatsApp Number (with country code)</label>
-                  <div className={styles.phoneInputWrapper}>
-                    <span className={styles.phonePrefix}>+</span>
-                    <input 
-                      type="tel" 
-                      className={`${styles.phoneInput} ${!isPhoneValid ? styles.inputError : ''}`}
-                      value={phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber}
-                      onChange={(e) => {
-                        setPhoneNumber(e.target.value.startsWith('+') ? e.target.value : '+' + e.target.value);
-                        setIsPhoneValid(true);
-                        setPhoneError('');
-                      }}
-                      placeholder="55219999"
-                    />
-                  </div>
-                  {phoneError ? (
-                    <p className={styles.errorText}>{phoneError}</p>
-                  ) : (
-                    <p className={styles.helpText}>Enter the full number with country code (e.g., 55219999)</p>
-                  )}
-                </div>
-              
-                <button 
-                  className={styles.sendButton}
-                  onClick={handleSendTemplate}
-                  disabled={loading || !phoneNumber}
-                >
-                  {loading ? (
-                    <>
-                      <div className={styles.loadingSpinner}></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <FiSend />
-                      Send Template
-                    </>
-                  )}
-                </button>
               </div>
-            ) : (
-              <div className={styles.sendResult}>
-                <div className={styles.sendSuccessIcon}>
-                  <FiCheck size={48} />
-                </div>
-                <h3 className={styles.sendSuccessTitle}>Template Sent Successfully!</h3>
-                <p className={styles.sendSuccessMessage}>
-                  Your template has been sent to <strong>{formatPhoneDisplay(phoneNumber)}</strong> for testing.
-                </p>
-                <p className={styles.sendSuccessNote}>
-                  If you don't receive the message, please ensure the number is valid and has previously messaged your WhatsApp Business account.
-                </p>
-              
-                <div className={styles.sendResultActions}>
-                  <button 
-                    className={styles.sendAgainButton}
-                    onClick={handleSendAnother}
-                  >
-                    <FiRefreshCw />
-                    Send to Another Number
-                  </button>
-                </div>
+              <div className={styles.jsonViewerWrapper}>
+                <JsonViewer 
+                  json={finalJson.sendTemplate}
+                  fileName={`${templateName || 'template'}_sendTemplate.json`}
+                  onCopy={() => handleCopy('sendTemplate')}
+                  onDownload={() => handleDownload('sendTemplate')}
+                />
               </div>
-            )}
+            </div>
+            
+            <div className={styles.codeSection}>
+              <div className={styles.codeSectionHeader}>
+                <h3 className={styles.codeSectionTitle}>JSON para Criação do Template</h3>
+                <p className={styles.codeSectionDescription}>
+                  Use este JSON para registrar seu template no WhatsApp.
+                </p>
+              </div>
+              <div className={styles.jsonViewerWrapper}>
+                <JsonViewer 
+                  json={finalJson.createTemplate}
+                  fileName={`${templateName || 'template'}_createTemplate.json`}
+                  onCopy={() => handleCopy('createTemplate')}
+                  onDownload={() => handleDownload('createTemplate')}
+                />
+              </div>
+            </div>
+            
+            {/* Novo formato para Builder Blip */}
+            <div className={styles.codeSection}>
+              <div className={styles.codeSectionHeader}>
+                <h3 className={styles.codeSectionTitle}>JSON para Conteúdo Dinâmico (Builder Blip)</h3>
+                <p className={styles.codeSectionDescription}>
+                  Use este JSON para integrar seu template na plataforma Blip.
+                </p>
+              </div>
+              <div className={styles.jsonViewerWrapper}>
+                <JsonViewer 
+                  json={finalJson.builderTemplate}
+                  fileName={`${templateName || 'template'}_builderTemplate.json`}
+                  onCopy={() => handleCopy('builderTemplate')}
+                  onDownload={() => handleDownload('builderTemplate')}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -728,14 +769,14 @@ const StepThree = ({
           onClick={() => setStep(2)}
         >
           <FiChevronLeft />
-          Back to Editing
+          Voltar para Edição
         </button>
       
         <button 
           className={styles.newTemplateButton}
           onClick={resetForm}
         >
-          Create New Template
+          Criar Novo Template
         </button>
       </div>
     

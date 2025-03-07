@@ -93,11 +93,11 @@ export const createAzureBlobService = () => {
     const containerName = process.env.REACT_APP_AZURE_CONTAINER_NAME || 'uploads';
 
     // Log de configurações (cuidado para não logar tokens sensíveis)
-    console.log('Configurações do Azure Blob Storage:', {
-      accountName,
-      containerName,
-      sasTokenPresent: !!sasToken
-    });
+    // console.log('Configurações do Azure Blob Storage:', {
+    //   accountName,
+    //   containerName,
+    //   sasTokenPresent: !!sasToken
+    // });
 
     return new AzureBlobService(accountName, sasToken, containerName);
   } catch (error) {

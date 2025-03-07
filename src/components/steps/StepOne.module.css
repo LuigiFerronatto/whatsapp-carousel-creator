@@ -110,6 +110,7 @@
   width: 16px;
   height: 16px;
   accent-color: var(--color-surface-primary);
+  cursor: pointer;
 }
 
 /* Cards control section */

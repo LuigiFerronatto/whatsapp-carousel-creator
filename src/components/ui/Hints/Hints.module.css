@@ -1,102 +1,356 @@
-/* HintSystem.module.css */
+/* // HintSystem.module.css */
 .hintContainer {
-    display: flex;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-p2);
+  margin-top: 0.75rem;
+  word-break: normal;
+  word-wrap: break-word;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.hintContainer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  border-radius: 2px 0 0 2px;
+}
+
+.hintIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-circle);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-1);
+}
+
+.hintContent {
+  flex: 1;
+}
+
+.hintTitle {
+  font-weight: var(--fw-bold);
+  margin-bottom: 0.5rem;
+  font-size: var(--fs-p1);
+  letter-spacing: -0.01em;
+  position: relative;
+  display: inline-block;
+}
+
+.hintMessage {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.hintList {
+  margin: 0.75rem 0 0.25rem;
+  padding-left: 1.5rem;
+}
+
+.hintList li {
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.hintList li::before {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: 0.5rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.6;
+}
+
+.hintAction {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-p3);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.hintAction:hover {
+  opacity: 0.8;
+}
+
+.hintAction svg {
+  margin-left: 0.25rem;
+}
+
+/* Simple variant - more subtle with less visual noise */
+.simple {
+  padding: 0.625rem 0.75rem;
+  background-color: var(--whisper);
+  border: 1px solid var(--box);
+  margin-top: 0.5rem;
+  font-size: var(--fs-p3);
+  box-shadow: none;
+}
+
+.simple::before {
+  display: none;
+}
+
+.simple .hintIconWrapper {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  color: var(--blip-action);
+  box-shadow: none;
+}
+
+.simple .hintTitle {
+  font-size: var(--fs-p2);
+  color: var(--dove-gray);
+}
+
+/* Contextual variants with clear visual differentiation */
+.info {
+  background-color: rgba(197, 217, 251, 0.2);
+  color: var(--blip-night);
+}
+
+.info::before {
+  background-color: var(--blip-blue-brand);
+}
+
+.info .hintIconWrapper {
+  background-color: var(--blip-blue-brand);
+  color: var(--alabaster);
+}
+
+.warning {
+  background-color: rgba(251, 197, 197, 0.3);
+  color: var(--pomegranate);
+}
+
+.warning::before {
+  background-color: var(--milano-red);
+}
+
+.warning .hintIconWrapper {
+  background-color: var(--milano-red);
+  color: var(--alabaster);
+}
+
+.success {
+  background-color: rgba(132, 235, 188, 0.2);
+  color: var(--jewel);
+}
+
+.success::before {
+  background-color: var(--mountain-meadow);
+}
+
+.success .hintIconWrapper {
+  background-color: var(--mountain-meadow);
+  color: var(--alabaster);
+}
+
+.whatsapp {
+  background-color: rgba(197, 217, 251, 0.25);
+  color: var(--blip-night);
+  border-left: none;
+}
+
+.whatsapp::before {
+  background-color: var(--color-surface-primary);
+}
+
+.whatsapp .hintIconWrapper {
+  background-color: var(--color-surface-primary);
+  color: var(--alabaster);
+}
+
+/* Feature-specific hint styles */
+.buttonHint {
+  background-color: var(--box);
+  border-radius: var(--radius-md);
+}
+
+.buttonHint::before {
+  background-color: var(--blip-blue-brand);
+}
+
+.textHint {
+  background-color: var(--whisper);
+  border-radius: var(--radius-md);
+}
+
+.textHint::before {
+  background-color: var(--cloud);
+}
+
+/* Detailed variant with extra emphasis */
+.detailed {
+  padding: 1.25rem;
+  background-color: var(--whisper);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+}
+
+.detailed::before {
+  width: 6px;
+}
+
+.detailed .hintIconWrapper {
+  width: 32px;
+  height: 32px;
+}
+
+.detailed .hintTitle {
+  font-size: var(--fs-h4);
+  margin-bottom: 0.75rem;
+}
+
+.detailed .hintList li {
+  margin-bottom: 0.75rem;
+}
+
+/* Animated variant for important notifications */
+.animated {
+  animation: pulseHighlight 2s ease-in-out;
+}
+
+@keyframes pulseHighlight {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(25, 104, 240, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(25, 104, 240, 0.2); }
+}
+
+/* Dismissable hints */
+.dismissable {
+  padding-right: 2.5rem;
+}
+
+.dismissButton {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+  color: currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-circle);
+}
+
+.dismissButton:hover {
+  opacity: 0.8;
+}
+
+/* Interactive list with checkboxes */
+.checkList {
+  list-style: none;
+  padding-left: 0.25rem;
+}
+
+.checkItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.checkbox {
+  margin-top: 0.25rem;
+}
+
+/* Media queries for better responsive behavior */
+@media (max-width: 600px) {
+  .hintContainer {
+    flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    border-radius: var(--radius-md);
-    font-size: var(--fs-p3);
-    margin-top: 0.5rem;
-    word-break: break-all;
   }
   
   .hintIconWrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-circle);
-    flex-shrink: 0;
-  }
-  
-  .hintContent {
-    flex: 1;
-  }
-  
-  .hintTitle {
-    font-weight: var(--fw-bold);
-    margin-bottom: 0.25rem;
-  }
-  
-  .hintMessage {
-    margin: 0;
-  }
-  
-  .hintList {
-    margin: 0.5rem 0 0;
-    padding-left: 1.25rem;
-  }
-  
-  /* Variant Styles */
-  .simple {
-    color: var(--dove-gray-2);
-    gap: 0;
-    margin: 0;
-    padding: 0.5rem;
-  }
-  
-  .simple .hintIconWrapper {
-    /* background-color: var(--blip-light); */
-    gap: 0;
-    margin: 0;
-    padding-right: 5px;
-    color: var(--blip-dark);
-    width: 18px;
-    height: 18px;
-
+    margin-bottom: 0.5rem;
   }
   
   .detailed {
-    background-color: var(--color-surface-1);
-    color: var(--text-color-default);
-    border: 1px solid var(--wave);
+    padding: 1rem;
   }
-  
-  .detailed .hintIconWrapper {
-    background-color: var(--color-surface-primary);
-    color: var(--alabaster);
-  }
-  
-  .whatsapp {
-    background-color: var(--blip-light);
-    color: var(--blip-dark);
-    border-left: 3px solid var(--color-surface-primary);
-  }
-  
-  .whatsapp .hintIconWrapper {
-    background-color: var(--blip-dark);
-    color: var(--alabaster);
-  }
-  
-  .warning {
-    background-color: var(--cinderella);
-    color: var(--milano-red);
-    border-left: 3px solid var(--color-surface-negative);
-  }
-  
-  .warning .hintIconWrapper {
-    background-color: var(--color-surface-negative);
-    color: var(--alabaster);
-  }
-  
-  .success {
-    background-color: var(--magic-mint);
-    color: var(--jewel);
-    border-left: 3px solid var(--mountain-meadow);
-  }
-  
-  .success .hintIconWrapper {
-    background-color: var(--mountain-meadow);
-    color: var(--alabaster);
-  }
+}
+
+/* Component wrapper - used for groups of related hints */
+.hintsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+/* Progress variant */
+.progress {
+  background-color: var(--whisper);
+}
+
+.progressBar {
+  height: 4px;
+  background-color: var(--blip-blue-brand);
+  border-radius: var(--radius-pill);
+  margin-top: 0.75rem;
+  transition: width var(--transition-normal);
+}
+
+/* Social proof variant */
+.socialProof {
+  background-color: rgba(197, 217, 251, 0.15);
+  border: 1px solid rgba(197, 217, 251, 0.5);
+}
+
+.socialProof .socialCount {
+  display: inline-block;
+  font-weight: var(--fw-bold);
+  color: var(--blip-blue-brand);
+}
+
+/* Emphasis for importance */
+.important .hintTitle::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  opacity: 0.3;
+  margin-top: 0.25rem;
+}
+
+/* Compact variant for dense UIs */
+.compact {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--fs-p3);
+}
+
+.compact .hintIconWrapper {
+  width: 18px;
+  height: 18px;
+}
+
+.compact .hintIconWrapper svg {
+  width: 12px;
+  height: 12px;
+}

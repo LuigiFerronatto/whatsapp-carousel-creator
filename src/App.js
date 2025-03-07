@@ -21,7 +21,7 @@ function App() {
     // Inicializar o Azure Blob Service (se necessário)
     try {
       const blobService = createAzureBlobService();
-      console.log('Azure Blob Service inicializado com sucesso');
+      // console.log('Azure Blob Service inicializado com sucesso');
     } catch (error) {
       console.error('Erro ao inicializar Azure Blob Service:', error);
     }

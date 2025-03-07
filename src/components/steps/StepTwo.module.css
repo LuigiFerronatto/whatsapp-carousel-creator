@@ -53,7 +53,7 @@
 }
 
 /* Variable Manager */
-.variableManagerContainer {
+/* .variableManagerContainer {
   padding: 1rem;
   background-color: var(--whisper);
   border-radius: var(--radius-lg);
@@ -61,14 +61,14 @@
   border: 1px solid var(--blip-light);
   box-shadow: var(--shadow-1);
   animation: fadeIn 0.3s ease;
-}
+} */
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.variableManagerHeader {
+/* .variableManagerHeader {
   margin-bottom: 1rem;
 }
 
@@ -202,8 +202,8 @@
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
   border-left: 3px solid var(--blip-light);
-}
-
+} */
+/* 
 .tipIconWrapper {
   display: flex;
   align-items: center;
@@ -231,7 +231,7 @@
 
 .variableTips li {
   margin-bottom: 0.25rem;
-}
+} */
 
 /* Form Sections */
 .basicDetailsSection, .cardEditorSection {
@@ -257,78 +257,8 @@
   margin-bottom: 1.5rem;
 }
 
-.label {
-  display: block;
-  font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
-  margin-bottom: 0.5rem;
-  color: var(--text-color-default);
-}
-
-.requiredMark {
-  color: var(--color-surface-negative);
-  margin-left: 0.25rem;
-}
-
-.input, .select, .textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--wave);
-  border-radius: var(--radius-md);
-  font-size: var(--fs-p2);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  background-color: var(--color-surface-0);
-}
-
-.input:focus, .select:focus, .textarea:focus {
-  outline: none;
-  border-color: var(--color-surface-primary);
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
-}
-
-.invalidInput {
-  border-color: var(--color-surface-negative);
-  background-color: rgba(255, 224, 224, 0.2);
-}
-
-.invalidInput:focus {
-  box-shadow: 0 0 0 3px rgba(230, 15, 15, 0.15);
-}
-
 .customSelect {
   position: relative;
-}
-
-.select {
-  appearance: none;
-  padding-right: 2rem;
-}
-
-.selectArrow {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid var(--dove-gray);
-  pointer-events: none;
-}
-
-.textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.errorMessage {
-  color: var(--color-surface-negative);
-  font-size: var(--fs-p3);
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background-color: var(--cinderella);
-  border-radius: var(--radius-md);
 }
 
 /* Card Navigation */

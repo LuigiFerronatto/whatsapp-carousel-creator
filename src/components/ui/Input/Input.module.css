@@ -200,50 +200,40 @@
     opacity: 1;
   }
   
-  /* Text formatting toolbar */
-  .toolbar {
-  }
-  
-  /* Bottom area */
-  .bottomWrapper {
+  /* Wrapper específico para o componente de hint */
+
+  .bottomContent {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-top: 0.375rem;
-    min-height: 1.5rem;
+    width: 100%;
   }
   
-  .hint, .errorMessage {
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
-  }
-  
-  .hint {
-    color: var(--dove-gray-2, #6b7280);
-  }
-  
-  .errorMessage {
-    color: var(--color-surface-negative, #e53935);
-  }
-  
+  /* Ajuste do contador para ficar à esquerda */
   .counterWrapper {
-    margin-left: auto;
-  }
-  
-  .charCounter {
-    font-size: 0.75rem;
-    color: var(--dove-gray-2, #6b7280);
+    flex-shrink: 1;
+    margin: 0.7rem 0 0 1rem; /* Espaço entre o contador e as dicas */
+    display: flex;
+    align-items: center;
+    min-width: auto;
   }
   
   /* Responsive adjustments */
   @media (max-width: 640px) {
-    .bottomWrapper {
-      flex-direction: column;
+    .bottomContent {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
     }
     
+    /* Ajuste do contador para ficar à esquerda */
     .counterWrapper {
-      margin-left: 0;
-      margin-top: 0.375rem;
+      flex-shrink: 1;
+      margin: 0.7rem 0 0 1rem; /* Espaço entre o contador e as dicas */
+      display: flex;
+      align-items: center;
+      min-width: auto;
     }
   }
 
@@ -319,6 +309,8 @@
 
 .dropdownToggle {
   position: absolute;
+  width: 99%;
+  height: 100%;
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
@@ -326,7 +318,7 @@
   border: none;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   padding: 4px;
   cursor: pointer;
   color: var(--input-icon-color, #666);

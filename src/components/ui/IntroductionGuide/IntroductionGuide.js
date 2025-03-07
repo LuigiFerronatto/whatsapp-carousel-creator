@@ -6,7 +6,7 @@ import {
   FiUpload, 
   FiEdit3, 
   FiCheckCircle, 
-  FiSend, 
+  FiTarget, 
   FiX, 
   FiChevronLeft, 
   FiChevronRight 
@@ -27,26 +27,31 @@ const IntroductionGuide = ({ onClose }) => {
   
   // Guide steps data
   const steps = [
-      {
-        "title": "Bem-vindo ao Criador de Carrosséis do WhatsApp",
-        "icon": "<FiInfo size={28} />",
-        "content": "Crie carrosséis interativos para o WhatsApp de forma simples e rápida. Siga este passo a passo para começar."
-      },
-      {
-        "title": "1. Adicione arquivos",
-        "icon": "<FiUpload size={28} />",
-        "content": "Envie imagens ou vídeos para cada card do seu carrossel. Você pode adicionar até 10 cards, cada um com mídia e botões interativos."
-      },
-      {
-        "title": "2. Personalize seu template",
-        "icon": "<FiEdit3 size={28} />",
-        "content": "Adicione textos e botões interativos a cada card. Você pode incluir até 2 botões por card, com ações como links ou respostas rápidas."
-      },
-      {
-        "title": "3. Revise e teste seu carrossel",
-        "icon": "<FiCheckCircle size={28} />",
-        "content": "Seu template foi criado com sucesso! Agora, você pode visualizar a prévia, obter o código JSON ou enviá-lo para testes."
-      }
+    {
+      "title": "Bem-vindo ao Criador de Carrosséis do WhatsApp",
+      "icon": <FiInfo size={28} />,
+      "content": "Crie carrosséis interativos para o WhatsApp de forma simples e rápida. Este guia passo a passo ajudará você a começar."
+    },
+    {
+      "title": "1. Adicione seus arquivos",
+      "icon": <FiUpload size={28} />,
+      "content": <>Envie imagens ou vídeos para cada card do seu carrossel. Você pode adicionar até <strong>10 cards</strong>, cada um com mídia e botões interativos.</>
+    },
+    {
+      "title": "2. Personalize seu carrossel",
+      "icon": <FiEdit3 size={28} />,
+      "content": <>Adicione textos e botões interativos a cada card. Inclua até <strong>2 botões por card</strong>, com ações como links ou respostas rápidas.</>
+    },
+    {
+      "title": "3. Teste e finalize",
+      "icon": <FiCheckCircle size={28} />,
+      "content": <><strong>Seu carrossel está pronto!</strong> Visualize a prévia, obtenha o código JSON ou envie para testes.</>
+    },
+    {
+      "title": "Por que criei isso?",
+      "icon": <FiTarget size={28} />,
+      "content": <>Como a <strong>Meta</strong> e a <strong>Blip</strong> ainda não liberaram uma interface de criação de carrosséis, tudo tinha que ser feito através de APIs, o que era muito trabalhoso.</>
+    }
   ];
   
   // Move to next step
@@ -99,19 +104,19 @@ const IntroductionGuide = ({ onClose }) => {
           {currentStep > 0 && (
             <button className={styles.backButton} onClick={prevStep}>
               <FiChevronLeft size={18} />
-              Back
+              Voltar
             </button>
           )}
           
           <button className={styles.nextButton} onClick={nextStep}>
             {currentStep < steps.length - 1 ? (
               <>
-                Next
+                Seguir
                 <FiChevronRight size={18} />
               </>
             ) : (
               <>
-                Get Started
+                Vamos lá!
                 <FiArrowRight size={18} />
               </>
             )}

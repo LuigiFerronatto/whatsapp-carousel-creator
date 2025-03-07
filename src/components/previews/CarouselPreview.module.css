@@ -1,30 +1,76 @@
-/* CarouselPreview.module.css com suporte a formatação WhatsApp */
+/* CarouselPreview.module.css com responsividade aprimorada */
 
-/* iPhone X mockup styling */
+/* iPhone X mockup styling - com suporte responsivo */
 .phoneMockup {
-  position: relative;
-  width: 20dvw;
-  height: 78dvh;
-  background-color: #075e54;
-  border-radius: 40px;
-  box-shadow: 0px 0px 0px 8px #1f1f1f, 0px 0px 0px 11px #191919, 0px 0px 0px 15px #111;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  margin: 2rem;
+    position: relative;
+    width: 20dvw;
+    height: 78dvh;
+    background-color: #075e54;
+    border-radius: 40px;
+    box-shadow: 0px 0px 0px 8px #1f1f1f, 0px 0px 0px 11px #191919, 0px 0px 0px 15px #111;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin: 2rem;
+  
+
+  /* Regras responsivas para diferentes tamanhos de tela */
+  @media (max-width: 1400px) {
+    width: 340px;
+    height: 640px;
+  }
+  
+  @media (max-width: 1200px) {
+    width: 320px;
+    height: 600px;
+  }
+  
+  @media (max-width: 992px) {
+    width: 300px;
+    height: 560px;
+  }
+  
+  @media (max-width: 768px) {
+    width: 280px;
+    height: 520px;
+    border-radius: 30px;
+    box-shadow: 0px 0px 0px 6px #1f1f1f, 0px 0px 0px 9px #191919, 0px 0px 0px 12px #111;
+  }
+  
+  @media (max-width: 576px) {
+    width: 260px;
+    height: 480px;
+    border-radius: 25px;
+    box-shadow: 0px 0px 0px 5px #1f1f1f, 0px 0px 0px 7px #191919, 0px 0px 0px 10px #111;
+    margin: 1rem auto;
+  }
+  
+  @media (max-width: 375px) {
+    width: 240px;
+    height: 440px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 0px 4px #1f1f1f, 0px 0px 0px 6px #191919, 0px 0px 0px 8px #111;
+    margin: 0.5rem auto;
+  }
 }
 
 .phoneMockup:after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 7px;
-  transform: translateX(-50%);
-  width: 140px;
-  height: 4px;
-  background-color: #f2f2f2;
-  border-radius: 10px;
-  z-index: 100;
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+    width: 140px;
+    height: 4px;
+    background-color: #f2f2f2;
+    border-radius: 10px;
+    z-index: 100;
+  
+  
+  @media (max-width: 576px) {
+    height: 3px;
+    bottom: 5px;
+  }
 }
 
 .phoneStatusBar {
@@ -33,11 +79,20 @@
   padding: 10px 16px 4px;
   font-size: 12px;
   color: white;
+  
+  @media (max-width: 576px) {
+    padding: 8px 12px 3px;
+    font-size: 10px;
+  }
 }
 
 .phoneIcons {
   display: flex;
   gap: 6px;
+  
+  @media (max-width: 576px) {
+    gap: 4px;
+  }
 }
 
 .whatsappHeader {
@@ -48,6 +103,16 @@
   align-items: center;
   padding: 0 16px;
   color: white;
+  
+  @media (max-width: 768px) {
+    height: 45px;
+    padding: 0 12px;
+  }
+  
+  @media (max-width: 576px) {
+    height: 40px;
+    padding: 0 10px;
+  }
 }
 
 .backButton, .moreButton {
@@ -57,6 +122,11 @@
   align-items: center;
   justify-content: center;
   color: white;
+  
+  @media (max-width: 576px) {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .contactInfo {
@@ -64,6 +134,10 @@
   align-items: center;
   gap: 8px;
   margin-right: auto;
+  
+  @media (max-width: 576px) {
+    gap: 6px;
+  }
 }
 
 .contactAvatar {
@@ -75,11 +149,29 @@
   background-size: 120%;
   background-position: center center;
   object-fit: cover;
+  
+  @media (max-width: 768px) {
+    width: 32px;
+    height: 32px;
+  }
+  
+  @media (max-width: 576px) {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .contactName {
   font-size: 16px;
   font-weight: 500;
+  
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 13px;
+  }
 }
 
 .chatWindow {
@@ -88,12 +180,21 @@
   background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
   background-repeat: no-repeat;
   background-position: center;
+  background-size: cover; /* Melhor para responsividade */
   padding: 14px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 10px;
+  }
 }
 
 .messageBodyText {
@@ -106,15 +207,28 @@
   margin-bottom: 12px;
   position: relative;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-  overflow: auto;
   max-height: 15rem;
   position: relative;
   word-wrap: break-word;
   align-self: flex-start;
   overflow-y: auto;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    font-size: 13px;
+    border-radius: 0.6rem;
+    max-height: 12rem;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 0.4rem;
+    font-size: 12px;
+    border-radius: 0.5rem;
+    max-height: 10rem;
+  }
 }
 
-/* WhatsApp text formatting styles */
+/* WhatsApp text formatting styles - mantidos os mesmos */
 .messageBodyText strong, .cardBody strong {
   font-weight: bold;
 }
@@ -141,6 +255,11 @@
   white-space: pre-wrap;
   word-break: break-all;
   background-color: #f0f0f0;
+  
+  @media (max-width: 576px) {
+    padding: 6px;
+    margin: 6px 0;
+  }
 }
 
 .messageBodyText code.inline-code, .cardBody code.inline-code {
@@ -151,18 +270,24 @@
 
 span .blockquote {
   padding: 5px 0 5px 10px;
-  border-left: 3px solid var(--dove-gray-2); /* Cor verde do WhatsApp fixa */
+  border-left: 3px solid var(--dove-gray-2);
   color: var(--dove-gray);
-  display: block; /* Importante: deve ser block, não inline */
-  width: 100%; /* Alterado de 100% para auto */
+  display: block;
+  width: 100%;
   margin: 8px 0;
   background-color: rgba(0, 0, 0, 0.05);
+  
+  @media (max-width: 576px) {
+    padding: 4px 0 4px 8px;
+    border-left: 2px solid var(--dove-gray-2);
+    margin: 6px 0;
+  }
 }
 
 .messageBodyText br, .cardBody br {
   content: "";
   display: block;
-  margin-top: 0.15em; /* Espaçamento extra para simular quebra de linha do WhatsApp */
+  margin-top: 0.15em;
 }
 
 .messageBodyText .list-item, .cardBody .list-item {
@@ -176,6 +301,10 @@ span .blockquote {
   margin-right: 8px;
   color: #128C7E;
   font-weight: bold;
+  
+  @media (max-width: 576px) {
+    margin-right: 6px;
+  }
 }
 
 .messageBodyText .variable, .cardBody .variable {
@@ -200,6 +329,13 @@ span .blockquote {
   border-top: 0 solid transparent;
   border-bottom: 12px solid transparent;
   z-index: 2;
+  
+  @media (max-width: 576px) {
+    left: -6px;
+    border-left: 10px solid white;
+    border-right: 10px solid white;
+    border-bottom: 10px solid transparent;
+  }
 }
 
 .carouselContainer {
@@ -209,6 +345,10 @@ span .blockquote {
   justify-content: center;
   position: relative;
   margin-bottom: 12px;
+  
+  @media (max-width: 576px) {
+    margin-bottom: 10px;
+  }
 }
 
 .navButton {
@@ -225,6 +365,16 @@ span .blockquote {
   color: white;
   position: absolute;
   transition: background-color 0.2s ease;
+  
+  @media (max-width: 768px) {
+    width: 22px;
+    height: 22px;
+  }
+  
+  @media (max-width: 576px) {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .navButton:hover {
@@ -266,6 +416,10 @@ span .blockquote {
   gap: 0.5rem;
   padding-left: 0;
   margin: 0;
+  
+  @media (max-width: 576px) {
+    gap: 0.4rem;
+  }
 }
 
 .card {
@@ -280,6 +434,20 @@ span .blockquote {
   border-radius: 1rem;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
   transition: transform 0.3s ease;
+  
+  @media (max-width: 768px) {
+    min-height: 200px;
+    border-radius: 0.8rem;
+  }
+  
+  @media (max-width: 576px) {
+    min-height: 180px;
+    border-radius: 0.7rem;
+  }
+  
+  @media (max-width: 375px) {
+    min-height: 160px;
+  }
 }
 
 .cardHeader {
@@ -293,6 +461,21 @@ span .blockquote {
   justify-content: center;
   overflow: hidden;
   border-radius: 0.8rem;
+  
+  @media (max-width: 768px) {
+    height: 8rem;
+    border-radius: 0.7rem;
+  }
+  
+  @media (max-width: 576px) {
+    height: 7rem;
+    border-radius: 0.6rem;
+    margin: 2px;
+  }
+  
+  @media (max-width: 375px) {
+    height: 6rem;
+  }
 }
 
 .cardImage, .cardVideo {
@@ -300,7 +483,16 @@ span .blockquote {
   height: 100%;
   object-fit: cover;
   border-radius: 0.8rem;
+  
+  @media (max-width: 768px) {
+    border-radius: 0.7rem;
+  }
+  
+  @media (max-width: 576px) {
+    border-radius: 0.6rem;
+  }
 }
+
 .videoContainer {
   position: relative;
   width: 100%;
@@ -325,6 +517,16 @@ span .blockquote {
   justify-content: center;
   cursor: pointer;
   transition: opacity 0.3s ease;
+  
+  @media (max-width: 768px) {
+    width: 36px;
+    height: 36px;
+  }
+  
+  @media (max-width: 576px) {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .playButton:hover {
@@ -339,6 +541,11 @@ span .blockquote {
   height: 100%;
   color: #999;
   background-color: #f0f0f0;
+  font-size: 14px;
+  
+  @media (max-width: 576px) {
+    font-size: 12px;
+  }
 }
 
 .cardBody {
@@ -349,12 +556,35 @@ span .blockquote {
   color: #111;
   overflow-y: auto;
   word-wrap: break-word;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  @media (max-width: 576px) {
+    padding: 8px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
 }
 
 .cardBody p {
   margin: 0;
   max-height: 8rem;
   position: relative;
+  
+  @media (max-width: 768px) {
+    max-height: 7rem;
+  }
+  
+  @media (max-width: 576px) {
+    max-height: 6rem;
+  }
+  
+  @media (max-width: 375px) {
+    max-height: 5rem;
+  }
 }
 
 .placeholderText {
@@ -367,6 +597,11 @@ span .blockquote {
   flex-direction: column;
   padding: 0.5rem;
   gap: 0.25rem;
+  
+  @media (max-width: 576px) {
+    padding: 0.4rem;
+    gap: 0.2rem;
+  }
 }
 
 .cardButton {
@@ -384,6 +619,20 @@ span .blockquote {
   text-align: center;
   transition: background-color 0.2s ease;
   padding: 8px 0;
+  
+  @media (max-width: 768px) {
+    font-size: 13px;
+    padding: 7px 0;
+    gap: 6px;
+    border-radius: 0.8rem;
+  }
+  
+  @media (max-width: 576px) {
+    font-size: 12px;
+    padding: 6px 0;
+    gap: 5px;
+    border-radius: 0.7rem;
+  }
 }
 
 .cardButton:hover {
@@ -395,8 +644,13 @@ span .blockquote {
   align-items: center;
   justify-content: center;
   color: rgb(18, 140, 126);
-  width: 1rem; /* Tamanho fixo para todos */
+  width: 1rem;
   height: 1rem;
+  
+  @media (max-width: 576px) {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
 }
 
 .buttonIcon svg {
@@ -415,6 +669,11 @@ span .blockquote {
   justify-content: center;
   gap: 6px;
   margin-top: 8px;
+  
+  @media (max-width: 576px) {
+    gap: 5px;
+    margin-top: 6px;
+  }
 }
 
 .dot {
@@ -424,6 +683,11 @@ span .blockquote {
   background-color: rgba(0, 0, 0, 0.2);
   transition: background-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
+  
+  @media (max-width: 576px) {
+    width: 6px;
+    height: 6px;
+  }
 }
 
 .dot:hover {
@@ -447,8 +711,66 @@ span .blockquote {
   transform: translateX(-50%);
   opacity: 0;
   transition: opacity 0.3s ease;
+  
+  @media (max-width: 576px) {
+    width: 30px;
+    height: 3px;
+    bottom: 15px;
+  }
 }
 
 .cardsContainer:active .grabIndicator {
   opacity: 1;
+}
+
+/* Novas classes para melhorar a responsividade */
+.mockupContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+  
+  @media (max-width: 576px) {
+    padding: 0.5rem;
+  }
+}
+
+/* Classes para controle de escala em diferentes tamanhos de tela */
+.scale-container {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Classe auxiliar para garantir melhor visualização em telas muito pequenas */
+@media (max-height: 700px) {
+  .phoneMockup {
+    transform: scale(0.85);
+    height: 580px;
+  }
+}
+
+@media (max-height: 600px) {
+  .phoneMockup {
+    transform: scale(0.75);
+    height: 560px;
+  }
+}
+
+/* Ajustes para orientação paisagem em dispositivos móveis */
+@media (max-width: 896px) and (orientation: landscape) {
+  .phoneMockup {
+    width: 260px;
+    height: 480px;
+    transform: scale(0.8);
+    margin: 0.5rem auto;
+  }
+  
+  .cardHeader {
+    height: 6rem;
+  }
+  
+  .card {
+    min-height: 160px;
+  }
 }

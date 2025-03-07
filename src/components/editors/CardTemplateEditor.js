@@ -11,31 +11,12 @@ import {
   FiCheck, 
   FiMessageSquare,
   FiPlus,
-  FiInfo,
-  FiBold,
-  FiItalic,
-  FiList,
-  FiCode,
-  FiHash,
-  FiCornerUpRight
+  FiInfo
 } from 'react-icons/fi';
 import styles from './CardTemplateEditor.module.css';
 import Input from '../ui/Input/Input';
+import Hints from '../ui/Hints/Hints'; // Import the Hints component
 
-/**
- * Enhanced Card Template Editor Component
- * 
- * @param {Object} props Component properties
- * @param {string} props.id Unique ID for the card
- * @param {number} props.index Index of the card in the array
- * @param {Object} props.card Card data
- * @param {Array} props.cards Array of all cards
- * @param {Function} props.updateCard Function to update card data
- * @param {boolean} props.showHints Whether to show helpful hints
- * @param {string} props.validationMessage Validation error message if any
- * @param {number} props.numCards Number of active cards
- * @returns {JSX.Element} Card Template Editor component
- */
 const CardTemplateEditor = ({ 
   id, 
   index, 
@@ -44,17 +25,15 @@ const CardTemplateEditor = ({
   updateCard,
   showHints = true,
   validationMessage,
-  numCards = 2 // Por padrão, assumimos 2 cards
+  numCards = 2
 }) => {
-  // Local state
   const [isExpanded, setIsExpanded] = useState(true);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [activeSection, setActiveSection] = useState('text');
   const [changedFields, setChangedFields] = useState([]);
   const textareaRef = useRef(null);
-  
-  // Clear changed fields highlighting after a delay
+
   useEffect(() => {
     if (changedFields.length > 0) {
       const timer = setTimeout(() => {
@@ -64,12 +43,10 @@ const CardTemplateEditor = ({
       return () => clearTimeout(timer);
     }
   }, [changedFields]);
-  
-  // Basic text validations with visual feedback
+
   const maxTextLength = 160;
   const isTextValid = !!card.bodyText;
-  
-  // Update card text with change tracking
+
   const handleBodyTextChange = useCallback((e) => {
     updateCard(index, 'bodyText', e.target.value);
     if (!changedFields.includes('bodyText')) {
@@ -77,7 +54,6 @@ const CardTemplateEditor = ({
     }
   }, [updateCard, index, changedFields]);
 
-  // Update buttons data
   const updateButtons = useCallback((newButtons) => {
     updateCard(index, 'buttons', newButtons);
     if (!changedFields.includes('buttons')) {
@@ -85,62 +61,39 @@ const CardTemplateEditor = ({
     }
   }, [updateCard, index, changedFields]);
 
-  // Sincroniza os tipos de botões entre todos os cards
   const syncButtonTypes = useCallback((buttonIndex, newType) => {
-    // Só sincroniza se este for o primeiro card
     if (index === 0 && numCards > 1) {
-      // Atualizar o tipo de botão em todos os outros cards
       for (let cardIndex = 1; cardIndex < numCards; cardIndex++) {
         const otherCard = cards[cardIndex];
-        
-        // Verificar se o card tem um botão neste índice
         if (otherCard.buttons.length > buttonIndex) {
-          // Obter os botões atuais do card
           const cardButtons = [...otherCard.buttons];
-          
-          // Preservar campos específicos do botão existente, só mudando o tipo
           const existingButton = cardButtons[buttonIndex];
           cardButtons[buttonIndex] = {
             ...existingButton,
             type: newType,
-            // Adicionar campos específicos se necessário
             ...(newType === 'URL' && !existingButton.url ? { url: '' } : {}),
             ...(newType === 'PHONE_NUMBER' && !existingButton.phoneNumber ? { phoneNumber: '' } : {}),
             ...(newType === 'QUICK_REPLY' && !existingButton.payload ? { payload: '' } : {})
           };
-          
-          // Atualizar o card com os botões modificados
           updateCard(cardIndex, 'buttons', cardButtons);
         }
       }
     }
   }, [index, cards, numCards, updateCard]);
 
-  // Add a new button to the card and sync with other cards
   const addButton = useCallback(() => {
     if (card.buttons.length < 2) {
-      // Primeiro obtém o tipo de botão (use Quick Reply como padrão)
       const buttonType = card.buttons[0]?.type || 'QUICK_REPLY';
-      
-      // Adiciona o botão a este card
       const newButtons = [...card.buttons, { type: buttonType, text: '' }];
       updateButtons(newButtons);
-      
-      // Se este for o primeiro card, sincroniza com os demais
       if (index === 0 && numCards > 1) {
         for (let cardIndex = 1; cardIndex < numCards; cardIndex++) {
-          // Pegar os botões atuais do card
           const cardButtons = [...cards[cardIndex].buttons];
-          // Adicionar o novo botão com o mesmo tipo
           cardButtons.push({ type: buttonType, text: '' });
-          // Atualizar o card
           updateCard(cardIndex, 'buttons', cardButtons);
         }
-      }
-      // Se não for o primeiro card, avisa o usuário
-      else if (index > 0) {
+      } else if (index > 0) {
         alert("Para manter a consistência do WhatsApp, adicionaremos este botão em todos os cards.");
-        // Adicionar em todos os cards (incluindo o Card 1)
         for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
           if (cardIndex !== index) {
             const cardButtons = [...cards[cardIndex].buttons];
@@ -152,13 +105,9 @@ const CardTemplateEditor = ({
     }
   }, [card.buttons, updateButtons, cards, updateCard, index, numCards]);
 
-  // Remove a button from the card and sync with other cards
   const removeButton = useCallback((buttonIndex) => {
-    // Remove o botão deste card
     const newButtons = card.buttons.filter((_, i) => i !== buttonIndex);
     updateButtons(newButtons);
-    
-    // Se tiver mais de um card, sincroniza a remoção com os outros
     if (numCards > 1) {
       for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
         if (cardIndex !== index) {
@@ -169,19 +118,15 @@ const CardTemplateEditor = ({
     }
   }, [card.buttons, updateButtons, cards, updateCard, index, numCards]);
 
-  // Update a specific field of a button
   const updateButtonField = useCallback((buttonIndex, field, value) => {
     const newButtons = [...card.buttons];
     newButtons[buttonIndex] = { ...newButtons[buttonIndex], [field]: value };
     updateButtons(newButtons);
-    
-    // Se o campo for "type" e este for o primeiro card, sincroniza com os outros
     if (field === 'type' && index === 0 && numCards > 1) {
       syncButtonTypes(buttonIndex, value);
     }
   }, [card.buttons, updateButtons, syncButtonTypes, index, numCards]);
 
-  // Generate color based on card index for visual distinction
   const getCardColor = useCallback(() => {
     const colors = [
       'var(--blip-action)',
@@ -193,7 +138,6 @@ const CardTemplateEditor = ({
     return colors[index % colors.length];
   }, [index]);
 
-  // Copy file handle to clipboard
   const copyFileHandle = useCallback(() => {
     if (card.fileHandle) {
       navigator.clipboard.writeText(card.fileHandle)
@@ -207,55 +151,49 @@ const CardTemplateEditor = ({
     }
   }, [card.fileHandle]);
 
-  // Render card text input panel
   const renderTextPanel = () => (
     <div className={styles.cardFieldSection}>
-
       <Input
-id={`card-${index}-text`}
-name="cardText"
-label="Texto do card"
-ref={textareaRef}
-type="textarea"
-className={`
-  ${!isTextValid && card.bodyText !== '' ? styles.invalidInput : ''} 
-  ${changedFields.includes('bodyText') ? styles.changedField : ''}
-`}
-rows={3}
-value={card.bodyText || ''}
-onChange={handleBodyTextChange}
-placeholder="Descreva o produto ou serviço de forma clara e objetiva."
-maxLength={maxTextLength}
-allowFormatting={true}
-textFormatting={true} // Habilita a barra de formatação
-textFormattingCompact={true} // Opcional: tamanho normal
-textFormattingDarkMode={false} // Opcional: tema claro
-showCharCounter
-required
-hint={showHints && (
-  <div className={styles.textHint}>
-    <div className={styles.hintIconWrapper}>
-      <FiInfo className={styles.hintIcon} />
-    </div>
-    <div>
-      <p><strong>Dicas para um bom texto:</strong></p>
-      <ul>
-        <li>Mantenha entre <strong>60-120 caracteres</strong> para melhor legibilidade.</li>
-        <li>Foque nos <strong>principais benefícios</strong> ou diferenciais.</li>
-        <li>Evite repetir informações que já estão na imagem.</li>
-        <li>Use frases diretas e insira <strong>chamadas para ação</strong>.</li>
-        <li>Use formatação para destaque: <strong>*negrito*</strong>, <em>_itálico_</em>, <del>~tachado~</del>, `código`.</li>
-        <li>Para listas: <strong>*</strong> para tópicos, <strong>1.</strong> para numeração.</li>
-        <li>Para citações, comece a linha com <strong>{'>'}</strong>.</li>
-      </ul>
-    </div>
-  </div>
-)}
-/>    
+        id={`card-${index}-text`}
+        name="cardText"
+        label="Texto do card"
+        ref={textareaRef}
+        type="textarea"
+        className={`
+          ${!isTextValid && card.bodyText !== '' ? styles.invalidInput : ''} 
+          ${changedFields.includes('bodyText') ? styles.changedField : ''}
+        `}
+        rows={4}
+        value={card.bodyText || ''}
+        onChange={handleBodyTextChange}
+        placeholder="Descreva o produto ou serviço de forma clara e objetiva."
+        maxLength={maxTextLength}
+        allowFormatting={true}
+        textFormatting={true}
+        textFormattingCompact={true}
+        textFormattingDarkMode={false}
+        showCharCounter
+        characterCounterVariant="default"
+        required
+        hintMessage={showHints}
+        hintVariant="simple"
+        hintTitle="Dicas para um bom texto:"
+        hintList={[
+          "Mantenha entre 60-120 caracteres para melhor legibilidade.",
+          "Foque nos principais benefícios ou diferenciais.",
+          "Evite repetir informações que já estão na imagem.",
+          "Use frases diretas e insira chamadas para ação.",
+          "Use formatação para destaque: *negrito*, _itálico_, ~tachado~, `código`.",
+          "Para listas: * para tópicos, 1. para numeração.",
+          "Para citações, comece a linha com >."
+        ]}
+        validateOnChange={true}
+        validateOnBlur={true}
+        error={!isTextValid && card.bodyText !== '' ? "O texto não atende aos requisitos mínimos." : ""}
+      />
     </div>
   );
 
-  // Render buttons panel
   const renderButtonsPanel = () => (
     <div className={styles.buttonsSection}>
       {index === 0 && numCards > 1 && (
@@ -263,7 +201,7 @@ hint={showHints && (
           <FiInfo size={16} className={styles.infoIcon} />
           <div>
             <strong>Requisito do WhatsApp:</strong> Todos os cards devem ter o mesmo número e tipos de botões.
-            Alterações feitas no Card 1 serão sincronizadas automaticamente com os outros cards.
+            As alterações feitas no Card 1 serão sincronizadas automaticamente com os outros cards.
           </div>
         </div>
       )}
@@ -297,7 +235,7 @@ hint={showHints && (
       ) : (
         <div className={styles.noButtonsMessage}>
           <FiAlertCircle size={18} />
-          No buttons added. Buttons are required for each card.
+          Nenhum botão adicionado. Cada card deve ter pelo menos um botão.
         </div>
       )}
       
@@ -307,32 +245,27 @@ hint={showHints && (
           className={styles.addButton}
         >
           <FiPlus size={16} />
-          {numCards > 1 ? "Add Button to All Cards" : "Add Button"}
+          {numCards > 1 ? "Adicionar Botão a Todos os Cards" : "Adicionar Botão"}
         </button>
       )}
       
       {showHints && (
-        <div className={styles.buttonHint}>
-          <div className={styles.hintIconWrapper}>
-            <FiInfo className={styles.hintIcon} />
-          </div>
-          <div>
-            <p><strong>Button best practices:</strong></p>
-            <ul>
-              <li>Use clear, action-oriented text (e.g., "Buy Now", "Learn More")</li>
-              <li>Keep button text under 20 characters</li>
-              <li>Each card can have up to 2 buttons</li>
-              <li>For URLs, always include the https:// prefix</li>
-              <li>For phone numbers, use international format (+XXXXXXXXXXX)</li>
-              <li><strong>WhatsApp requirement:</strong> All cards must have the same button types in the same order</li>
-            </ul>
-          </div>
-        </div>
+        <Hints
+          variant="simple"
+          title="Melhores Práticas para Botões:"
+          list={[
+            "Use um texto claro e orientado para ação (ex.: 'Compre Agora', 'Saiba Mais')",
+            "Mantenha o texto do botão com menos de 20 caracteres",
+            "Cada card pode ter até 2 botões",
+            "Para URLs, sempre inclua o prefixo https://",
+            "Para números de telefone, use o formato internacional (+XXXXXXXXXXX)",
+            "Requisito do WhatsApp: Todos os cards devem ter os mesmos tipos de botões na mesma ordem"
+          ]}
+        />
       )}
     </div>
   );
 
-  // Render collapsed card content for minimized view
   const renderCollapsedContent = () => (
     <div className={styles.collapsedPreview}>
       <div className={styles.collapsedField}>
@@ -401,7 +334,7 @@ hint={showHints && (
                   onClick={() => setShowImagePreview(!showImagePreview)}
                 >
                   {showImagePreview ? <FiEyeOff size={14} /> : <FiEye size={14} />}
-                  {showImagePreview ? 'Hide image' : 'View image'}
+                  {showImagePreview ? 'Esconder imagem' : 'Mostrar imagem'}
                 </button>
               )}
             </div>
@@ -418,7 +351,7 @@ hint={showHints && (
           <button 
             className={`${styles.expandButton} ${isExpanded ? styles.expanded : ''}`}
             onClick={() => setIsExpanded(!isExpanded)}
-            aria-label={isExpanded ? "Collapse card" : "Expand card"}
+            aria-label={isExpanded ? "Minimizar" : "Expandir"}
           >
             {isExpanded ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
           </button>

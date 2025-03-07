@@ -7,26 +7,27 @@ import StepThree from './steps/StepThree';
 import StepFour from './steps/StepFour';
 import ProgressHeader from './ui/ProgressHeader/ProgressHeader';
 import IntroductionGuide from './ui/IntroductionGuide/IntroductionGuide';
-import { FiArrowUp, FiInfo } from 'react-icons/fi';
+import { FiArrowUp } from 'react-icons/fi';
 import styles from './WhatsAppCarouselCreator.module.css';
+import Footer from './ui/Footer/Footer';
 
 /**
- * Main component for the WhatsApp Carousel Creator application
- * Enhanced with improved UI/UX based on the design system
+ * Componente principal para o aplicativo Criador de Carrossel do WhatsApp
+ * Melhorado com UI/UX aprimorada com base no sistema de design
  * 
- * @returns {JSX.Element} WhatsAppCarouselCreator component
+ * @returns {JSX.Element} Componente WhatsAppCarouselCreator
  */
 const WhatsAppCarouselCreator = () => {
-  // Get template context
+  // Obter contexto do template
   const templateContext = useWhatsAppTemplateContext();
   const { step, setStep, isStepValid, resetForm } = templateContext;
   
-  // Local state
+  // Estado local
   const [showGuide, setShowGuide] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showTips, setShowTips] = useState(true);
 
-  // Check if introduction guide has been shown before
+  // Verificar se o guia de introdução foi mostrado antes
   useEffect(() => {
     const hasSeenGuide = localStorage.getItem('introductionGuideShown');
     if (!hasSeenGuide) {
@@ -34,7 +35,7 @@ const WhatsAppCarouselCreator = () => {
     }
   }, []);
 
-  // Monitor scroll position to show/hide scroll-to-top button
+  // Monitorar posição de rolagem para mostrar/ocultar botão de rolar para o topo
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
@@ -44,7 +45,7 @@ const WhatsAppCarouselCreator = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scroll to top function
+  // Função para rolar para o topo
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -52,19 +53,19 @@ const WhatsAppCarouselCreator = () => {
     });
   };
 
-  // Toggle tips visibility
+  // Alternar visibilidade das dicas
   const toggleTips = () => {
     setShowTips(!showTips);
     localStorage.setItem('showTips', String(!showTips));
   };
 
-  // Mark guide as shown
+  // Marcar guia como mostrado
   const handleGuideClose = () => {
     setShowGuide(false);
     localStorage.setItem('introductionGuideShown', 'true');
   };
 
-  // Render current step based on state
+  // Renderizar etapa atual com base no estado
   const renderCurrentStep = () => {
     switch(step) {
       case 1:
@@ -83,11 +84,10 @@ const WhatsAppCarouselCreator = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>WhatsApp Carousel Creator</h1>
+        <h1 className={styles.title}>Criador de Carrossel do WhatsApp</h1>
         <p className={styles.subtitle}>
-          Create interactive carousel templates for your Router in Blip through WhatsApp Business API messages
+          Crie templates interativos de carrossel para seu Router no Blip através de mensagens da API do WhatsApp Business
         </p>
-
 
         <ProgressHeader 
           step={step} 
@@ -103,7 +103,7 @@ const WhatsAppCarouselCreator = () => {
       <button 
         className={`${styles.scrollTopButton} ${showScrollTop ? styles.showScrollTop : ''}`}
         onClick={scrollToTop}
-        aria-label="Back to top"
+        aria-label="Voltar ao topo"
       >
         <FiArrowUp size={20} />
       </button>
@@ -112,13 +112,7 @@ const WhatsAppCarouselCreator = () => {
         <IntroductionGuide onClose={handleGuideClose} />
       )}
 
-
-<footer className={styles.footer}>
-        <p>WhatsApp Carousel Creator © {new Date().getFullYear()}</p>
-        <p>Developed By: Luigi Ferronatto</p>
-      </footer>
-
-
+      <Footer />
     </div>
   );
 };

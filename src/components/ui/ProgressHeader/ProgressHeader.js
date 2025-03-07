@@ -17,21 +17,21 @@ const ProgressHeader = ({ step, setStep, isStepValid }) => {
   const steps = [
     {
       id: 1,
-      name: 'File Configuration',
+      name: 'Enviar Arquivos',
       icon: <FiUpload />,
-      description: 'Upload files and configure card media'
+      description: 'Faça o upload dos arquivos e configure a mídia do cartão.'
     },
     {
       id: 2,
-      name: 'Template Creation',
+      name: 'Personalizar Template',
       icon: <FiEdit3 />,
-      description: 'Configure template text and buttons'
+      description: 'Configure o texto e os botões do modelo e envie para aprovação.'
     },
     {
       id: 3,
-      name: 'Template Review',
+      name: 'Teste o Template',
       icon: <FiCheckCircle />,
-      description: 'Review and generate template JSON'
+      description: 'Colete os códigos JSON e envie o carrossel para seu Whatsapp.'
     }
   ];
 

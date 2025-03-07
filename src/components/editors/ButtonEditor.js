@@ -3,24 +3,25 @@ import React, { useState, useEffect } from 'react';
 import { FiLink, FiPhone, FiMessageSquare, FiInfo, FiAlertCircle, FiCheckCircle, FiExternalLink, FiLock, FiUnlock } from 'react-icons/fi';
 import styles from './ButtonEditor.module.css';
 import Input from '../ui/Input/Input';
+import Button from '../ui/Button/Button';
 
 /**
- * ButtonEditor - Enhanced component for editing WhatsApp template buttons
- * Now with button type synchronization across all cards
+ * ButtonEditor - Componente aprimorado para editar botões de templates do WhatsApp
+ * Agora com sincronização de tipo de botão em todos os cards
  * 
- * @param {Object} props Component properties
- * @param {number} props.index Card index
- * @param {number} props.buttonIndex Button index within the card
- * @param {Object} props.button Button data
- * @param {Function} props.updateButtonField Function to update button fields
- * @param {Function} props.removeButton Function to remove the button
- * @param {number} props.totalButtons Total number of buttons in the card
- * @param {boolean} props.showHints Whether to show helpful hints
- * @param {string} props.validationMessage Validation error message if any
- * @param {Array} props.cards All carousel cards
- * @param {number} props.numCards Number of active cards
- * @param {Function} props.syncButtonTypes Function to sync button types across all cards
- * @returns {JSX.Element} ButtonEditor component
+ * @param {Object} props Propriedades do componente
+ * @param {number} props.index Índice do card
+ * @param {number} props.buttonIndex Índice do botão dentro do card
+ * @param {Object} props.button Dados do botão
+ * @param {Function} props.updateButtonField Função para atualizar campos do botão
+ * @param {Function} props.removeButton Função para remover o botão
+ * @param {number} props.totalButtons Total de botões no card
+ * @param {boolean} props.showHints Se deve mostrar dicas úteis
+ * @param {string} props.validationMessage Mensagem de erro de validação, se houver
+ * @param {Array} props.cards Todos os cards do carrossel
+ * @param {number} props.numCards Número de cards ativos
+ * @param {Function} props.syncButtonTypes Função para sincronizar tipos de botões em todos os cards
+ * @returns {JSX.Element} Componente ButtonEditor
  */
 const ButtonEditor = ({ 
   index, 
@@ -35,43 +36,23 @@ const ButtonEditor = ({
   numCards,
   syncButtonTypes
 }) => {
-  // State for UI interactions
-  const [showUrlHelp, setShowUrlHelp] = useState(false);
-  const [showPhoneHelp, setShowPhoneHelp] = useState(false);
+  // Estado para interações de UI
   const [urlTested, setUrlTested] = useState(false);
   const [phoneTested, setPhoneTested] = useState(false);
   const [isTypeLocked, setIsTypeLocked] = useState(true);
   const [showSyncWarning, setShowSyncWarning] = useState(false);
   
-  // Effect to detect if this is the first card with this button index
-  // If not, we lock the button type selection (it should follow the first card)
+  // Efeito para detectar se este é o primeiro card com este índice de botão
+  // Se não for, bloqueamos a seleção do tipo de botão (deve seguir o primeiro card)
   useEffect(() => {
-    // Only lock if there are multiple cards and this isn't the first card
+    // Só bloqueia se houver múltiplos cards e este não for o primeiro card
     const shouldLock = numCards > 1 && index > 0;
     setIsTypeLocked(shouldLock);
   }, [numCards, index]);
   
-  // Field validation
-  const isTextValid = !!button.text;
-  const isUrlValid = button.type !== 'URL' || !!button.url;
-  const isPhoneValid = button.type !== 'PHONE_NUMBER' || !!button.phoneNumber;
-    
-  // Phone number formatting helper
-  const formatPhoneNumber = (value) => {
-    // Remove todos os caracteres que não sejam números ou "+"
-    let cleaned = value.replace(/[^\d+]/g, '');
+
   
-    // Garante que "+" aparece apenas no começo
-    if (cleaned.startsWith('+')) {
-      cleaned = '+' + cleaned.replace(/\+/g, '');
-    } else {
-      cleaned = cleaned.replace(/\+/g, ''); // Remove "+" extras
-    }
-  
-    return cleaned;
-  };
-  
-  // URL validation check with proper protocol
+  // Verificação de URL válida com protocolo adequado
   const isValidUrl = (url) => {
     try {
       new URL(url);
@@ -81,7 +62,7 @@ const ButtonEditor = ({
     }
   };
 
-  // Test URL link with visual feedback
+  // Testar link de URL com feedback visual
   const testUrl = () => {
     if (button.url && isValidUrl(button.url)) {
       window.open(button.url, '_blank', 'noopener,noreferrer');
@@ -90,23 +71,7 @@ const ButtonEditor = ({
     }
   };
 
-  // Format phone number for display
-  const formatPhoneDisplay = (phone) => {
-    if (!phone) return '';
-    
-    const cleaned = phone.replace(/\\D/g, '');
-    if (cleaned.length < 7) return phone;
-    
-    // Simple formatting for readability
-    const countryCode = cleaned.substring(0, 2);
-    const areaCode = cleaned.substring(2, 4);
-    const firstPart = cleaned.substring(4, 9);
-    const secondPart = cleaned.substring(9);
-    
-    return `+${countryCode} (${areaCode}) ${firstPart}-${secondPart}`;
-  };
-
-  // Test phone number click action
+  // Testar ação de clique no número de telefone
   const testPhoneNumber = () => {
     if (button.phoneNumber) {
       window.location.href = `tel:${button.phoneNumber}`;
@@ -115,34 +80,34 @@ const ButtonEditor = ({
     }
   };
   
-  // Handle button type change with synchronization
+  // Lidar com mudança de tipo de botão com sincronização
   const handleButtonTypeChange = (newType) => {
     if (isTypeLocked && !window.confirm("Alterar o tipo deste botão irá sincronizar todos os botões nesta posição em todos os cards. Deseja continuar?")) {
       return;
     }
     
-    // If first card and multiple cards exist, show warning about syncing
+    // Se for o primeiro card e houver múltiplos cards, mostrar aviso sobre sincronização
     if (index === 0 && numCards > 1 && !showSyncWarning) {
       setShowSyncWarning(true);
       setTimeout(() => setShowSyncWarning(false), 5000);
     }
     
-    // Check if we need to sync across all cards
+    // Verificar se precisamos sincronizar em todos os cards
     if (numCards > 1) {
-      // First update this button
+      // Primeiro atualiza este botão
       updateButtonField(buttonIndex, 'type', newType);
       
-      // Then sync with all other cards
+      // Depois sincroniza com todos os outros cards
       if (syncButtonTypes) {
         syncButtonTypes(buttonIndex, newType);
       }
     } else {
-      // Just update this button
+      // Apenas atualiza este botão
       updateButtonField(buttonIndex, 'type', newType);
     }
   };
   
-  // Handle button removal with synchronization
+  // Lidar com remoção de botão com sincronização
   const handleRemoveButton = () => {
     if (numCards > 1 && !window.confirm("Remover este botão irá remover o botão correspondente em todos os cards. Deseja continuar?")) {
       return;
@@ -150,8 +115,8 @@ const ButtonEditor = ({
     
     removeButton(buttonIndex);
   };
-  
-  // Button type configuration with icons and descriptions
+
+  // Configuração de tipos de botão com ícones e descrições
   const buttonTypes = [
     { 
       value: 'URL', 
@@ -172,21 +137,20 @@ const ButtonEditor = ({
       description: 'Inicia uma chamada telefônica instantaneamente.'
     }
   ];
-  
 
   return (
     <div className={`${styles.buttonContainer} ${validationMessage ? styles.invalidContainer : ''}`}>
-      {/* WhatsApp Sync Notice */}
+      {/* Aviso de Sincronização do WhatsApp */}
       {showSyncWarning && index === 0 && numCards > 1 && (
         <div className={styles.syncWarning}>
           <FiInfo size={16} />
           <span>
-          O WhatsApp exige que todos os cards tenham os mesmos botões na mesma posição. Se alterar este botão, todas as outras versões serão ajustadas automaticamente.
+            O WhatsApp exige que todos os cards tenham os mesmos botões na mesma posição. Se alterar este botão, todas as outras versões serão ajustadas automaticamente.
           </span>
         </div>
       )}
     
-      {/* Button Type Selector */}
+      {/* Seletor de Tipo de Botão */}
       <div className={styles.buttonTypeSelector}>
         {buttonTypes.map(type => (
           <div 
@@ -211,205 +175,164 @@ const ButtonEditor = ({
         ))}
       </div>
       
-      {/* WhatsApp Requirement Notice */}
-      {isTypeLocked && index > 0 && showHints && (
-        <div className={styles.syncNotice}>
-          <FiInfo size={14} />
-          <span>
-          O tipo deste botão segue a configuração do primeiro card, conforme as regras do WhatsApp.
-          </span>
-        </div>
-      )}
-      
-      {/* Type Description */}
+      {/* Descrição do Tipo */}
       {showHints && (
         <div className={styles.typeDescription}>
           {buttonTypes.find(t => t.value === button.type)?.description}
         </div>
       )}
-      
 
-         <Input
-          id="buttonText"
-          name="ButtonText"
-          label="Texto do Botão"
-          value={button.text || ''}
-          onChange={(e) => updateButtonField(buttonIndex, 'text', e.target.value)}
-          placeholder="Exemplos: Saiba mais, Comprar agora, etc."
-          required
-          minLength={1}
-          maxLength={25}
-          error={false}
-          hint= {showHints ? "Texto exibido no botão. Máximo de 25 caracteres." : ""}
-          useHintComponent={true}
-          allowFormatting={false}
-          textFormatting={false} // Habilita a barra de formatação
-          textFormattingCompact={false} // Opcional: tamanho normal
-          textFormattingDarkMode={false} // Opcional: tema claro
-          showCharCounter
-        />
+      {/* Aviso de Requisito do WhatsApp */}
+      {isTypeLocked && index > 0 && showHints && (
+        <div className={styles.syncNotice}>
+          <FiInfo size={14} />
+          <span>
+            O tipo deste botão segue a configuração do primeiro card, conforme as regras do WhatsApp.
+          </span>
+        </div>
+      )}
+
+      <Input
+        id="buttonText"
+        name="ButtonText"
+        label="Texto do Botão"
+        value={button.text || ''}
+        onChange={(e) => updateButtonField(buttonIndex, 'text', e.target.value)}
+        placeholder="Exemplos: Saiba mais, Comprar agora, etc."
+        required
+        minLength={1}
+        maxLength={25}
+        error={false}
+        hintMessage={showHints ? "Texto exibido no botão. Máximo de 25 caracteres." : ""}
+        allowFormatting={false}
+        textFormatting={false} // Habilita a barra de formatação
+        textFormattingCompact={false} // Opcional: tamanho normal
+        textFormattingDarkMode={false} // Opcional: tema claro
+        showCharCounter
+        hintIsCompact={true}
+      />
       
       {button.type === 'URL' && (
-  <div className={styles.formGroup}>
-    <div className={styles.labelWithHelp}>
-      <label className={styles.label}>
-        Destination URL
-        <span className={styles.requiredMark}>*</span>
-      </label>
-      <button 
-        type="button" 
-        className={styles.helpButton}
-        onClick={() => setShowUrlHelp(!showUrlHelp)}
-      >
-        {showUrlHelp ? "Hide Help" : "Show Help"}
-      </button>
-    </div>
-    
-    <Input
-      id={`button-${buttonIndex}-url`}
-      name={`button-${buttonIndex}-url`}
-      type="url"
-      value={button.url || ''}
-      onChange={(e) => updateButtonField(buttonIndex, 'url', e.target.value)}
-      placeholder="https://example.com/page"
-      required
-      error={button.url && !isValidUrl(button.url) ? "Invalid URL. Make sure to include 'https://' or 'http://'" : ""}
-      hint={showUrlHelp ? "Use a secure URL starting with https:// for better security and user experience." : ""}
-      variant="url"
-      validateOnChange
-      rightElement={button.url && (
-        <button 
-          type="button"
-          className={styles.testActionButton}
-          onClick={testUrl}
-          disabled={!isValidUrl(button.url)}
-          title={isValidUrl(button.url) ? "Test this URL" : "Invalid URL format"}
-        >
-          {urlTested ? (
-            <>
-              <FiCheckCircle size={14} />
-              <span>Opened</span>
-            </>
-          ) : (
-            <>
-              <FiExternalLink size={14} />
-              <span>Test</span>
-            </>
+        <Input
+          id={`button-${buttonIndex}-url`}
+          name={`button-${buttonIndex}-url`}
+          type="url"
+          label="Link de Destino"
+          value={button.url || ''}
+          onChange={(e) => updateButtonField(buttonIndex, 'url', e.target.value)}
+          placeholder="https://example.com/page"
+          required
+          error={button.url && !isValidUrl(button.url) ? "URL inválida. Certifique-se de incluir 'https://' ou 'http://'" : ""}
+          variant="url"
+          validateOnChange
+          rightElement={button.url && (
+            <Button 
+              type="button"
+              className={styles.testActionButton}
+              onClick={testUrl}
+              disabled={!isValidUrl(button.url)}
+              title={isValidUrl(button.url) ? "Testar este URL" : "Formato de URL inválido"}
+            >
+              {urlTested ? (
+                <>
+                  <FiCheckCircle size={14} />
+                  <span>Aberto</span>
+                </>
+              ) : (
+                <>
+                  <FiExternalLink size={14} />
+                  <span>Testar</span>
+                </>
+              )}
+            </Button>
           )}
-        </button>
+          icon={button.url && !isValidUrl(button.url) ? <FiAlertCircle size={14}/> : null}
+          hintMessage={showHints}
+          hintTitle="Como criar um bom link:"
+          hintList={[
+            "Sempre use HTTPS quando possível (mais seguro)",
+            "A URL completa deve incluir 'https://' no início",
+            "Evite encurtadores de URL não confiáveis",
+            "Teste o link antes de salvar",
+            <React.Fragment>
+              <strong>Exemplos válidos:</strong><br />
+              <code>https://www.example.com</code><br />
+              <code>https://example.com/product?id=123</code>
+            </React.Fragment>
+          ]}
+          hintVariant="simple"
+          hintIsCompact={true}
+        />
       )}
-      icon={button.url && !isValidUrl(button.url) ? <FiAlertCircle size={14} /> : null}
-      iconPosition="left"
-      useHintsComponent={showUrlHelp}
-      hintTitle="How to create a good link:"
-      hintList={[
-        "Always use HTTPS when possible (more secure)",
-        "Full URL must include 'https://' at the beginning",
-        "Avoid unreliable URL shorteners",
-        "Test the link before saving",
-        <React.Fragment>
-          <strong>Valid examples:</strong><br />
-          <code>https://www.example.com</code><br />
-          <code>https://example.com/product?id=123</code>
-        </React.Fragment>
-      ]}
-      hintVariant="detailed"
-    />
-  
-  
-  </div>
-)}
       
-      {/* Quick Reply Payload Field */}
+      {/* Campo de Payload de Resposta Rápida */}
       {button.type === 'QUICK_REPLY' && (
         <div className={styles.formGroup}>
-        
           <Input
             type="text"
             name="OptinalPayload"
             label="Payload"
-            hint="The payload is the text that will be sent to your system when the user clicks the button."
-            useHintComponent={true}
+            hintMessage="O payload é o texto que será enviado ao seu sistema quando o usuário clicar no botão."
             hintVariant="simple"
             value={button.payload || ''}
             onChange={(e) => updateButtonField(buttonIndex, 'payload', e.target.value)}
-            placeholder="Leave empty to use the button text as payload"
+            placeholder="Deixe vazio para usar o texto do botão como payload"
+            hintIsCompact={true}
           />
         </div>
       )}
       
-      {/* Phone Number Field */}
+      {/* Campo de Número de Telefone */}
       {button.type === 'PHONE_NUMBER' && (
-        <div className={styles.formGroup}>
-          <div className={styles.labelWithHelp}>
-            <label className={styles.label}>
-              Phone Number
-              <span className={styles.requiredMark}>*</span>
-            </label>
-            <button 
-              type="button" 
-              className={styles.helpButton}
-              onClick={() => setShowPhoneHelp(!showPhoneHelp)}
-            >
-              {showPhoneHelp ? "Hide Help" : "Show Help"}
-            </button>
-          </div>
-          <div className={styles.phoneInputWrapper}>
-            <input 
-              type="tel"
-              className={`${styles.input} ${!isPhoneValid && button.phoneNumber !== '' ? styles.invalidInput : ''}`}
-              value={button.phoneNumber || ''}
-              onChange={(e) => updateButtonField(buttonIndex, 'phoneNumber', formatPhoneNumber(e.target.value))}
-              placeholder="+5521999999999"
-            />
-            {button.phoneNumber && (
-              <button 
-                type="button"
-                className={styles.testActionButton}
-                onClick={testPhoneNumber}
-                title="Test this phone number"
-              >
-                {phoneTested ? (
-                  <>
-                    <FiCheckCircle size={14} />
-                    <span>Called</span>
-                  </>
-                ) : (
-                  <>
-                    <FiPhone size={14} />
-                    <span>Test</span>
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-          {/* Phone Number Preview */}
-          {button.phoneNumber && (
-            <div className={styles.phonePreview}>
-              {formatPhoneDisplay(button.phoneNumber)}
-            </div>
-          )}
-          {/* Phone Help Section */}
-          {showPhoneHelp && (
-            <div className={styles.helpContent}>
-              <h4>Phone number format:</h4>
-              <ul>
-                <li>Use international format with "+" at the beginning</li>
-                <li>Include the country code (Brazil: 55)</li>
-                <li>Include the area code without the zero</li>
-                <li>Do not use spaces, parentheses, or hyphens</li>
-              </ul>
-              <div className={styles.exampleBox}>
-                <strong>Valid examples:</strong>
-                <code>+5521999999999</code>
-                <code>+551140042222</code>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Remove Button - only shown if there's more than 1 button */}
+    <Input
+    id={`button-${buttonIndex}-phone`}
+    name={`button-${buttonIndex}-phone`}
+    type="tel"
+    label="Número de Telefone"
+    value={button.phoneNumber || ''}
+    onChange={(e) => {
+      // O componente Input já envia apenas os dígitos no e.target.value
+      // Não precisamos fazer nenhum processamento adicional aqui
+      updateButtonField(buttonIndex, 'phoneNumber', e.target.value);
+    }}
+    placeholder="5521999999999"
+    required
+    variant="phoneNumber"
+    validateOnChange
+    rightElement={button.phoneNumber && (
+      <Button
+        type="button"
+        className={styles.testActionButton}
+        onClick={testPhoneNumber}
+        title="Testar este número"
+        size="small"
+        variant='outline'
+      >
+        {phoneTested ? (
+          <>
+            <FiCheckCircle size={14} />
+            <span>Testado</span>
+          </>
+        ) : (
+          <>
+            <FiPhone size={14} />
+            <span>Testar</span>
+          </>
+        )}
+      </Button>
+    )}
+    hintMessage={showHints}
+    hintTitle="Formato do número de telefone:"
+    hintList={[
+      "Inclua o código do país (Brasil: 55)",
+      "Inclua o código de área sem o zero",
+      "Não use espaços, parênteses ou hífens"
+    ]}
+    hintVariant="simple"
+    hintIsCompact={true}
+  />
+)}
+
       {totalButtons > 1 && (
         <div className={styles.buttonActions}>
           <button
@@ -417,12 +340,12 @@ const ButtonEditor = ({
             className={styles.removeButton}
             onClick={handleRemoveButton}
           >
-            {numCards > 1 ? "Remove Button in All Cards" : "Remove Button"}
+            {numCards > 1 ? "Remover Botão em Todos os Cards" : "Remover Botão"}
           </button>
         </div>
       )}
       
-      {/* Validation message */}
+      {/* Mensagem de Validação */}
       {validationMessage && (
         <div className={styles.validationMessage}>
           <FiAlertCircle className={styles.validationIcon} />

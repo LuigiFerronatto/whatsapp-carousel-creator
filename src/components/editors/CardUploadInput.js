@@ -16,17 +16,17 @@ import {
 import styles from './CardUploadInput.module.css';
 
 /**
- * Enhanced component for uploading or selecting URL for each carousel card
+ * Componente aprimorado para upload ou seleção de URL para cada cartão do carrossel
  * 
- * @param {Object} props Component properties
- * @param {number} props.index Card index
- * @param {Object} props.card Card data
- * @param {Function} props.updateCard Function to update card data
- * @param {number} props.totalCards Total number of cards
- * @returns {JSX.Element} CardUploadInput component
+ * @param {Object} props Propriedades do componente
+ * @param {number} props.index Índice do cartão
+ * @param {Object} props.card Dados do cartão
+ * @param {Function} props.updateCard Função para atualizar dados do cartão
+ * @param {number} props.totalCards Total de cartões
+ * @returns {JSX.Element} Componente CardUploadInput
  */
 const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
-  // Local state
+  // Estado local
   const [uploadMethod, setUploadMethod] = useState('url');
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -36,7 +36,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
   const fileInputRef = useRef(null);
   const dropAreaRef = useRef(null);
   
-  // Custom hook for file upload
+  // Hook customizado para upload de arquivos
   const { 
     uploadToAzure, 
     isUploading, 
@@ -45,7 +45,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     resetUpload 
   } = useFileUpload();
 
-  // Update preview when card URL changes
+  // Atualiza preview quando a URL do cartão muda
   useEffect(() => {
     if (card.fileUrl) {
       setPreviewUrl(card.fileUrl);
@@ -55,7 +55,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     }
   }, [card.fileUrl]);
 
-  // Drag and drop handlers
+  // Manipuladores de arrastar e soltar
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -86,50 +86,50 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     }
   }, []);
 
-  // File upload handler
+  // Manipulador de upload de arquivo
   const handleFileUpload = useCallback(async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     try {
-      // Determine file type (image or video)
+      // Determina o tipo de arquivo (imagem ou vídeo)
       const fileType = file.type.startsWith('image/') ? 'image' : 'video';
       updateCard(index, 'fileType', fileType);
       
-      // Create temporary local preview
+      // Cria preview local temporário
       const tempUrl = URL.createObjectURL(file);
       setPreviewUrl(tempUrl);
       
-      // Upload to Azure
+      // Faz upload para Azure
       const uploadResult = await uploadToAzure(file);
 
-      // Update card with blob URL
+      // Atualiza cartão com URL do blob
       updateCard(index, 'fileUrl', uploadResult.url);
       updateCard(index, 'fileType', uploadResult.type);
       updateCard(index, 'fileHandle', uploadResult.name || `file-${Date.now()}`);
       
-      // Clean up the temporary preview
+      // Limpa o preview temporário
       URL.revokeObjectURL(tempUrl);
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Erro no upload:', error);
     } finally {
-      // Clear file input
+      // Limpa input de arquivo
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   }, [index, updateCard, uploadToAzure]);
 
-  // Open file selector
+  // Abre seletor de arquivos
   const handleFileInputClick = useCallback(() => {
     resetUpload();
     fileInputRef.current?.click();
   }, [resetUpload]);
 
-  // URL validation
+  // Validação de URL
   const validateUrl = useCallback((url) => {
     if (!url) {
-      setUrlValidationError('URL is required');
+      setUrlValidationError('URL é obrigatória');
       return false;
     }
     
@@ -138,12 +138,12 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       setUrlValidationError('');
       return true;
     } catch (e) {
-      setUrlValidationError('Invalid URL. Include "https://" or "http://"');
+      setUrlValidationError('URL inválida. Inclua "https://" ou "http://"');
       return false;
     }
   }, []);
 
-  // URL change handler
+  // Manipulador de mudança de URL
   const handleUrlChange = useCallback((e) => {
     const url = e.target.value;
     updateCard(index, 'fileUrl', url);
@@ -151,7 +151,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     setUploadMethod('url');
   }, [index, updateCard, validateUrl]);
 
-  // Use test URL
+  // Usa URL de teste
   const handleTestUrlClick = useCallback(() => {
     const testUrls = [
       "https://www.yamaha-motor.com.br/ccstore/v1/images/?source=/file/v4553622368473064581/products/30115.301151.png",
@@ -168,41 +168,41 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     validateUrl(newUrl);
   }, [index, updateCard, validateUrl]);
 
-  // Clear URL
+  // Limpa URL
   const handleClearUrl = useCallback(() => {
     updateCard(index, 'fileUrl', '');
     updateCard(index, 'fileHandle', '');
     setPreviewUrl('');
   }, [index, updateCard]);
 
-  // Change file type
+  // Muda tipo de arquivo
   const handleFileTypeChange = useCallback((e) => {
     updateCard(index, 'fileType', e.target.value);
   }, [index, updateCard]);
 
-  // Get file type icon
+  // Obtém ícone do tipo de arquivo
   const getFileTypeIcon = useCallback(() => {
     return card.fileType === 'image' ? 
       <FiImage size={20} className={styles.typeIcon} /> : 
       <FiVideo size={20} className={styles.typeIcon} />;
   }, [card.fileType]);
 
-  // Card CSS class based on index
+  // Classe CSS do cartão baseada no índice
   const cardClass = `${styles.cardContainer} ${index % 2 === 0 ? styles.evenCard : styles.oddCard}`;
 
   return (
     <div className={cardClass}>
       <div className={styles.cardHeader}>
-        <div className={styles.cardNumber}>Card {index + 1}</div>
+        <div className={styles.cardNumber}>Cartão {index + 1}</div>
         <div className={styles.fileTypeSelect}>
           <select 
             className={styles.select}
             value={card.fileType}
             onChange={handleFileTypeChange}
-            aria-label="Media type"
+            aria-label="Tipo de mídia"
           >
-            <option value="image">Image</option>
-            <option value="video">Video</option>
+            <option value="image">Imagem</option>
+            <option value="video">Vídeo</option>
           </select>
           <div className={styles.fileTypeIconWrapper}>
             {getFileTypeIcon()}
@@ -230,21 +230,21 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
         
         {uploadMethod === 'url' ? (
           <div className={styles.formGroup}>
-            <label className={styles.label}>File URL</label>
+            <label className={styles.label}>URL do Arquivo</label>
             <div className={styles.inputGroup}>
               <input 
                 type="url" 
                 className={`${styles.input} ${urlValidationError ? styles.inputError : ''}`}
                 value={card.fileUrl || ''}
                 onChange={handleUrlChange}
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://exemplo.com/imagem.jpg"
               />
               {card.fileUrl ? (
                 <button 
                   type="button"
                   className={styles.clearButton}
                   onClick={handleClearUrl}
-                  aria-label="Clear URL"
+                  aria-label="Limpar URL"
                 >
                   <FiX size={18} />
                 </button>
@@ -255,7 +255,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
                   onClick={handleTestUrlClick}
                 >
                   <FiTrendingUp size={14} />
-                  <span>Use Test URL</span>
+                  <span>URL de Teste</span>
                 </button>
               )}
             </div>
@@ -263,13 +263,13 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
               <p className={styles.errorText}>{urlValidationError}</p>
             ) : (
               <p className={styles.helpText}>
-                Public URL of the {card.fileType === 'image' ? 'image' : 'video'} to display in the carousel
+                URL pública da {card.fileType === 'image' ? 'imagem' : 'vídeo'} para exibir no carrossel
               </p>
             )}
           </div>
         ) : (
           <div className={styles.formGroup}>
-            <label className={styles.label}>File Upload</label>
+            <label className={styles.label}>Upload de Arquivo</label>
             <div 
               className={`${styles.dropArea} ${isDragging ? styles.dragging : ''}`}
               onDragEnter={handleDragEnter}
@@ -280,14 +280,14 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
               onClick={handleFileInputClick}
               role="button"
               tabIndex={0}
-              aria-label="Drag and drop area"
+              aria-label="Área de arrastar e soltar"
             >
               <FiUploadCloud size={32} className={styles.uploadIcon} />
               <p className={styles.dropText}>
-                {isUploading ? 'Uploading...' : 'Drag a file or click to choose'}
+                {isUploading ? 'Enviando...' : 'Arraste um arquivo ou clique para escolher'}
               </p>
               <p className={styles.dropHint}>
-                Formats: JPEG, PNG, GIF, WebP, MP4, WebM
+                Formatos: JPEG, PNG, GIF, WebP, MP4, WebM
               </p>
             </div>
             <input 
@@ -312,14 +312,14 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       {previewUrl && (
         <div className={styles.previewSection}>
           <div className={styles.previewHeader}>
-            <span className={styles.previewTitle}>Preview</span>
+            <span className={styles.previewTitle}>Pré-visualização</span>
             {card.fileUrl && <FiCheck size={16} className={styles.checkIcon} />}
           </div>
           <div className={styles.previewContent}>
             {card.fileType === 'image' ? (
               <img 
                 src={previewUrl} 
-                alt={`Preview of Card ${index + 1}`} 
+                alt={`Pré-visualização do Cartão ${index + 1}`} 
                 className={styles.previewImage}
                 loading="lazy"
               />
@@ -341,7 +341,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
                 className={styles.viewOriginalLink}
               >
                 <FiExternalLink size={14} />
-                View original
+                Ver original
               </a>
             </div>
           )}

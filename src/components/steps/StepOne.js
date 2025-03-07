@@ -11,8 +11,6 @@ import {
   FiArrowDown, 
   FiSave, 
   FiInfo, 
-  FiEye, 
-  FiEyeOff,
   FiCheckCircle
 } from 'react-icons/fi';
 import styles from './StepOne.module.css';
@@ -43,7 +41,6 @@ const StepOne = ({
   saveDraftManually
 }) => {
   // Local state
-  const [authKeyVisible, setAuthKeyVisible] = useState(false);
   const [savedBeforeUpload, setSavedBeforeUpload] = useState(false);
   const [rememberKey, setRememberKey] = useState(() => {
     return localStorage.getItem('remember_auth_key') === 'true';
@@ -74,11 +71,6 @@ const StepOne = ({
     }
   }, [rememberKey, authKey, setAuthKey]);
   
-  // Toggle auth key visibility
-  const toggleAuthKeyVisibility = useCallback(() => {
-    setAuthKeyVisible(!authKeyVisible);
-  }, [authKeyVisible]);
-  
   // Scroll to upload section
   const scrollToUploadSection = useCallback(() => {
     uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -103,61 +95,63 @@ const StepOne = ({
     <div className={steps.container}>
       {/* Introduction section */}
       <div className={steps.introSection}>
-        <h2 className={steps.stepTitle}>File Configuration</h2>
+        <h2 className={steps.stepTitle}>Configuração de Arquivos</h2>
         <p className={steps.stepDescription}>
-          In this step, you'll configure the images or videos to be displayed in your WhatsApp carousel
-          and provide the authorization key required to upload the files.
+          Nesta etapa, você configurará as imagens ou vídeos que serão exibidos no seu carrossel do WhatsApp
+          e fornecerá a chave de autorização necessária para fazer o upload dos arquivos.
         </p>
       </div>
 
-      {/* Authentication section */}
-       {/* Authentication section */}
-       <div className={styles.authSection}>
-        <div className={styles.authCard}>
-          <div className={styles.authHeader}>
-            <div className={styles.authIconContainer}>
-              <FiKey size={24} />
-            </div>
-            <h3>Authentication</h3>
+        <div className={styles.authSection}>
+          <div className={styles.authCard}>
+            <div className={styles.authHeader}>
+          <div className={styles.authIconContainer}>
+            <FiKey size={24} />
           </div>
-          
-          <Input 
-            id="authKey"
-            name="authKey"
-            label="Authorization Key (Router Key)"
-            type={authKeyVisible ? "text" : "password"}
-            value={authKey}
-            onChange={(e) => setAuthKey(e.target.value)}
-            placeholder="Key=xxxxxxxxx"
-            hint="This key is required to send files and create templates. You can find it in the Blip portal."
-          />
+          <h3>Autenticação</h3>
+            </div>
+            
+            <Input 
+          id="authKey"
+          name="authKey"
+          label="Chave de Autorização (Router Key)"
+          type="password"
+          value={authKey}
+          onChange={(e) => setAuthKey(e.target.value)}
+          placeholder="Digite sua chave de autorização"
+          hintMessage="Esta chave é necessária para enviar arquivos e criar templates. Você pode encontrá-la no portal Blip no seu roteador conectado ao Canal WhatsApp."
+          hintVariant="simple"
+          hintIsCompact={true}
+          required
+          error="A chave de autorização é obrigatória. Você pode encontrá-la no seu roteador conectado ao Canal WhatsApp, no portal Blip."
+            />
 
-          <div className={styles.authOptions}>
-            <label className={styles.rememberKeyLabel}>
-              <input 
-                type="checkbox" 
-                className={styles.rememberKeyCheckbox}
-                checked={rememberKey}
-                onChange={(e) => setRememberKey(e.target.checked)}
-              />
-              Remember my key
-            </label>
+            <div className={styles.authOptions}>
+          <label className={styles.rememberKeyLabel}>
+            <input 
+              type="checkbox" 
+              className={styles.rememberKeyCheckbox}
+              checked={rememberKey}
+              onChange={(e) => setRememberKey(e.target.checked)}
+            />
+            Lembrar minha chave
+          </label>
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Card controls section */}
+        
+        {/* Card controls section */}
       <div className={styles.cardsControlSection}>
         <div className={styles.controlHeader}>
-          <h3>Card Configuration</h3>
+          <h3>Configuração dos Cards</h3>
           <div className={styles.cardCounter}>
-            <span className={styles.cardCountLabel}>Number of cards:</span>
+            <span className={styles.cardCountLabel}>Número de cards:</span>
             <div className={styles.buttonGroup}>
               <button 
                 onClick={handleRemoveCard}
                 disabled={numCards <= 2}
                 className={styles.controlButton}
-                aria-label="Remove card"
+                aria-label="Remover card"
               >
                 <FiMinus size={18} />
               </button>
@@ -166,7 +160,7 @@ const StepOne = ({
                 onClick={handleAddCard}
                 disabled={numCards >= 10}
                 className={styles.controlButton}
-                aria-label="Add card"
+                aria-label="Adicionar card"
               >
                 <FiPlus size={18} />
               </button>
@@ -176,7 +170,7 @@ const StepOne = ({
         
         <div className={styles.cardControlOptions}>
           <p className={styles.cardControlHelp}>
-            A carousel needs at least 2 and at most 10 cards. Each card will have an image or video and interactive buttons.
+            Um carrossel precisa de pelo menos 2 e no máximo 10 cards. Cada card terá uma imagem ou vídeo e botões interativos.
           </p>
           
           <div className={styles.cardTipsContainer}>
@@ -184,17 +178,17 @@ const StepOne = ({
               className={styles.tipsToggle}
               onClick={() => setShowTips(!showTips)}
             >
-              {showTips ? "Hide tips" : "Show tips"}
+              {showTips ? "Ocultar dicas" : "Mostrar dicas"}
             </button>
             
             {showTips && (
               <div className={styles.cardTips}>
-                <h4>Best practices for carousel images:</h4>
+                <h4>Melhores práticas para imagens de carrossel:</h4>
                 <ul>
-                  <li>Recommended size: 800×418 pixels</li>
-                  <li>Use the same dimensions for all images for consistent display</li>
-                  <li>Keep files under 5MB for fast loading</li>
-                  <li>For videos, keep duration under 60 seconds</li>
+                  <li>Tamanho recomendado: 800×418 pixels</li>
+                  <li>Use as mesmas dimensões para todas as imagens para uma exibição consistente</li>
+                  <li>Mantenha os arquivos abaixo de 5MB para carregamento rápido</li>
+                  <li>Para vídeos, mantenha a duração abaixo de 60 segundos</li>
                 </ul>
               </div>
             )}
@@ -208,7 +202,7 @@ const StepOne = ({
           iconRight={<FiArrowDown size={14} />}
           className={styles.jumpToCardsButton}
         >
-          View all cards
+          Ver todos os cards
         </Button>
       </div>
       
@@ -236,7 +230,7 @@ const StepOne = ({
             iconLeft={savedBeforeUpload ? <FiCheckCircle size={18} /> : <FiSave size={18} />}
             className={styles.saveButton}
           >
-            {savedBeforeUpload ? 'Saved!' : 'Save Draft'}
+            {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
           </Button>
           
           <Button 
@@ -249,21 +243,21 @@ const StepOne = ({
             onClick={handleUploadFiles}
             className={styles.uploadButton}
           >
-            {loading ? 'Processing uploads...' : 'Upload Files & Continue'}
+            {loading ? 'Processando uploads...' : 'Enviar Arquivos & Continuar'}
           </Button>
         </div>
         
         {!authKey && (
           <div className={styles.validationMessage}>
             <FiInfo size={16} />
-            Add your authorization key before continuing.
+            Adicione sua chave de autorização antes de continuar.
           </div>
         )}
         
         {authKey && !allCardsHaveUrls() && (
           <div className={styles.validationMessage}>
             <FiInfo size={16} />
-            Add URLs for all cards before continuing.
+            Adicione URLs para todos os cards antes de continuar.
           </div>
         )}
       </div>
@@ -275,13 +269,13 @@ const StepOne = ({
       {/* Upload summary */}
       {uploadResults.length > 0 && (
         <div className={styles.uploadSummary}>
-          <div className={styles.summaryTitle}>Upload summary:</div>
+          <div className={styles.summaryTitle}>Resumo do upload:</div>
           <ul className={styles.summaryList}>
             {uploadResults.map((result, idx) => (
               <li key={idx} className={styles.summaryItem}>
                 Card {idx + 1}: 
                 <span className={result.status === 'success' ? styles.successStatus : styles.simulatedStatus}>
-                  {result.status === 'success' ? ' Upload successful' : ' Simulated for testing'}
+                  {result.status === 'success' ? ' Upload bem-sucedido' : ' Simulado para teste'}
                 </span>
               </li>
             ))}

@@ -31,6 +31,7 @@ function JsonViewer({
   const [error, setError] = useState(null);
   
   const containerRef = useRef(null);
+  const jsonDataRef = useRef(null); // Ref para armazenar os dados JSON originais
   
   // Memoized syntax highlighting function
   const formatJsonSyntax = useMemo(() => {
@@ -60,7 +61,17 @@ function JsonViewer({
   useEffect(() => {
     if (json) {
       try {
+        // Armazena os dados JSON originais em ref para uso posterior
+        jsonDataRef.current = json;
+        
+        // Tenta formatar o JSON
         const formatted = JSON.stringify(json, null, 2);
+        
+        // Verifica se o JSON foi formatado corretamente (não está vazio ou truncado)
+        if (!formatted || formatted === "null" || formatted === "{" || formatted === "[") {
+          throw new Error("JSON inválido ou truncado");
+        }
+        
         setFormattedJson(formatted);
         setSyntaxHighlighted(formatJsonSyntax(formatted));
         setError(null);
@@ -71,6 +82,7 @@ function JsonViewer({
     } else {
       setFormattedJson('');
       setSyntaxHighlighted('');
+      jsonDataRef.current = null;
     }
   }, [json, formatJsonSyntax]);
   
@@ -79,7 +91,28 @@ function JsonViewer({
     if (onCopy) {
       onCopy();
     } else {
-      navigator.clipboard.writeText(formattedJson)
+      // Garante que estamos usando o JSON mais recente
+      let jsonToCopy = formattedJson;
+      
+      // Se o formattedJson estiver vazio ou truncado, tenta reformatar com base no ref
+      if (!jsonToCopy || jsonToCopy.length < 5) {
+        try {
+          // Tenta usar os dados originais do JSON
+          if (jsonDataRef.current) {
+            jsonToCopy = JSON.stringify(jsonDataRef.current, null, 2);
+          }
+        } catch (err) {
+          console.error('Error re-generating JSON for copy:', err);
+        }
+      }
+      
+      // Verifica novamente antes de copiar
+      if (!jsonToCopy || jsonToCopy.length < 5) {
+        alert('Não foi possível copiar o JSON. Os dados parecem inválidos.');
+        return;
+      }
+      
+      navigator.clipboard.writeText(jsonToCopy)
         .then(() => {
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
@@ -96,7 +129,27 @@ function JsonViewer({
     if (onDownload) {
       onDownload();
     } else {
-      const blob = new Blob([formattedJson], { type: 'application/json' });
+      // Garante que estamos usando o JSON mais recente para download
+      let jsonToDownload = formattedJson;
+      
+      // Se o formattedJson estiver vazio ou truncado, tenta reformatar
+      if (!jsonToDownload || jsonToDownload.length < 5) {
+        try {
+          if (jsonDataRef.current) {
+            jsonToDownload = JSON.stringify(jsonDataRef.current, null, 2);
+          }
+        } catch (err) {
+          console.error('Error re-generating JSON for download:', err);
+        }
+      }
+      
+      // Verifica novamente antes de fazer o download
+      if (!jsonToDownload || jsonToDownload.length < 5) {
+        alert('Não foi possível fazer o download do JSON. Os dados parecem inválidos.');
+        return;
+      }
+      
+      const blob = new Blob([jsonToDownload], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

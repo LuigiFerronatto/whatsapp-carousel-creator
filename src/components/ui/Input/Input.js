@@ -1,14 +1,14 @@
-// Modified Input.js with dropdown support
+// Input.js
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Input.module.css';
 import CharacterCounter from '../CharacterCounter/CharacterCounter';
 import TextFormatter from '../TextFormatter/TextFormatter';
 import Hints from '../Hints/Hints';
-import { FiEye, FiEyeOff, FiChevronDown, FiChevronUp, FiX } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiChevronDown, FiChevronUp, FiX, FiInfo, FiAlertCircle } from 'react-icons/fi';
 
 /**
- * Enhanced Input component with validation, masks, formatting and dropdown support
+ * Enhanced Input component with validation, masks, formatting, dropdown support, and improved hints
  * @param {Object} props - Component properties
  * @returns {JSX.Element} Input component
  */
@@ -22,7 +22,20 @@ const Input = forwardRef(({
   onChange,
   onBlur,
   error,
-  hint,
+  // Hints specific props
+  hintMessage,
+  hintVariant = 'simple',
+  hintTitle,
+  hintList,
+  hintIsDismissable = false,
+  hintIsAnimated = false,
+  hintIsImportant = false,
+  hintIsCompact = false,
+  hintSocialCount = null,
+  hintActionText = null,
+  hintActionCallback = null,
+  hintOnDismiss = null,
+  hintClassName = '',
   // Dropdown specific props
   isDropdown = false,
   options = [],
@@ -37,19 +50,11 @@ const Input = forwardRef(({
   dropdownWidth,
   dropdownMaxHeight = '250px',
   closeOnSelect = true,
-
-    // New prop for optional badge
-    showOptionalBadge = false,
-    optionalText = 'Optional',
-    optionalBadgeClassName = '',
-
+  // Optional badge
+  showOptionalBadge = false,
+  optionalText = 'Optional',
+  optionalBadgeClassName = '',
   // Existing props
-  useHintsComponent = false,
-  hintVariant = 'simple',
-  hintTitle,
-  hintList,
-  hintClassName,
-  inlineHintsComponent = false,
   required = false,
   disabled = false,
   readOnly = false,
@@ -76,7 +81,6 @@ const Input = forwardRef(({
   rightElement,
   leftElement,
   characterCounterVariant = 'default',
-  inlineHint,
   textFormatting = false,
   textFormattingCompact = false,
   textFormattingDarkMode = false,
@@ -104,7 +108,7 @@ const Input = forwardRef(({
   
   // Update local value when prop changes
   useEffect(() => {
-    if (!isDropdown) {
+    if (!isDropdown && value !== localValue) {
       setLocalValue(value || '');
     }
   }, [value, isDropdown]);
@@ -113,41 +117,51 @@ const Input = forwardRef(({
   useEffect(() => {
     if (isDropdown && options && options.length > 0) {
       if (multiple) {
-        // For multiple select, initialize selectedOptions as an array
         const initialSelected = Array.isArray(value) 
           ? options.filter(option => 
               value.includes(option[optionValueKey] || option)
             )
           : [];
+        
         setSelectedOptions(initialSelected);
+        
+        const displayText = initialSelected.length > 0
+          ? initialSelected.map(opt => opt[optionLabelKey] || opt).join(', ')
+          : '';
+        
+        if (displayText !== localValue) {
+          setLocalValue(displayText);
+        }
       } else {
-        // For single select, find the matching option
         const selectedOption = options.find(option => 
           (option[optionValueKey] || option) === value
         );
         
-        if (selectedOption) {
-          setSelectedOptions([selectedOption]);
-          setLocalValue(selectedOption[optionLabelKey] || selectedOption);
-        } else {
-          setSelectedOptions([]);
-          setLocalValue('');
+        setSelectedOptions(selectedOption ? [selectedOption] : []);
+        
+        const displayValue = selectedOption ? (selectedOption[optionLabelKey] || selectedOption) : '';
+        if (displayValue !== localValue) {
+          setLocalValue(displayValue);
         }
       }
     }
-  }, [isDropdown, options, value, optionValueKey, optionLabelKey, multiple]);
+  }, [isDropdown, options, value, optionValueKey, optionLabelKey, multiple]); // Remove selectedOptions e localValue
   
   // Update filtered options based on search
   useEffect(() => {
-    if (isDropdown && searchable) {
-      const filtered = options.filter(option => {
-        const optionLabel = option[optionLabelKey] || option;
-        return String(optionLabel).toLowerCase().includes(searchValue.toLowerCase());
-      });
-      
-      setFilteredOptions(filtered);
-    } else {
-      setFilteredOptions(options);
+    // Comparar os arrays antes de atualizar
+    const newFilteredOptions = isDropdown && searchable
+      ? options.filter(option => {
+          const optionLabel = option[optionLabelKey] || option;
+          return String(optionLabel).toLowerCase().includes(searchValue.toLowerCase());
+        })
+      : options;
+  
+    // Verificar se realmente precisa atualizar
+    const needsUpdate = JSON.stringify(filteredOptions) !== JSON.stringify(newFilteredOptions);
+    
+    if (needsUpdate) {
+      setFilteredOptions(newFilteredOptions);
     }
   }, [isDropdown, options, searchValue, searchable, optionLabelKey]);
 
@@ -168,11 +182,12 @@ const Input = forwardRef(({
     };
   }, [isDropdownOpen]);
 
-  // Other effects from original component...
+  // Error state synchronization
   useEffect(() => {
     setLocalError(error || '');
   }, [error]);
 
+  // Reset changed fields indication after some time
   useEffect(() => {
     if (changedFields.length > 0) {
       const timer = setTimeout(() => {
@@ -183,9 +198,8 @@ const Input = forwardRef(({
     }
   }, [changedFields]);
 
-  // Pre-defined regex patterns (existing code)
+  // Pre-defined regex patterns
   const patterns = {
-    // ... existing patterns
     phoneNumber: /^\(\d{2}\) \d{5}-\d{4}$/,
     cpf: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
     cnpj: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
@@ -201,16 +215,14 @@ const Input = forwardRef(({
     templateName: /^[a-z0-9_]{3,}$/
   };
 
-  // Existing functions for non-dropdown inputs
+  // Input mask function
   const applyMask = (value, maskType) => {
-    // ... existing applyMask function ...
     if (!value) return '';
     
     const digits = value.replace(/\D/g, '');
     
     switch (maskType) {
       case 'phoneNumber':
-        // existing code
         if (digits.length <= 11) {
           return digits.replace(/^(\d{2})(\d{0,5})(\d{0,4})/, (_, p1, p2, p3) => {
             let result = '';
@@ -221,16 +233,54 @@ const Input = forwardRef(({
           }).trim();
         }
         return value;
+
+        case 'internationalPhone':
+          // Format: 55(country)55(state)9(verification digit)XXXXXXX(number)
+          return digits.replace(/^(\d{0,2})(\d{0,2})(\d{0,1})(\d{0,7})/, (_, country, state, verificationDigit, number) => {
+            let result = '';
+            if (country) result += country;
+            if (state) result += state;
+            if (verificationDigit) result += verificationDigit;
+            if (number) result += number;
+            return result;
+          }).trim();
       
-      // other cases...
+      case 'cpf':
+        return digits.replace(/^(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/, (_, p1, p2, p3, p4) => {
+          let result = '';
+          if (p1) result += p1;
+          if (p2) result += `.${p2}`;
+          if (p3) result += `.${p3}`;
+          if (p4) result += `-${p4}`;
+          return result;
+        }).trim();
+      
+      case 'cnpj':
+        return digits.replace(/^(\d{0,2})(\d{0,3})(\d{0,3})(\d{0,4})(\d{0,2})/, (_, p1, p2, p3, p4, p5) => {
+          let result = '';
+          if (p1) result += p1;
+          if (p2) result += `.${p2}`;
+          if (p3) result += `.${p3}`;
+          if (p4) result += `/${p4}`;
+          if (p5) result += `-${p5}`;
+          return result;
+        }).trim();
+      
+      case 'cep':
+        return digits.replace(/^(\d{0,5})(\d{0,3})/, (_, p1, p2) => {
+          let result = '';
+          if (p1) result += p1;
+          if (p2) result += `-${p2}`;
+          return result;
+        }).trim();
       
       default:
         return value;
     }
   };
 
+  // Value formatting function
   const formatValue = (value, variant) => {
-    // ... existing formatValue function ...
     if (!value || !allowFormatting) return value;
     
     switch (variant) {
@@ -238,55 +288,76 @@ const Input = forwardRef(({
         // Capitalize each word
         return value.replace(/\b\w/g, char => char.toUpperCase());
       
-      // other cases...
+      case 'uppercase':
+        return value.toUpperCase();
+      
+      case 'lowercase':
+        return value.toLowerCase();
+      
+      case 'capitalize':
+        return value.charAt(0).toUpperCase() + value.slice(1);
+      
+      case 'sentence':
+        // Capitalize first letter of each sentence
+        return value.replace(/(^\s*\w|[.!?]\s*\w)/g, char => char.toUpperCase());
       
       default:
         return value;
     }
   };
 
-  const validateValue = (valueToValidate) => {
-    // ... existing validateValue function ...
-    // Skip validation if disabled or read-only
-    if (disabled || readOnly) return '';
-    
-    // For dropdown, check if a value is selected when required
-    if (isDropdown && required && selectedOptions.length === 0) {
-      return 'Please select an option';
+  // Input validation function
+  // Modificação para a função validateValue no Input.js
+const validateValue = (valueToValidate) => {
+  // Skip validation if disabled or read-only
+  if (disabled || readOnly) return '';
+  
+  // For dropdown, check if a value is selected when required
+  if (isDropdown && required && selectedOptions.length === 0) {
+    return 'Este campo é obrigatório';
+  }
+  
+  // Required validation for text inputs
+  if (required && !valueToValidate?.trim() && !isDropdown) {
+    return 'Este campo é obrigatório';
+  }
+  
+  // Skip more validations if the field is empty and not required
+  if (!valueToValidate && !isDropdown) return '';
+  
+  // Existing validations for text inputs
+  if (!isDropdown) {
+    // Min length validation
+    if (minLength && valueToValidate.length < minLength) {
+      return `O comprimento mínimo é de ${minLength} caracteres`;
     }
     
-    // Required validation for text inputs
-    if (required && !valueToValidate?.trim() && !isDropdown) {
-      return 'This field is required';
+    // Max length validation (should not happen due to maxLength attribute)
+    if (maxLength && valueToValidate.length > maxLength) {
+      return `O comprimento máximo é de ${maxLength} caracteres`;
     }
     
-    // Skip more validations if the field is empty and not required
-    if (!valueToValidate && !isDropdown) return '';
-    
-    // Existing validations for text inputs
-    if (!isDropdown) {
-      // Min length validation
-      if (minLength && valueToValidate.length < minLength) {
-        return `Minimum length is ${minLength} characters`;
+    // MODIFICAÇÃO AQUI: Pular validação de regex para phoneNumber
+    if (variant === 'phoneNumber') {
+      // Verificar apenas se contém pelo menos alguns dígitos (básico)
+      if (!/\d/.test(valueToValidate)) {
+        return 'O número de telefone deve conter pelo menos um dígito';
       }
-      
-      // Max length validation (should not happen due to maxLength attribute)
-      if (maxLength && valueToValidate.length > maxLength) {
-        return `Maximum length is ${maxLength} characters`;
-      }
-      
-      // Regex validation (custom or predefined)
-      const patternToUse = regexPattern || (patterns[variant] || null);
-      if (patternToUse && valueToValidate && !patternToUse.test(valueToValidate)) {
-        if (variant === 'templateName') {
-          return "Use a descriptive name without spaces, minimum 3 characters. Example: 'summer_promo' or 'product_launch'";
-        }
-        return regexErrorMessage || `Invalid ${variant || 'format'}`;
-      }
+      return ''; // Pular validação regex
     }
     
-    return '';
-  };
+    // Regex validation (custom or predefined)
+    const patternToUse = regexPattern || (patterns[variant] || null);
+    if (patternToUse && valueToValidate && !patternToUse.test(valueToValidate)) {
+      if (variant === 'templateName') {
+        return "Use um nome descritivo sem espaços, mínimo de 3 caracteres. Exemplo: 'promo_verao' ou 'lancamento_produto'";
+      }
+      return regexErrorMessage || `Formato inválido para ${variant || 'campo'}`;
+    }
+  }
+  
+  return '';
+};
 
   // Dropdown specific handlers
   const handleDropdownToggle = () => {
@@ -383,11 +454,12 @@ const Input = forwardRef(({
     }
   };
 
-  // Original event handlers for non-dropdown
+  // Password toggle
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
   
+  // Clear input field
   const handleClear = () => {
     if (isDropdown) {
       setSelectedOptions([]);
@@ -427,47 +499,63 @@ const Input = forwardRef(({
     }
   };
 
+  // Input change handler
   const handleChange = (e) => {
     if (isDropdown) {
-      // For dropdown, don't allow direct text changes
+      // Para dropdown, não permite alterações diretas de texto
       return;
     }
     
+    // Obtém o valor do evento
     let newValue = e.target.value;
     
-    // Apply mask if needed
+    // Extrai apenas os dígitos para números de telefone antes de qualquer manipulação
+    // para poder passar isso de volta ao componente pai
+    const digitsOnly = variant === 'phoneNumber' ? newValue.replace(/\D/g, '') : null;
+    
+    // Primeiro impede entrada de caracteres inválidos com base no variant
+    newValue = preventInvalidInput(newValue, variant);
+    
+    // Depois aplica a máscara (formatação de exibição)
     if (variant && variant !== 'default') {
       newValue = applyMask(newValue, variant);
     } else if (mask) {
       newValue = applyMask(newValue, 'custom');
     }
     
-    // Apply formatting if allowed
+    // Aplica formatação se permitido
     if (allowFormatting && !formatOnBlur) {
       newValue = formatValue(newValue, variant);
     }
     
-    // Update local state
+    // Atualiza estado local com o valor formatado (para exibição)
     setLocalValue(newValue);
     
-    // Call original onChange with new value
+    // Chama onChange original com o valor apropriado
     if (onChange) {
-      const syntheticEvent = { ...e, target: { ...e.target, value: newValue } };
-      onChange(syntheticEvent);
+      // Para campos de telefone, passa apenas os dígitos ao componente pai
+      if (variant === 'phoneNumber' && digitsOnly !== null) {
+        const syntheticEvent = { ...e, target: { ...e.target, value: digitsOnly, displayValue: newValue } };
+        onChange(syntheticEvent);
+      } else {
+        const syntheticEvent = { ...e, target: { ...e.target, value: newValue } };
+        onChange(syntheticEvent);
+      }
     }
     
-    // Validate on change if enabled
+    // Valida durante digitação se habilitado
     if (validateOnChange && isTouched) {
       const validationError = validateValue(newValue);
       setLocalError(validationError);
     }
     
-    // Mark as changed
+    // Marca como alterado
     if (!changedFields.includes('value')) {
       setChangedFields(prev => [...prev, 'value']);
     }
   };
 
+  // Focus handler
   const handleFocus = (e) => {
     setIsFocused(true);
     setIsTouched(true);
@@ -482,6 +570,7 @@ const Input = forwardRef(({
     }
   };
 
+  // Blur handler
   const handleBlur = (e) => {
     // Don't blur immediately for dropdowns to allow clicking options
     if (isDropdown) {
@@ -523,6 +612,70 @@ const Input = forwardRef(({
     }
   };
 
+
+  const preventInvalidInput = (value, variant) => {
+    // Se não houver variant especificado, permite qualquer input
+    if (!variant || variant === 'default') return value;
+    
+    switch (variant) {
+      case 'phoneNumber':
+     // Permite apenas números e alguns caracteres especiais para formatação
+        return value.replace(/[^\d() -]/g, '');
+        
+      case 'number':
+      case 'onlyNumbers':
+        // Permite apenas números
+        return value.replace(/[^\d]/g, '');
+        
+      case 'onlyLetters':
+        // Permite apenas letras, incluindo acentuadas
+        return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ ]/g, '');
+        
+      case 'alphanumeric':
+        // Permite letras e números
+        return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ0-9 ]/g, '');
+        
+      case 'name':
+        // Permite letras, espaços, apóstrofos, pontos e hífens
+        return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'.-]/g, '');
+        
+      case 'email':
+        // Validação básica para email - permite caracteres válidos em email
+        return value.replace(/[^A-Za-z0-9@._+-]/g, '');
+        
+      case 'url':
+        // Permite caracteres válidos em URL
+        return value.replace(/[^A-Za-z0-9:/.?&=_-]/g, '');
+        
+      case 'cpf':
+        // Permite apenas números e pontos/hífen para formatação
+        return value.replace(/[^\d.-]/g, '');
+        
+      case 'cnpj':
+        // Permite apenas números e pontos/hífen/barra para formatação
+        return value.replace(/[^\d./-]/g, '');
+        
+      case 'cep':
+        // Permite apenas números e hífen para formatação
+        return value.replace(/[^\d-]/g, '');
+        
+      case 'rg':
+        // Permite números, pontos, hífen e X (para RG)
+        return value.replace(/[^\dXx.-]/g, '');
+        
+      case 'creditCard':
+        // Permite apenas números, espaços e hífens
+        return value.replace(/[^\d -]/g, '');
+        
+      case 'templateName':
+        // Permite apenas letras minúsculas, números e underscore
+        return value.replace(/[^a-z0-9_]/g, '');
+        
+      default:
+        return value;
+    }
+  };
+
   // Build class names
   const containerClasses = [
     styles.container,
@@ -550,6 +703,7 @@ const Input = forwardRef(({
     inputClassName
   ].filter(Boolean).join(' ');
 
+  // Determine input type based on variant and settings
   const getInputType = () => {
     if (isDropdown) {
       return 'text';
@@ -580,7 +734,7 @@ const Input = forwardRef(({
     return type;
   };
 
-  // Render password toggle button (original)
+  // Render password toggle button
   const renderPasswordToggle = () => {
     if (type !== 'password' || isDropdown) return null;
     
@@ -589,7 +743,7 @@ const Input = forwardRef(({
         type="button"
         className={styles.visibilityToggle}
         onClick={togglePasswordVisibility}
-        aria-label={showPassword ? "Hide" : "Show"}
+        aria-label={showPassword}
         tabIndex="-1"
       >
         {showPassword ? (
@@ -597,7 +751,7 @@ const Input = forwardRef(({
         ) : (
           <FiEye size={16} />
         )}
-        {<span>{showPassword ? "Hide" : "Show"}</span>}
+        <span>{showPassword ? "Esconder" : "Mostrar"}</span>
       </button>
     );
   };
@@ -624,7 +778,7 @@ const Input = forwardRef(({
     );
   };
   
-  // Render clear button (original)
+  // Render clear button
   const renderClearButton = () => {
     if (!clearable || (!localValue && selectedOptions.length === 0) || disabled || readOnly) return null;
     
@@ -636,7 +790,7 @@ const Input = forwardRef(({
         aria-label="Clear input"
         tabIndex="-1"
       >
-<FiX />
+        <FiX />
       </button>
     );
   };
@@ -715,7 +869,7 @@ const Input = forwardRef(({
                 className={styles.createOption}
                 onClick={handleCreateOption}
               >
-                Create "{searchValue}"
+                Criar "{searchValue}"
               </button>
             )}
           </div>
@@ -724,7 +878,7 @@ const Input = forwardRef(({
     );
   };
 
-  // Original render functions
+  // Render text formatting toolbar
   const renderFormatting = () => {
     if (isDropdown) return null;
     
@@ -743,23 +897,67 @@ const Input = forwardRef(({
     return toolbar;
   };
 
-  const renderInlineHints = () => {
-    if (inlineHintsComponent && hint) {
-      return (
-        <div className={styles.inlineHintsComponent}>
-          <Hints
-            variant={hintVariant}
-            message={hint}
-            title={hintTitle}
-            list={hintList}
-            className={`${styles.inlineHints} ${hintClassName || ''}`}
-          />
+  const renderBottomContent = () => {
+    return (
+      <div className={styles.bottomWrapper}>
+        <div className={styles.bottomContent}>
+        <div className={styles.hintWrapper}>
+            {renderHintOrError()}
+          </div>
+          {showCharCounter && maxLength && !isDropdown && (
+            <div className={styles.counterWrapper}>
+              <CharacterCounter 
+                current={localValue ? localValue.length : 0} 
+                max={maxLength} 
+                className={styles.charCounter}
+                variant={characterCounterVariant}
+                showFormatting={showCounterFormatting}
+              />
+            </div>
+          )}
         </div>
+      </div>
+    );
+  };
+
+  // Render hint or error message using the new Hints component
+  const renderHintOrError = () => {
+    if (!hintMessage && !localError) return null;
+    
+    if (localError) {
+      return (
+        <Hints
+          variant="warning"
+          message={localError}
+          className={hintClassName}
+          isAnimated={hintIsAnimated}
+          isDismissable={hintIsDismissable}
+          isImportant={hintIsImportant}
+          isCompact={hintIsCompact}
+          iconOverride={<FiAlertCircle size={hintIsCompact ? 14 : 18} />}
+        />
       );
     }
     
-    if (inlineHint) {
-      return <span className={styles.inlineHint}>{inlineHint}</span>;
+    if (hintMessage) {
+      return (
+        <Hints
+          variant={hintVariant}
+          message={hintMessage}
+          title={hintTitle}
+          list={hintList}
+          className={hintClassName}
+          isAnimated={hintIsAnimated}
+          isDismissable={hintIsDismissable}
+          isImportant={hintIsImportant}
+          isCompact={hintIsCompact}
+          socialCount={hintSocialCount}
+          actionText={hintActionText}
+          actionCallback={hintActionCallback}
+          onDismiss={hintOnDismiss}
+          iconOverride={hintVariant === 'simple' ? <FiInfo size={hintIsCompact ? 12 : 16} /> : null}
+        />
+      );
     }
     
     return null;
@@ -768,16 +966,16 @@ const Input = forwardRef(({
   return (
     <div className={containerClasses}>
       {label && (
-  <label htmlFor={id} className={styles.label}>
-    {label}
-    {required && <span className={styles.requiredMark}>*</span>}
-    {!required && showOptionalBadge && (
-      <span className={`${styles.optionalBadge} ${optionalBadgeClassName}`}>
-        {optionalText}
-      </span>
-    )}
-  </label>
-)}
+        <label htmlFor={id} className={styles.label}>
+          {label}
+          {required && <span className={styles.requiredMark}>*</span>}
+          {!required && showOptionalBadge && (
+            <span className={`${styles.optionalBadge} ${optionalBadgeClassName}`}>
+              {optionalText}
+            </span>
+          )}
+        </label>
+      )}
       
       {!isDropdown && (textFormatting || toolbar) && (
         <div className={styles.toolbar}>
@@ -794,32 +992,27 @@ const Input = forwardRef(({
           <span className={styles.icon}>{icon}</span>
         )}
         
-        {renderInlineHints()}
-        
         {isDropdown ? (
-          <>
-            <div 
-              className={`${styles.dropdownContainer} ${isDropdownOpen ? styles.open : ''}`}
-              onClick={handleDropdownToggle}
-            >
-              <input
-                ref={combinedRef}
-                id={id}
-                name={name}
-                type="text"
-                value={localValue}
-                placeholder={placeholder}
-                disabled={disabled}
-                readOnly={true} // Always readonly for dropdown
-                className={inputClasses}
-                onFocus={handleFocus}
-                required={required}
-                {...restProps}
-              />
-              {renderDropdownOptions()}
-            </div>
-            {renderDropdownToggle()}
-          </>
+  <>
+    <div className={`${styles.dropdownContainer} ${isDropdownOpen ? styles.open : ''}`} onClick={handleDropdownToggle}>
+      <input
+        ref={combinedRef}
+        id={id}
+        name={name}
+        type="text"
+        value={localValue}
+        placeholder={placeholder}
+        disabled={disabled}
+        readOnly={true}
+        className={inputClasses}
+        onFocus={handleFocus}
+        required={required}
+        {...restProps}
+      />
+      {renderDropdownOptions()}
+    </div>
+    {renderDropdownToggle()}
+    </>
         ) : type === 'textarea' ? (
           <textarea
             ref={combinedRef}
@@ -871,45 +1064,9 @@ const Input = forwardRef(({
           <div className={styles.rightElement}>{rightElement}</div>
         )}
       </div>
-      
-      <div className={styles.bottomWrapper}>
-        {(hint || localError) && !useHintsComponent && !inlineHintsComponent && (
-          <div className={localError ? styles.errorMessage : styles.hint}>
-            {localError || hint}
-          </div>
-        )}
-        
-        {hint && useHintsComponent && !localError && !inlineHintsComponent && (
-          <Hints
-            variant={hintVariant}
-            message={hint}
-            title={hintTitle}
-            list={hintList}
-            className={hintClassName}
-          />
-        )}
-        
-        {localError && useHintsComponent && !inlineHintsComponent && (
-          <Hints
-            variant="warning"
-            message={localError}
-            className={hintClassName}
-          />
-        )}
-        
-        {showCharCounter && maxLength && !isDropdown && (
-          <div className={styles.counterWrapper}>
-            <CharacterCounter 
-              current={localValue ? localValue.length : 0} 
-              max={maxLength} 
-              className={styles.charCounter}
-              variant={characterCounterVariant}
-              showFormatting={showCounterFormatting}
-            />
-          </div>
-        )}
-      </div>
-    </div>
+  
+  {renderBottomContent()}
+</div>
   );
 });
 
@@ -931,7 +1088,21 @@ Input.propTypes = {
   onChange: PropTypes.func,
   onBlur: PropTypes.func,
   error: PropTypes.string,
-  hint: PropTypes.string,
+  
+  // Enhanced Hints specific props
+  hintMessage: PropTypes.string,
+  hintVariant: PropTypes.oneOf(['simple', 'info', 'warning', 'success', 'whatsapp', 'detailed']),
+  hintTitle: PropTypes.string,
+  hintList: PropTypes.arrayOf(PropTypes.string),
+  hintIsDismissable: PropTypes.bool,
+  hintIsAnimated: PropTypes.bool,
+  hintIsImportant: PropTypes.bool,
+  hintIsCompact: PropTypes.bool,
+  hintSocialCount: PropTypes.number,
+  hintActionText: PropTypes.string,
+  hintActionCallback: PropTypes.func,
+  hintOnDismiss: PropTypes.func,
+  hintClassName: PropTypes.string,
   
   // Display configuration
   size: PropTypes.oneOf(['small', 'medium', 'large']),
@@ -948,7 +1119,6 @@ Input.propTypes = {
   iconPosition: PropTypes.oneOf(['left', 'right']),
   rightElement: PropTypes.node,
   leftElement: PropTypes.node,
-  inlineHint: PropTypes.node,
   toolbar: PropTypes.node,
   
   // Validation and formatting
@@ -971,14 +1141,6 @@ Input.propTypes = {
   showCharCounter: PropTypes.bool,
   showCounterFormatting: PropTypes.bool,
   characterCounterVariant: PropTypes.oneOf(['default', 'compact', 'minimal']),
-  
-  // Hints component
-  useHintsComponent: PropTypes.bool,
-  hintVariant: PropTypes.oneOf(['simple', 'detailed', 'whatsapp', 'warning', 'success']),
-  hintTitle: PropTypes.string,
-  hintList: PropTypes.arrayOf(PropTypes.string),
-  hintClassName: PropTypes.string,
-  inlineHintsComponent: PropTypes.bool,
   
   // Text formatter
   textFormatting: PropTypes.bool,
