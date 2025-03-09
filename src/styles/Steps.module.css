@@ -11,6 +11,22 @@
   box-shadow: var(--shadow-1);
 }
 
+.containerCard {
+  padding: 1.5rem;
+  background-color: var(--color-surface-0);
+  border: 1px solid var(--blip-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  margin-bottom: 1rem;
+}
+
+.containerCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+
 .introSection {
   text-align: center;
   max-width: 700px;

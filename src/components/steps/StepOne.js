@@ -102,8 +102,7 @@ const StepOne = ({
         </p>
       </div>
 
-        <div className={styles.authSection}>
-          <div className={styles.authCard}>
+          <div className={steps.containerCard}>
             <div className={styles.authHeader}>
           <div className={styles.authIconContainer}>
             <FiKey size={24} />
@@ -138,7 +137,7 @@ const StepOne = ({
           </label>
             </div>
           </div>
-        </div>
+
         
         {/* Card controls section */}
       <div className={styles.cardsControlSection}>
@@ -147,23 +146,27 @@ const StepOne = ({
           <div className={styles.cardCounter}>
             <span className={styles.cardCountLabel}>Número de cards:</span>
             <div className={styles.buttonGroup}>
-              <button 
+              <Button 
                 onClick={handleRemoveCard}
                 disabled={numCards <= 2}
                 className={styles.controlButton}
                 aria-label="Remover card"
-              >
-                <FiMinus size={18} />
-              </button>
+                variant="outline"
+                color="content"
+                size="small"
+                iconLeft={<FiMinus size={18} />}
+              />
               <span className={styles.cardCount}>{numCards}</span>
-              <button 
+              <Button 
                 onClick={handleAddCard}
                 disabled={numCards >= 10}
                 className={styles.controlButton}
                 aria-label="Adicionar card"
-              >
-                <FiPlus size={18} />
-              </button>
+                variant="outline"
+                color="content"
+                size="small"
+                iconLeft={<FiPlus size={18} />}
+              />
             </div>
           </div>
         </div>
@@ -174,12 +177,15 @@ const StepOne = ({
           </p>
           
           <div className={styles.cardTipsContainer}>
-            <button 
+            <Button 
               className={styles.tipsToggle}
               onClick={() => setShowTips(!showTips)}
+              variant="text"
+              color="content"
+              size="small"
             >
               {showTips ? "Ocultar dicas" : "Mostrar dicas"}
-            </button>
+            </Button>
             
             {showTips && (
               <div className={styles.cardTips}>

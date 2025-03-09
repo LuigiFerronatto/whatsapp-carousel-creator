@@ -34,22 +34,141 @@ import Input from '../ui/Input/Input';
 // Conectar o CarouselPreview ao controlador para acesso programático
 const ControlledCarouselPreview = withCarouselControl(CarouselPreview);
 
-/**
- * Componente interno que gerencia a visualização do carrossel
- * Isso nos permite usar o hook useCarouselControl dentro do contexto do provider
- */
-/**
- * Componente interno que gerencia a visualização do carrossel
- * Isso nos permite usar o hook useCarouselControl dentro do contexto do provider
- */
-/**
- * Componente interno que gerencia a visualização do carrossel
- * Isso nos permite usar o hook useCarouselControl dentro do contexto do provider
- */
-/**
- * Componente interno que gerencia a visualização do carrossel
- * Isso nos permite usar o hook useCarouselControl dentro do contexto do provider
- */
+// Enhanced Download Options Component
+const DownloadOptions = ({
+  previewFormat,
+  setPreviewFormat,
+  captureSequence,
+  handleSimpleDownload,
+  isGeneratingPreview,
+  downloadStatus,
+  areDownloadButtonsDisabled,
+  interactionDisabled
+}) => {
+  return (
+    <div className={styles.downloadOptions}>
+      <h4 className={styles.downloadTitle}>
+        <span className={styles.downloadIcon}><FiDownload /></span>
+        Salvar Visualização
+      </h4>
+      
+      {downloadStatus.status === 'error' && downloadStatus.message.includes('ferramenta de geração de vídeo') ? (
+        <div className={styles.ffmpegError}>
+          <FiAlertTriangle className={styles.errorIcon} />
+          <p>Não foi possível carregar a ferramenta de geração de vídeo. Você ainda pode baixar uma imagem estática.</p>
+          <Button
+            variant="outline"
+            color="primary"
+            onClick={handleSimpleDownload}
+            loading={isGeneratingPreview}
+            disabled={isGeneratingPreview || interactionDisabled}
+            iconLeft={<FiImage />}
+          >
+            Baixar Imagem Estática
+          </Button>
+        </div>
+      ) : (
+        <>
+          <div className={styles.formatSelector}>
+            <div className={styles.formatOptions}>
+              <Button
+                variant={previewFormat === 'mp4' ? 'solid' : 'outline'}
+                color={previewFormat === 'mp4' ? 'primary' : 'content'}
+                onClick={() => setPreviewFormat('mp4')}
+                disabled={areDownloadButtonsDisabled}
+                className={styles.formatOption}
+                iconLeft={<FiFilm />}
+              >
+                Vídeo MP4
+                {previewFormat === 'mp4' && <span className={styles.checkMark}><FiCheck /></span>}
+              </Button>
+              
+              <Button
+                variant={previewFormat === 'gif' ? 'solid' : 'outline'}
+                color={previewFormat === 'gif' ? 'primary' : 'content'}
+                onClick={() => setPreviewFormat('gif')}
+                disabled={areDownloadButtonsDisabled}
+                className={styles.formatOption}
+                iconLeft={<FiImage />}
+              >
+                Animação GIF
+                {previewFormat === 'gif' && <span className={styles.checkMark}><FiCheck /></span>}
+              </Button>
+              
+              <Button
+                variant={previewFormat === 'png' ? 'solid' : 'outline'}
+                color={previewFormat === 'png' ? 'primary' : 'content'}
+                onClick={() => setPreviewFormat('png')}
+                disabled={areDownloadButtonsDisabled}
+                className={styles.formatOption}
+                iconLeft={<FiImage />}
+              >
+                Imagem Estática
+                {previewFormat === 'png' && <span className={styles.checkMark}><FiCheck /></span>}
+              </Button>
+            </div>
+          </div>
+
+          <div className={styles.downloadActionArea}>
+            <Button
+              variant="solid"
+              color="primary"
+              onClick={previewFormat === 'png' ? handleSimpleDownload : captureSequence}
+              loading={isGeneratingPreview}
+              disabled={areDownloadButtonsDisabled}
+              iconLeft={<FiDownload />}
+              fullWidth
+              className={styles.downloadButton}
+            >
+              {isGeneratingPreview
+                ? `${downloadStatus.message || 'Processando...'}`
+                : `Baixar ${previewFormat === 'mp4' ? 'Vídeo' : previewFormat === 'gif' ? 'GIF' : 'Imagem'}`}
+            </Button>
+
+            {downloadStatus.status !== 'idle' && (
+              <div className={styles.statusIndicator}>
+                {downloadStatus.progress > 0 && downloadStatus.status !== 'success' && downloadStatus.status !== 'error' && (
+                  <div className={styles.progressBarContainer}>
+                    <div className={styles.progressBar}>
+                      <div 
+                        className={styles.progressFill} 
+                        style={{ width: `${downloadStatus.progress}%` }}
+                      ></div>
+                    </div>
+                    <span className={styles.progressPercentage}>{Math.round(downloadStatus.progress)}%</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {downloadStatus.status === 'error' && (
+            <div className={styles.downloadError}>
+              <FiAlertTriangle className={styles.errorIcon} />
+              <p>{downloadStatus.message}</p>
+              <Button
+                variant="outline"
+                color="primary"
+                onClick={handleSimpleDownload}
+                disabled={areDownloadButtonsDisabled}
+              >
+                Usar Imagem Estática
+              </Button>
+            </div>
+          )}
+
+          {downloadStatus.status === 'success' && (
+            <div className={styles.downloadSuccess}>
+              <FiCheckCircle className={styles.successIcon} />
+              <p>{downloadStatus.message}</p>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
 const PreviewContent = ({ 
   cards, 
   bodyText, 
@@ -161,14 +280,16 @@ const PreviewContent = ({
     
     return (
       <div className={styles.previewAutomation}>
-        <button 
+        <Button 
           className={`${styles.previewButton} ${isPlaying ? styles.playing : ''}`}
           onClick={startPreview}
           disabled={isGeneratingPreview || !isInitialized || interactionDisabled}
+          iconLeft={<FiPlayCircle className={styles.playIcon} />}
+          variant="outline"
+          color="primary"
         >
-          <FiPlayCircle className={styles.playIcon} />
           {isPlaying ? 'Reproduzindo...' : 'Visualizar Animação'}
-        </button>
+        </Button>
         
         {isPlaying && (
           <ControlledCarouselPreview
@@ -400,8 +521,8 @@ const PreviewContent = ({
   return (
     <div className={styles.previewSection}>
       <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>Visualização Final</h3>
-        <p className={styles.previewDescription}>
+        <h3>Visualização Final</h3>
+        <p>
           Este é o carrossel que seus clientes verão no WhatsApp. Deslize para ver todos os cartões.
         </p>
       </div>
@@ -416,7 +537,7 @@ const PreviewContent = ({
 
       <div className={styles.templateInfo}>
         <div className={styles.infoItem}>
-          <span className={styles.infoLabel}>Template:</span>
+          <span className={styles.infoLabel}>Nome do Template:</span>
           <span className={styles.infoValue}>{templateName}</span>
         </div>
         <div className={styles.infoItem}>
@@ -424,134 +545,23 @@ const PreviewContent = ({
           <span className={styles.infoValue}>{cards.length}</span>
         </div>
 
-        <PreviewAutomation />
-      </div>
-
-      <div className={styles.previewActions}>
         <PreRenderStatus 
           downloadPreview={downloadPreview} 
           preRenderStarted={preRenderStarted} 
         />
-        <div className={styles.downloadOptions}>
-          <h4 className={styles.downloadTitle}>Salvar Visualização</h4>
 
-          {downloadStatus.status === 'error' && downloadStatus.message.includes('ferramenta de geração de vídeo') ? (
-            <div className={styles.ffmpegError}>
-              <FiAlertTriangle className={styles.errorIcon} />
-              <p>Não foi possível carregar a ferramenta de geração de vídeo. Você ainda pode baixar uma imagem estática.</p>
-              <Button
-                variant="outline"
-                color="primary"
-                onClick={handleSimpleDownload}
-                loading={isGeneratingPreview}
-                disabled={isGeneratingPreview || interactionDisabled}
-                iconLeft={<FiDownload />}
-              >
-                Baixar Imagem Estática
-              </Button>
-            </div>
-          ) : (
-            <>
-              <div className={styles.formatSelector}>
-                <span className={styles.formatLabel}>Formato:</span>
-                <div className={styles.formatOptions}>
-                  <button
-                    className={`${styles.formatOption} ${previewFormat === 'mp4' ? styles.activeFormat : ''}`}
-                    onClick={() => setPreviewFormat('mp4')}
-                    disabled={areDownloadButtonsDisabled}
-                  >
-                    <FiFilm className={styles.formatIcon} />
-                    Vídeo MP4
-                  </button>
-                  <button
-                    className={`${styles.formatOption} ${previewFormat === 'gif' ? styles.activeFormat : ''}`}
-                    onClick={() => setPreviewFormat('gif')}
-                    disabled={areDownloadButtonsDisabled}
-                  >
-                    <FiImage className={styles.formatIcon} />
-                    Animação GIF
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                variant="outline"
-                color="primary"
-                onClick={captureSequence}
-                loading={isGeneratingPreview}
-                disabled={areDownloadButtonsDisabled}
-                iconLeft={<FiDownload />}
-              >
-                {isGeneratingPreview ?
-                  `${downloadStatus.message || 'Processando...'}` :
-                  `Baixar ${previewFormat === 'mp4' ? 'Vídeo' : 'GIF'}`
-                }
-              </Button>
-
-              {downloadStatus.status !== 'idle' && (
-                <div className={styles.statusIndicator}>
-                  <div className={styles.statusMessage}>
-                    {downloadStatus.message}
-                  </div>
-                  
-                  {downloadStatus.progress > 0 && (
-                    <div className={styles.progressBar}>
-                      <div 
-                        className={styles.progressFill} 
-                        style={{ width: `${downloadStatus.progress}%` }}
-                      ></div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {downloadStatus.status === 'error' && (
-                <div className={styles.downloadError}>
-                  <FiAlertTriangle className={styles.errorIcon} />
-                  <p>{downloadStatus.message}</p>
-                  <button
-                    className={styles.fallbackButton}
-                    onClick={handleSimpleDownload}
-                    disabled={areDownloadButtonsDisabled}
-                  >
-                    Usar Imagem Estática
-                  </button>
-                </div>
-              )}
-
-              {downloadStatus.status === 'success' && (
-                <div className={styles.downloadSuccess}>
-                  <FiCheck className={styles.successIcon} />
-                  <p>{downloadStatus.message}</p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className={styles.jsonActions}>
-          <h4 className={styles.jsonActionsTitle}>JSON do Template</h4>
-          <div className={styles.actionsContainer}>
-            <Button
-              variant="outline"
-              color="primary"
-              onClick={() => handleCopy('sendTemplate')}
-              iconLeft={justCopied.sendTemplate ? <FiCheck /> : <FiCopy />}
-            >
-              {justCopied.sendTemplate ? 'Copiado!' : 'Copiar JSON'}
-            </Button>
-
-            <Button
-              variant="outline"
-              color="primary"
-              onClick={() => handleDownload('sendTemplate')}
-              iconLeft={<FiDownload />}
-            >
-              Baixar JSON
-            </Button>
-          </div>
-        </div>
+        <DownloadOptions
+          previewFormat={previewFormat}
+          setPreviewFormat={setPreviewFormat}
+          captureSequence={captureSequence}
+          handleSimpleDownload={handleSimpleDownload}
+          isGeneratingPreview={isGeneratingPreview}
+          downloadStatus={downloadStatus}
+          areDownloadButtonsDisabled={areDownloadButtonsDisabled}
+          interactionDisabled={interactionDisabled}
+        />
       </div>
+
     </div>
   );
 };
@@ -695,20 +705,24 @@ const StepThree = ({
 
       {/* View tabs */}
       <div className={styles.viewTabs}>
-        <button
+        <Button
           className={`${styles.viewTab} ${activeView === 'send' ? styles.activeTab : ''}`}
           onClick={() => setActiveView('send')}
+          variant="text"
+          color={activeView === 'send' ? 'primary' : 'content'}
+          iconLeft={<FiSend className={styles.tabIcon} />}
         >
-          <FiSend className={styles.tabIcon} />
           Visualização e Envio
-        </button>
-        <button
+        </Button>
+        <Button
           className={`${styles.viewTab} ${activeView === 'code' ? styles.activeTab : ''}`}
           onClick={() => setActiveView('code')}
+          variant="text"
+          color={activeView === 'code' ? 'primary' : 'content'}
+          iconLeft={<FiCode className={styles.tabIcon} />}
         >
-          <FiCode className={styles.tabIcon} />
           Código JSON
-        </button>
+        </Button>
       </div>
 
       {/* Content based on active tab */}
@@ -742,8 +756,8 @@ const StepThree = ({
                 {!sendSuccess ? (
                   <>
                     <div className={styles.sectionHeader}>
-                      <h3 className={styles.sectionTitle}>Testar Template</h3>
-                      <p className={styles.sendDescription}>
+                      <h3>Testar Template</h3>
+                      <p>
                         Envie seu template para um número WhatsApp para confirmar como ele será exibido para seus clientes
                       </p>
                     </div>

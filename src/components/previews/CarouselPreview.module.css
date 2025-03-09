@@ -12,6 +12,10 @@
     display: flex;
     flex-direction: column;
     margin: 2rem;
+    user-select: none;
+    -webkit-user-select: none; /* Para compatibilidade com WebKit (Safari, Chrome) */
+    -moz-user-select: none; /* Para compatibilidade com Firefox */
+    -ms-user-select: none; /* Para compatibilidade com IE/Edge */
   
 
   /* Regras responsivas para diferentes tamanhos de tela */
@@ -621,7 +625,7 @@ span .blockquote {
   cursor: pointer;
   width: 100%;
   text-align: center;
-  transition: background-color 0.2s ease;
+  /* transition: background-color 0.2s ease; */
   padding: 8px 0;
   
   @media (max-width: 768px) {
@@ -708,7 +712,7 @@ span .blockquote {
 }
 
 .inactiveCard {
-  opacity: 0.9;
+  opacity: 1;
 }
 
 /* Indicador visual de arrasto (opcional) */
@@ -721,8 +725,8 @@ span .blockquote {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  opacity: 1;
+  /* transition: opacity 0.3s ease; */
   
   @media (max-width: 576px) {
     width: 30px;
@@ -789,7 +793,7 @@ span .blockquote {
 
 
 @keyframes fadeIn {
-  from { opacity: 0.7; }
+  from { opacity: 1; }
   to { opacity: 1; }
 }
 
@@ -814,7 +818,6 @@ span .blockquote {
 /* Botão de navegação desativado durante transição */
 .disabledButton {
   display: none;
-  opacity: 0.5;
   cursor: default;
 }
 
@@ -850,7 +853,6 @@ span .blockquote {
 /* Melhoria para feedback visual durante o arrasto */
 .grabbing .card {
   transform: scale(1);
-  transition: transform 0.1s ease;
 }
 
 /* Additional styles for disabled interaction */

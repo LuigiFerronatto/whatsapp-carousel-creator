@@ -5,6 +5,7 @@ import CarouselPreview from '../previews/CarouselPreview';
 import AlertMessage from '../ui/AlertMessage/AlertMessage';
 import Input from '../ui/Input/Input';
 import Hints, { HintsGroup } from '../ui/Hints/Hints';
+import Button from '../ui/Button/Button';
 import { 
   FiSave, 
   FiCheck, 
@@ -135,34 +136,40 @@ const StepTwo = ({
       <div className={steps.introSection}>
         <h2 className={steps.stepTitle}>Criação de Template</h2>
         <p className={steps.stepDescription}>
-          Configure os detalhes do seu template,
+          Configure os detalhes do seu template, adicione os textos iniciais dos cartões, adicione formatação para os textos e veja o preview logo ao lado!
         </p>
 
         <div className={styles.viewControls}>
-          <button
+          <Button
             className={styles.viewToggle}
             onClick={() => setShowPreview(!showPreview)}
             aria-label={showPreview ? "Ocultar visualização" : "Mostrar visualização"}
+            variant="text"
+            color="content"
+            size="small"
+            iconLeft={showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
           >
-            {showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
             {showPreview ? "Ocultar visualização" : "Mostrar visualização"}
-          </button>
+          </Button>
 
-          <button
+          <Button
             className={styles.hintsToggle}
             onClick={() => setShowHints(!showHints)}
             aria-label={showHints ? "Ocultar dicas" : "Mostrar dicas"}
+            variant="text"
+            color="content"
+            size="small"
+            iconLeft={<FiInfo size={16} />}
           >
-            <FiInfo size={16} />
             {showHints ? "Ocultar dicas" : "Mostrar dicas"}
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className={styles.contentWrapper}>
         <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
           <div className={styles.basicDetailsSection}>
-            <h3 className={styles.sectionTitle}>Informações Básicas do Template</h3>
+            <h3>Informações Básicas do Template</h3>
 
             <div className={progressbar.progressContainer}>
               <div className={progressbar.progressBarWrapper}>
@@ -247,18 +254,21 @@ const StepTwo = ({
           </div>
 
           <div className={styles.cardEditorSection}>
-            <h3 className={styles.sectionTitle}>Conteúdo dos Cards</h3>
+            <h3>Conteúdo dos Cards</h3>
 
             <div className={styles.cardTabs}>
               {cards.slice(0, numCards).map((_, index) => (
-                <button
+                <Button
                   key={index}
                   className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''}`}
                   onClick={() => setActiveCard(index)}
+                  variant={activeCard === index ? "solid" : "outline"}
+                  color={activeCard === index ? "primary" : "content"}
+                  size="small"
                 >
                   Card {index + 1}
                   {!cards[index].bodyText && <span className={styles.incompleteIndicator}>!</span>}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -291,39 +301,37 @@ const StepTwo = ({
               )}
             </div>
 
-            <button
+            <Button
               className={styles.backButton}
               onClick={() => setStep(1)}
+              variant="outline"
+              color="content"
+              iconLeft={<FiChevronLeft className={styles.buttonIcon} />}
             >
-              <FiChevronLeft className={styles.buttonIcon} />
               Voltar
-            </button>
+            </Button>
 
-            <button
+            <Button
               className={styles.saveButton}
               onClick={handleSaveDraft}
+              variant="outline"
+              color="primary"
+              iconLeft={<FiSave className={styles.buttonIcon} />}
             >
-              <FiSave className={styles.buttonIcon} />
               Salvar Rascunho
-            </button>
+            </Button>
 
-            <button
+            <Button
               className={styles.nextButton}
               onClick={handleContinue}
               disabled={loading}
+              variant="solid"
+              color="primary"
+              loading={loading}
+              iconRight={!loading ? <FiChevronRight className={styles.buttonIcon} /> : null}
             >
-              {loading ? (
-                <>
-                  <div className={styles.loadingSpinner}></div>
-                  Processando...
-                </>
-              ) : (
-                <>
-                  Criar Template
-                  <FiChevronRight className={styles.buttonIcon} />
-                </>
-              )}
-            </button>
+              {loading ? 'Processando...' : 'Criar Template'}
+            </Button>
           </div>
 
           {error && <AlertMessage error={error} />}

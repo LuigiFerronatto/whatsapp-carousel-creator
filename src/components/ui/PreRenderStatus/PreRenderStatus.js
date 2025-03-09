@@ -1,17 +1,17 @@
 // src/components/ui/PreRenderStatus/PreRenderStatus.js
 import React, { useState, useEffect } from 'react';
-import { FiClock, FiCheckCircle, FiAlertTriangle } from 'react-icons/fi';
+import { FiClock, FiCheckCircle, FiAlertTriangle, FiRefreshCw, FiLoader } from 'react-icons/fi';
 import styles from './PreRenderStatus.module.css';
 
 /**
- * Componente que mostra o status de pré-renderização
- * @param {Object} props - Propriedades do componente
- * @param {Object} props.downloadPreview - Serviço de download de pré-visualização
- * @param {boolean} props.preRenderStarted - Se a pré-renderização foi iniciada
- * @returns {JSX.Element} Componente de status
+ * Enhanced component that shows the pre-rendering status
+ * @param {Object} props - Component properties
+ * @param {Object} props.downloadPreview - Download preview service
+ * @param {boolean} props.preRenderStarted - If pre-rendering has started
+ * @returns {JSX.Element} Status component
  */
 const PreRenderStatus = ({ downloadPreview, preRenderStarted = false }) => {
-  // Estado inicial com base no cache existente
+  // Initial state based on existing cache
   const [status, setStatus] = useState(() => {
     if (downloadPreview.cachedFiles?.mp4 && downloadPreview.cachedFiles?.gif) {
       return 'completed-all';
@@ -28,20 +28,20 @@ const PreRenderStatus = ({ downloadPreview, preRenderStarted = false }) => {
     }
   });
   
-  // Status de cada formato
+  // Format status
   const [formatStatus, setFormatStatus] = useState({
     mp4: downloadPreview.cachedFiles?.mp4 ? 'completed' : 'pending',
     gif: downloadPreview.cachedFiles?.gif ? 'completed' : 'pending'
   });
   
-  // Polling para verificar o estado do cache a cada 500ms
+  // Poll to check cache status every 500ms
   useEffect(() => {
     const checkStatus = () => {
-      // Verificar status de cada formato
+      // Check status of each format
       const mp4Status = downloadPreview.cachedFiles?.mp4 ? 'completed' : 'pending';
       const gifStatus = downloadPreview.cachedFiles?.gif ? 'completed' : 'pending';
       
-      // Atualizar status dos formatos se mudou
+      // Update format status if changed
       if (mp4Status !== formatStatus.mp4 || gifStatus !== formatStatus.gif) {
         setFormatStatus({
           mp4: mp4Status,
@@ -49,7 +49,7 @@ const PreRenderStatus = ({ downloadPreview, preRenderStarted = false }) => {
         });
       }
       
-      // Verificar status geral
+      // Check overall status
       if (downloadPreview.cachedFiles?.mp4 && downloadPreview.cachedFiles?.gif) {
         setStatus('completed-all');
       } else if (downloadPreview.cachedFiles?.mp4 || downloadPreview.cachedFiles?.gif) {
@@ -63,81 +63,120 @@ const PreRenderStatus = ({ downloadPreview, preRenderStarted = false }) => {
       }
     };
     
-    // Verificar imediatamente
+    // Check immediately
     checkStatus();
     
-    // E continuar verificando periodicamente
+    // And continue checking periodically
     const intervalId = setInterval(checkStatus, 500);
     
     return () => clearInterval(intervalId);
   }, [downloadPreview, preRenderStarted]);
   
-  // Não mostrar nada se estiver ocioso
+  // Don't show anything if idle
   if (status === 'idle') return null;
+
+  // Helper to determine how many formats are ready
+  const getCompletedCount = () => {
+    let count = 0;
+    if (formatStatus.mp4 === 'completed') count++;
+    if (formatStatus.gif === 'completed') count++;
+    return count;
+  };
   
   return (
     <div className={styles.container}>
       {status === 'in-progress' && (
-        <div className={styles.statusItem}>
-          <FiClock className={styles.inProgressIcon} />
-          <span className={styles.inProgressText}>
-            Capturando frames em segundo plano...
-          </span>
+        <div className={styles.statusCard}>
+          <div className={styles.statusIconWrapper + ' ' + styles.inProgress}>
+            <FiLoader className={styles.statusIcon} />
+          </div>
+          <div className={styles.statusContent}>
+            <h4 className={styles.statusTitle}>Estamos animando, estamos animando!</h4>
+            <p className={styles.statusMessage}>
+              Segura aí! Estamos criando uma animação do seu carrossel...
+            </p>
+            <div className={styles.progressBar}>
+              <div className={styles.progressIndeterminate}></div>
+            </div>
+          </div>
         </div>
       )}
       
       {status === 'frames-captured' && (
-        <div className={styles.statusItem}>
-          <FiClock className={styles.inProgressIcon} />
-          <span className={styles.inProgressText}>
-            Processando frames em segundo plano...
-          </span>
+        <div className={styles.statusCard}>
+          <div className={styles.statusIconWrapper + ' ' + styles.inProgress}>
+            <FiClock className={styles.statusIcon} />
+          </div>
+          <div className={styles.statusContent}>
+            <h4 className={styles.statusTitle}>Processando Quadros</h4>
+            <p className={styles.statusMessage}>
+              Quase lá! Que carrossel bonito esse seu 🤩...
+            </p>
+            <div className={styles.progressBar}>
+              <div className={styles.progressIndeterminate}></div>
+            </div>
+          </div>
         </div>
       )}
       
       {status === 'frames-stored' && (
-        <div className={styles.statusItem}>
-          <FiClock className={styles.inProgressIcon} />
-          <span className={styles.inProgressText}>
-            Preparando formatos em segundo plano...
-          </span>
-          <div className={styles.formatStatuses}>
-            <span className={`${styles.formatStatus} ${formatStatus.mp4 === 'completed' ? styles.formatReady : ''}`}>
-              {formatStatus.mp4 === 'completed' ? '✓' : '⟳'} MP4
-            </span>
-            <span className={`${styles.formatStatus} ${formatStatus.gif === 'completed' ? styles.formatReady : ''}`}>
-              {formatStatus.gif === 'completed' ? '✓' : '⟳'} GIF
-            </span>
+        <div className={styles.statusCard}>
+          <div className={styles.statusIconWrapper + ' ' + styles.inProgress}>
+            <FiRefreshCw className={styles.statusIcon} />
+          </div>
+          <div className={styles.statusContent}>
+            <h4 className={styles.statusTitle}>Preparando Formatos</h4>
+            <p className={styles.statusMessage}>
+              Gerando seus formatos de download, aguenta firme...
+            </p>
+            <div className={styles.formatContainer}>
+              <div className={`${styles.formatBadge} ${formatStatus.mp4 === 'completed' ? styles.formatComplete : ''}`}>
+                {formatStatus.mp4 === 'completed' ? '✓' : '✕'} MP4
+              </div>
+              <div className={`${styles.formatBadge} ${formatStatus.gif === 'completed' ? styles.formatComplete : ''}`}>
+                {formatStatus.gif === 'completed' ? '✓' : '✕'} GIF
+              </div>
+            </div>
           </div>
         </div>
       )}
       
       {status === 'completed-partial' && (
-        <div className={styles.statusItem}>
-          <FiCheckCircle className={styles.partialIcon} />
-          <span className={styles.partialText}>
-            Alguns formatos prontos para download rápido!
-          </span>
-          <div className={styles.formatStatuses}>
-            <span className={`${styles.formatStatus} ${formatStatus.mp4 === 'completed' ? styles.formatReady : ''}`}>
-              {formatStatus.mp4 === 'completed' ? '✓' : '⟳'} MP4
-            </span>
-            <span className={`${styles.formatStatus} ${formatStatus.gif === 'completed' ? styles.formatReady : ''}`}>
-              {formatStatus.gif === 'completed' ? '✓' : '⟳'} GIF
-            </span>
+        <div className={styles.statusCard}>
+          <div className={styles.statusIconWrapper + ' ' + styles.partialSuccess}>
+            <FiCheckCircle className={styles.statusIcon} />
+          </div>
+          <div className={styles.statusContent}>
+            <h4 className={styles.statusTitle}>Formatos Prontos</h4>
+            <p className={styles.statusMessage}>
+              {getCompletedCount()} de 2 formatos prontos para download!
+            </p>
+            <div className={styles.formatContainer}>
+              <div className={`${styles.formatBadge} ${formatStatus.mp4 === 'completed' ? styles.formatComplete : ''}`}>
+                {formatStatus.mp4 === 'completed' ? '✓' : '✕'} MP4
+              </div>
+              <div className={`${styles.formatBadge} ${formatStatus.gif === 'completed' ? styles.formatComplete : ''}`}>
+                {formatStatus.gif === 'completed' ? '✓' : '✕'} GIF
+              </div>
+            </div>
           </div>
         </div>
       )}
       
       {status === 'completed-all' && (
-        <div className={styles.statusItem}>
-          <FiCheckCircle className={styles.completedIcon} />
-          <span className={styles.completedText}>
-            Todos os formatos pré-carregados! Downloads serão instantâneos.
-          </span>
-          <div className={styles.formatStatuses}>
-            <span className={`${styles.formatStatus} ${styles.formatReady}`}>✓ MP4</span>
-            <span className={`${styles.formatStatus} ${styles.formatReady}`}>✓ GIF</span>
+        <div className={styles.statusCard}>
+          <div className={styles.statusIconWrapper + ' ' + styles.success}>
+            <FiCheckCircle className={styles.statusIcon} />
+          </div>
+          <div className={styles.statusContent}>
+            <h4 className={styles.statusTitle}>Todos os Formatos Prontos</h4>
+            <p className={styles.statusMessage}>
+              Todos os formatos estão prontos! Faça o download agora mesmo!
+            </p>
+            <div className={styles.formatContainer}>
+              <div className={`${styles.formatBadge} ${styles.formatComplete}`}>✓ MP4</div>
+              <div className={`${styles.formatBadge} ${styles.formatComplete}`}>✓ GIF</div>
+            </div>
           </div>
         </div>
       )}

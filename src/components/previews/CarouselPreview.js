@@ -9,7 +9,7 @@ const CONFIG = {
   MAX_CARD_TEXT_LENGTH: 160,
   MAX_BUTTON_TEXT_LENGTH: 25,
   TRANSITION_DURATION: 300, // Duração da transição em ms
-  TRANSITION_TIMEOUT: 350, // Timeout um pouco maior que a duração
+  TRANSITION_TIMEOUT: 400, // Timeout um pouco maior que a duração
 };
 
 // Componente de Ícones
@@ -316,7 +316,7 @@ const CarouselPreview = forwardRef(({
     const movePercent = ((currentPosition - startPosition) / wrapperWidth) * 100;
 
     // Limitar o arrasto para evitar que ultrapasse muito os limites
-    const maxOffset = 30; // Porcentagem máxima de arrasto
+    const maxOffset = 100; // Porcentagem máxima de arrasto
     const clampedMovePercent = Math.max(Math.min(movePercent, maxOffset), -maxOffset);
 
     // Registrando o offset atual do arrasto
@@ -533,14 +533,15 @@ const CarouselPreview = forwardRef(({
               )}
               
               <div
-                ref={cardsWrapperRef}
-                className={`${styles.cardsWrapper} ${isDragging ? styles.grabbing : styles.grab} ${disableInteraction ? styles.disabled : ''}`}
-                style={{
-                  transform: `translateX(${currentTranslate}%)`,
-                  transition: isDragging ? 'none' : `transform ${CONFIG.TRANSITION_DURATION}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
-                  pointerEvents: disableInteraction ? 'none' : 'auto'
-                }}
-              >
+  ref={cardsWrapperRef}
+  className={`${styles.cardsWrapper} ${isDragging ? styles.grabbing : styles.grab} ${disableInteraction ? styles.disabled : ''}`}
+  style={{
+    transform: `translateX(${currentTranslate}%)`,
+    transition: isDragging ? 'none' : `transform ${CONFIG.TRANSITION_DURATION}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
+    // ⚠️ Modifique a função de timing para a mais suave cubic-bezier(0.25, 0.1, 0.25, 1)
+    pointerEvents: disableInteraction ? 'none' : 'auto'
+  }}
+>
                 {cards.map((card, index) => (
                   <div 
                     key={index} 
@@ -656,7 +657,7 @@ const CarouselPreview = forwardRef(({
                               disabled={disableInteraction}
                               style={{ 
                                 cursor: disableInteraction ? 'not-allowed' : 'pointer',
-                                opacity: disableInteraction ? 0.7 : 1
+                                opacity: disableInteraction ? 1 : 1
                               }}
                             >
                               {button.type && (
