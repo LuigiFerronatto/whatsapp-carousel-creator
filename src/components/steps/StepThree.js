@@ -897,21 +897,23 @@ const StepThree = ({
       </div>
 
       {/* Action buttons */}
-      <div className={styles.actionButtons}>
-        <button
-          className={styles.backButton}
+      <div className={steps.actionSection}>
+        <Button
+          variant='outline'
           onClick={() => setStep(2)}
+          iconLeft={<FiChevronLeft />}
+          size='large'
         >
-          <FiChevronLeft />
           Voltar para Edição
-        </button>
+        </Button>
 
-        <button
-          className={styles.newTemplateButton}
+
+        <Button
           onClick={resetForm}
+          size='large'
         >
           Criar Novo Template
-        </button>
+        </Button>
       </div>
 
       {/* Error and success messages */}

@@ -1,5 +1,9 @@
 /* steps.module.css */
-/* Estilos base comuns para todos os steps */
+
+/* Variáveis e Tokens de Design (se aplicável) */
+:root {
+  /* Variáveis de cores, fontes, espaçamentos, etc. definidas aqui */
+}
 
 .container {
   display: flex;
@@ -9,28 +13,28 @@
   background-color: var(--color-surface-0);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-1);
-}
 
-.containerCard {
-  padding: 1.5rem;
-  background-color: var(--color-surface-0);
-  border: 1px solid var(--blip-light);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-1);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-  margin-bottom: 1rem;
-}
+  @media (max-width: 1200px) {
+    padding: 1.25rem;
+  }
 
-.containerCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-2);
-}
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+  }
+}
 
 .introSection {
   text-align: center;
   max-width: 700px;
   margin: 0 auto 1rem;
+
+  @media (max-width: 480px) {
+    margin-bottom: 0.75rem;
+  }
 }
 
 .stepTitle {
@@ -40,27 +44,34 @@
   color: var(--blip-blue-brand);
   position: relative;
   display: inline-block;
-}
 
-.stepTitle::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 3px;
-  background-color: var(--color-surface-primary);
-  border-radius: 3px;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: var(--color-surface-primary);
+    border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: var(--fs-h4);
+  }
 }
 
 .stepDescription {
   font-size: var(--fs-p1);
   color: var(--dove-gray-2);
   line-height: 1.5;
+
+  @media (max-width: 768px) {
+    font-size: var(--fs-p2);
+  }
 }
 
-/* Seções comuns */
 .sectionTitle {
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
@@ -70,56 +81,25 @@
   border-bottom: 1px solid var(--wave);
 }
 
-/* Botões e ações comuns */
-.actionButtons {
-  display: flex;
-  gap: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--wave);
+.containerCard,
+.card {
+  padding: 1.5rem;
+  background-color: var(--color-surface-0);
+  border: 1px solid var(--blip-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-2);
+  }
 }
 
-.backButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background-color: var(--color-surface-2);
-  color: var(--text-color-default);
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+.containerCard {
+  margin-bottom: 1rem;
 }
 
-.backButton:hover {
-  background-color: var(--color-surface-3);
-}
-
-.nextButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.nextButton:hover:not(:disabled) {
-  background-color: var(--blip-dark);
-}
-
-.nextButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Loading states comuns */
 .loadingSpinner {
   width: 18px;
   height: 18px;
@@ -134,7 +114,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Mensagens de validação comuns */
 .validationMessage {
   display: flex;
   align-items: center;
@@ -147,57 +126,32 @@
   margin-top: 0.75rem;
 }
 
-/* Cards e seções comuns */
-.card {
-  background-color: var(--color-surface-0);
-  border: 1px solid var(--wave);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-1);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-}
+.actionSection {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--wave);
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-2);
-}
-
-/* Responsividade comum */
-@media (max-width: 1200px) {
-  .container {
-    padding: 1.25rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-  
-  .actionButtons {
+  @media (max-width: 768px) {
     flex-direction: column;
-  }
-  
-  .backButton, .nextButton {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .stepTitle {
-    font-size: var(--fs-h4);
-  }
-  
-  .stepDescription {
-    font-size: var(--fs-p2);
+    gap: 0.75rem;
   }
 }
 
-@media (max-width: 480px) {
-  .container {
-    padding: 0.75rem;
-  }
-  
-  .introSection {
-    margin-bottom: 0.75rem;
+.actionButtonsWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
   }
 }

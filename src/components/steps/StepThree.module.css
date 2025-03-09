@@ -587,85 +587,6 @@
   transform: translateY(0);
 }
 
-/* Action Buttons */
-.actionButtons {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--wave);
-  margin-top: 1rem;
-}
-
-.backButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background-color: var(--color-surface-2);
-  color: var(--text-color-default);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.backButton:hover {
-  background-color: var(--color-surface-3);
-  transform: translateX(-2px);
-}
-
-.backButton:active {
-  transform: translateX(0);
-}
-
-.newTemplateButton {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.newTemplateButton::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    to bottom right,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0) 80%
-  );
-  transform: rotate(30deg);
-  transition: transform 0.3s ease;
-  pointer-events: none;
-}
-
-.newTemplateButton:hover::after {
-  transform: rotate(30deg) translate(10%, 10%);
-}
-
-.newTemplateButton:hover {
-  background-color: var(--blip-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.newTemplateButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 /* Responsiveness */
 @media (max-width: 992px) {
   .contentWrapper {
@@ -690,16 +611,6 @@
   
   .codeView {
     gap: 1.5rem;
-  }
-  
-  .actionButtons {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .backButton, .newTemplateButton {
-    width: 100%;
-    justify-content: center;
   }
   
   .previewContainer {

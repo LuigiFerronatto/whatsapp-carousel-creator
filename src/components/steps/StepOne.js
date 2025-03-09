@@ -227,14 +227,13 @@ const StepOne = ({
       
       {/* Action buttons */}
       <div className={styles.actionSection}>
-        <div className={styles.actionButtons}>
+        <div className={steps.actionSection}>
           <Button 
             variant="outline"
-            color="content"
+            color="primary"
             size="large"
             onClick={handleSaveBeforeUpload}
             iconLeft={savedBeforeUpload ? <FiCheckCircle size={18} /> : <FiSave size={18} />}
-            className={styles.saveButton}
           >
             {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
           </Button>
@@ -247,7 +246,6 @@ const StepOne = ({
             disabled={!isStepValid(1) || loading}
             iconLeft={loading ? null : <FiUpload size={18} />}
             onClick={handleUploadFiles}
-            className={styles.uploadButton}
           >
             {loading ? 'Processando uploads...' : 'Enviar Arquivos & Continuar'}
           </Button>

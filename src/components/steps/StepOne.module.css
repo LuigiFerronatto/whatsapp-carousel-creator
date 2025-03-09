@@ -231,51 +231,10 @@
   color: var(--text-color-default);
 }
 
-.input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--wave);
-  border-radius: var(--radius-md);
-  font-size: var(--fs-p1);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  background-color: var(--color-surface-0);
-}
-
-.input:focus {
-  border-color: var(--color-surface-primary);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.2);
-}
-
 .helpText {
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
   max-width: 300px;
-}
-
-/* Action section */
-.actionSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--wave);
-}
-
-.actionButtons {
-  display: flex;
-  gap: 1rem;
-  width: 100%;
-  max-width: 600px;
-}
-
-.saveButton {
-  flex: 0 0 auto;
-}
-
-.uploadButton {
-  flex: 1;
 }
 
 .validationMessage {

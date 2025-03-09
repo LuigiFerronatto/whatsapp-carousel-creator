@@ -357,107 +357,6 @@
   color: var(--text-color-default);
 }
 
-/* Action Buttons */
-.fixedButtonGroup {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 0;
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--wave);
-}
-
-.actionStatus {
-  flex: 1;
-}
-
-.savedIndicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--mountain-meadow);
-  font-size: var(--fs-p3);
-  animation: fadeInOut 3s ease forwards;
-}
-
-@keyframes fadeInOut {
-  0% { opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-.backButton, .saveButton, .nextButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-md);
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-p2);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.backButton {
-  background-color: var(--color-surface-2);
-  color: var(--text-color-default);
-  border: none;
-}
-
-.backButton:hover {
-  background-color: var(--color-surface-3);
-}
-
-.saveButton {
-  background-color: var(--color-surface-1);
-  color: var(--color-surface-primary);
-  border: 1px solid var(--color-surface-primary);
-}
-
-.saveButton:hover {
-  background-color: var(--hover-light);
-}
-
-.nextButton {
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
-  border: none;
-  min-width: 160px;
-}
-
-.nextButton:hover:not(:disabled) {
-  background-color: var(--blip-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-1);
-}
-
-.nextButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.buttonIcon {
-  width: 18px;
-  height: 18px;
-}
-
-.loadingSpinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--alabaster);
-  animation: spin 1s linear infinite;
-  margin-right: 0.5rem;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 /* Preview Container */
 .previewContainer {
   flex: 0 0 30%;
@@ -544,18 +443,7 @@
     justify-content: center;
   }
   
-  .fixedButtonGroup {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
   .backButton, .saveButton, .nextButton {
-    width: 100%;
-  }
-  
-  .actionStatus {
-    display: flex;
-    justify-content: center;
     width: 100%;
   }
 }

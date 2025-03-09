@@ -3,183 +3,161 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
+  font-family: var(--font-primary);
+  font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: background-color var(--transition-fast),
-              border-color var(--transition-fast),
-              color var(--transition-fast),
-              transform var(--transition-fast),
-              box-shadow var(--transition-fast);
-  border: 1px solid transparent;
-  outline: none;
-  position: relative;
-  white-space: nowrap;
+  line-height: 1.5;
+  text-align: center;
   text-decoration: none;
-  gap: 0.5rem;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              box-shadow var(--transition-fast),
+              transform var(--transition-fast);
 }
 
-.button:active:not(.disabled) {
+.button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 150, 250, 0.25);
+}
+
+.button:active:not(.disabled):not(.loading) {
   transform: translateY(1px);
 }
 
-.button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.25);
-}
-
-/* Button variants */
-.variant-solid {
-  border: none;
-}
-
-.variant-outline {
-  background-color: transparent;
-}
-
-.variant-text {
-  background-color: transparent;
-  border: 1px solid transparent;
-}
-
-/* Button sizes */
+/* Button Sizes */
 .size-small {
-  font-size: var(--fs-p3);
-  padding: 0.375rem 0.75rem;
-  height: 32px;
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--fs-p2);
 }
 
 .size-medium {
-  font-size: var(--fs-p2);
-  padding: 0.5rem 1rem;
-  height: 40px;
+  /* Default size, uses base .button styles */
 }
 
 .size-large {
+  padding: var(--spacing-4) var(--spacing-6);
   font-size: var(--fs-p1);
-  padding: 0.75rem 1.5rem;
-  height: 48px;
 }
 
-/* Colors by variant */
-/* Primary */
+/* Button Variants and Colors */
 .variant-solid.color-primary {
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
+  color: var(--text-inverse);
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 .variant-solid.color-primary:hover:not(.disabled):not(.loading) {
-  background-color: var(--blip-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-1);
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
 }
 
-.variant-outline.color-primary {
-  border-color: var(--color-surface-primary);
-  color: var(--color-surface-primary);
-}
-
-.variant-outline.color-primary:hover:not(.disabled):not(.loading) {
-  background-color: rgba(30, 107, 241, 0.08);
-}
-
-.variant-text.color-primary {
-  color: var(--color-surface-primary);
-}
-
-.variant-text.color-primary:hover:not(.disabled):not(.loading) {
-  background-color: rgba(30, 107, 241, 0.08);
-}
-
-/* Content (neutral) */
 .variant-solid.color-content {
-  background-color: var(--color-surface-2);
-  color: var(--text-color-default);
+  color: var(--text-primary);
+  background-color: var(--surface-2);
+  border-color: var(--surface-2);
 }
 
 .variant-solid.color-content:hover:not(.disabled):not(.loading) {
-  background-color: var(--color-surface-3);
+  background-color: var(--surface-3);
+  border-color: var(--surface-3);
 }
 
-.variant-outline.color-content {
-  border-color: var(--color-surface-2);
-  color: var(--text-color-default);
-}
-
-.variant-outline.color-content:hover:not(.disabled):not(.loading) {
-  background-color: rgba(224, 224, 224, 0.16);
-}
-
-.variant-text.color-content {
-  color: var(--text-color-default);
-}
-
-.variant-text.color-content:hover:not(.disabled):not(.loading) {
-  background-color: rgba(224, 224, 224, 0.16);
-}
-
-/* Success */
 .variant-solid.color-success {
-  background-color: var(--mountain-meadow);
-  color: var(--alabaster);
+  color: var(--text-inverse);
+  background-color: var(--accent);
+  border-color: var(--accent);
 }
 
 .variant-solid.color-success:hover:not(.disabled):not(.loading) {
-  background-color: var(--jewel);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-1);
+  background-color: var(--accent-dark);
+  border-color: var(--accent-dark);
 }
 
-.variant-outline.color-success {
-  border-color: var(--mountain-meadow);
-  color: var(--mountain-meadow);
-}
-
-.variant-outline.color-success:hover:not(.disabled):not(.loading) {
-  background-color: rgba(27, 167, 102, 0.08);
-}
-
-.variant-text.color-success {
-  color: var(--mountain-meadow);
-}
-
-.variant-text.color-success:hover:not(.disabled):not(.loading) {
-  background-color: rgba(27, 167, 102, 0.08);
-}
-
-/* Danger */
 .variant-solid.color-danger {
-  background-color: var(--pomegranate);
-  color: var(--alabaster);
+  color: var(--text-inverse);
+  background-color: var(--danger);
+  border-color: var(--danger);
 }
 
 .variant-solid.color-danger:hover:not(.disabled):not(.loading) {
-  background-color: var(--milano-red);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-1);
+  background-color: var(--danger-dark, #c50d0d);
+  border-color: var(--danger-dark, #c50d0d);
+}
+
+/* Outline Variants */
+.variant-outline.color-primary {
+  color: var(--primary);
+  background-color: transparent;
+  border-color: var(--primary);
+}
+
+.variant-outline.color-primary:hover:not(.disabled):not(.loading) {
+  color: var(--text-inverse);
+  background-color: var(--primary);
+}
+
+.variant-outline.color-content {
+  color: var(--text-secondary);
+  background-color: transparent;
+  border-color: var(--surface-2);
+}
+
+.variant-outline.color-content:hover:not(.disabled):not(.loading) {
+  color: var(--text-primary);
+  background-color: var(--surface-1);
+}
+
+.variant-outline.color-success {
+  color: var(--accent);
+  background-color: transparent;
+  border-color: var(--accent);
+}
+
+.variant-outline.color-success:hover:not(.disabled):not(.loading) {
+  color: var(--text-inverse);
+  background-color: var(--accent);
 }
 
 .variant-outline.color-danger {
-  border-color: var(--pomegranate);
-  color: var(--pomegranate);
+  color: var(--danger);
+  background-color: transparent;
+  border-color: var(--danger);
 }
 
 .variant-outline.color-danger:hover:not(.disabled):not(.loading) {
-  background-color: rgba(230, 15, 15, 0.08);
+  color: var(--text-inverse);
+  background-color: var(--danger);
 }
 
-.variant-text.color-danger {
-  color: var(--pomegranate);
+/* Text Variant */
+.variant-text {
+  background-color: transparent;
+  border-color: transparent;
 }
 
-.variant-text.color-danger:hover:not(.disabled):not(.loading) {
-  background-color: rgba(230, 15, 15, 0.08);
+.variant-text.color-primary {
+  color: var(--primary);
 }
 
-/* Button states */
-.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.variant-text.color-primary:hover:not(.disabled):not(.loading) {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Button States */
+.disabled,
+.button:disabled {
+  opacity: 0.65;
   pointer-events: none;
+  cursor: not-allowed;
 }
 
 .loading {
@@ -190,12 +168,18 @@
   opacity: 0.7;
 }
 
-/* Full width */
+/* Width Variations */
 .fullWidth {
   width: 100%;
 }
 
-/* Icons */
+.mediumWidth {
+  width: 50%;
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+/* Icon Support */
 .iconLeft, .iconRight {
   display: flex;
   align-items: center;
@@ -226,15 +210,54 @@
   stroke-dashoffset: 45;
 }
 
-/* Responsiveness */
-@media (max-width: 480px) {
-  .size-large {
-    font-size: var(--fs-p2);
-    padding: 0.5rem 1rem;
-    height: 44px;
-  }
-  
-  .fullWidth {
-    width: 100%;
-  }
+/* Tooltip Styles */
+.tooltipWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipText {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #000;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltipWrapper:hover .tooltipText {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Rounded Variant */
+.rounded {
+  border-radius: 9999px;
+}
+
+/* Button Icon Specific */
+.buttonIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: var(--radius-circle);
+}
+
+.buttonIcon.size-small {
+  width: 2rem;
+  height: 2rem;
+}
+
+.buttonIcon.size-large {
+  width: 3rem;
+  height: 3rem;
 }

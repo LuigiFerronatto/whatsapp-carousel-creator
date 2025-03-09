@@ -1,5 +1,5 @@
 // components/steps/StepTwo.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback  } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
 import AlertMessage from '../ui/AlertMessage/AlertMessage';
@@ -13,7 +13,8 @@ import {
   FiChevronLeft, 
   FiEye, 
   FiEyeOff, 
-  FiInfo 
+  FiInfo,
+  FiCheckCircle
 } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
@@ -40,7 +41,7 @@ const StepTwo = ({
   const [showPreview, setShowPreview] = useState(true);
   const [validationMessages, setValidationMessages] = useState({});
   const [activeCard, setActiveCard] = useState(0);
-  const [justSaved, setJustSaved] = useState(false);
+  const [savedBeforeUpload, setSavedBeforeUpload] = useState(false);
 
   useEffect(() => {
     if (templateName) {
@@ -100,14 +101,14 @@ const StepTwo = ({
     }
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveBeforeUpload = useCallback(() => {
     saveDraftManually();
-    setJustSaved(true);
-
+    setSavedBeforeUpload(true);
+    
     setTimeout(() => {
-      setJustSaved(false);
-    }, 3000);
-  };
+      setSavedBeforeUpload(false);
+    }, 5000);
+  }, [saveDraftManually]);
 
   const isAllValid = isTemplateNameValid && isBodyTextValid && Object.keys(validationMessages).length === 0;
 
@@ -291,35 +292,29 @@ const StepTwo = ({
             </div>
           </div>
 
-          <div className={styles.fixedButtonGroup}>
-            <div className={styles.actionStatus}>
-              {justSaved && (
-                <div className={styles.savedIndicator}>
-                  <FiCheck size={16} />
-                  Rascunho salvo!
-                </div>
-              )}
-            </div>
+          <div className={steps.actionSection}>
 
             <Button
-              className={styles.backButton}
               onClick={() => setStep(1)}
-              variant="outline"
+              variant="primary"
               color="content"
-              iconLeft={<FiChevronLeft className={styles.buttonIcon} />}
+              iconLeft={<FiChevronLeft />}
+              size='large'
+              
             >
               Voltar
             </Button>
 
-            <Button
-              className={styles.saveButton}
-              onClick={handleSaveDraft}
-              variant="outline"
-              color="primary"
-              iconLeft={<FiSave className={styles.buttonIcon} />}
-            >
-              Salvar Rascunho
-            </Button>
+            <Button 
+            variant="outline"
+            color="primary"
+            size="large"
+            onClick={handleSaveBeforeUpload}
+            iconLeft={savedBeforeUpload ? <FiCheckCircle size={18} /> : <FiSave size={18} />}
+            fullWidth
+          >
+            {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
+          </Button>
 
             <Button
               className={styles.nextButton}
@@ -328,7 +323,9 @@ const StepTwo = ({
               variant="solid"
               color="primary"
               loading={loading}
-              iconRight={!loading ? <FiChevronRight className={styles.buttonIcon} /> : null}
+              iconRight={!loading ? <FiChevronRight/> : null}
+              size='large'
+              fullWidth
             >
               {loading ? 'Processando...' : 'Criar Template'}
             </Button>
