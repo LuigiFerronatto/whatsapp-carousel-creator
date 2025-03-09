@@ -24,7 +24,7 @@
 
 /* Alert types */
 .success {
-  background-color: rgba(132, 235, 188, 0.2);
+  background-color: rgba(132, 235, 188, 1);
   border-left: 4px solid var(--color-positive);
   color: var(--color-content-default);
 }
@@ -34,7 +34,7 @@
 }
 
 .error {
-  background-color: rgba(249, 159, 159, 0.2);
+  background-color: rgba(249, 159, 159, 1);
   border-left: 4px solid var(--color-negative);
   color: var(--color-content-default);
 }
@@ -44,7 +44,7 @@
 }
 
 .warning {
-  background-color: rgba(253, 233, 155, 0.2);
+  background-color: rgba(253, 233, 155, 1);
   border-left: 4px solid var(--extended-yellow-dark);
   color: var(--color-content-default);
 }

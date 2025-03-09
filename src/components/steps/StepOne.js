@@ -304,19 +304,6 @@ const StepOne = ({
           </Button>
         </div>
         
-        {!authKey && (
-          <div className={styles.validationMessage}>
-            <FiInfo size={16} />
-            Adicione sua chave de autorização antes de continuar.
-          </div>
-        )}
-        
-        {authKey && !allCardsHaveUrls() && (
-          <div className={styles.validationMessage}>
-            <FiInfo size={16} />
-            Adicione URLs para todos os cards antes de continuar.
-          </div>
-        )}
       </div>
       
       {/* Upload summary */}

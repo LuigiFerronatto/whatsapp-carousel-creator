@@ -2,115 +2,143 @@
 import { useContext, useRef, useState, useEffect } from 'react';
 import AlertContext from '../components/ui/AlertMessage/AlertContext';
 
-// Cache global para evitar duplicação de alertas em um curto período
-const alertCache = {
+// Globally shared alert management
+const globalAlertCache = {
   messages: new Map(),
-  timeout: 3000 // Tempo para considerar mensagem como repetida
+  timeout: 3000, // Time to consider message as repeated
+  lastAlertTime: 0,
+  MIN_ALERT_INTERVAL: 500 // Minimum time between alerts
 };
 
 /**
- * Hook para usar o sistema de alertas com proteção contra loops.
+ * Hook for using alerts with advanced protection against loops and duplicates
  * 
- * @returns {Object} Métodos de alerta seguros (success, error, warning, info)
+ * @returns {Object} Safe alert methods
  */
 export const useAlertSafe = () => {
-  // Tenta obter o contexto de alerta
+  // Try to get alert context
   const context = useContext(AlertContext);
   
-  // Referência para armazenar se este é o carregamento inicial
+  // Refs for tracking initial render and alert state
   const initialRenderRef = useRef(true);
+  const alertCountRef = useRef(0);
   
-  // Estado local para evitar repetição de alertas
+  // State to control alert behavior
   const [enableAlerts, setEnableAlerts] = useState(false);
   
-  // Habilitar alertas após o carregamento inicial
+  // Enable alerts after initial render
   useEffect(() => {
-    // Aguardar componente montar totalmente
     const timer = setTimeout(() => {
       initialRenderRef.current = false;
       setEnableAlerts(true);
-    }, 1000);
+    }, 1500); // Increased delay to ensure stability
     
     return () => clearTimeout(timer);
   }, []);
   
-  // Função de proteção contra loops
+  // Advanced alert protection mechanism
   const guardAlert = (type, message, options = {}) => {
-    // Não mostrar alertas durante renderização inicial
+    // Prevent alerts during initial render
     if (initialRenderRef.current) {
-      console.log('Alerta ignorado (renderização inicial):', message);
+      console.log('Alert skipped (initial render):', message);
       return 'initial-render-skipped';
     }
     
-    // Não mostrar se alertas não estão habilitados ainda
+    // Disable alerts if not yet enabled
     if (!enableAlerts) {
-      console.log('Alerta ignorado (não habilitado):', message);
+      console.log('Alert skipped (not enabled):', message);
       return 'not-enabled-yet';
     }
     
-    // Verificar se a mensagem é repetida em um curto espaço de tempo
-    const key = `${type}:${message}`;
+    // Prevent too many alerts in quick succession
     const now = Date.now();
+    if (now - globalAlertCache.lastAlertTime < globalAlertCache.MIN_ALERT_INTERVAL) {
+      console.log('Alert skipped (too frequent):', message);
+      return 'too-frequent';
+    }
     
-    if (alertCache.messages.has(key)) {
-      const lastTime = alertCache.messages.get(key);
+    // Prevent duplicate messages
+    const key = `${type}:${message}`;
+    if (globalAlertCache.messages.has(key)) {
+      const lastTime = globalAlertCache.messages.get(key);
       
-      // Se a mensagem apareceu recentemente, ignorar
-      if (now - lastTime < alertCache.timeout) {
-        console.log('Alerta ignorado (repetido):', message);
+      // Skip if message is repeated within timeout
+      if (now - lastTime < globalAlertCache.timeout) {
+        console.log('Alert skipped (duplicate):', message);
         return 'duplicate';
       }
     }
     
-    // Armazenar a mensagem no cache
-    alertCache.messages.set(key, now);
+    // Limit total number of alerts
+    if (alertCountRef.current >= 5) {
+      console.log('Alert skipped (max limit reached):', message);
+      return 'max-limit';
+    }
     
-    // Limpar mensagens antigas do cache periodicamente
-    if (alertCache.messages.size > 50) {
-      for (const [msgKey, timestamp] of alertCache.messages.entries()) {
-        if (now - timestamp > alertCache.timeout * 2) {
-          alertCache.messages.delete(msgKey);
+    // Store message in cache
+    globalAlertCache.messages.set(key, now);
+    globalAlertCache.lastAlertTime = now;
+    alertCountRef.current++;
+    
+    // Clear old messages periodically
+    if (globalAlertCache.messages.size > 50) {
+      for (const [msgKey, timestamp] of globalAlertCache.messages.entries()) {
+        if (now - timestamp > globalAlertCache.timeout * 2) {
+          globalAlertCache.messages.delete(msgKey);
         }
       }
     }
     
-    // Se chegou até aqui, retorna a função real de alerta
+    // Attempt to show alert
     if (context) {
       try {
-        return context[type](message, {
+        const alertResult = context[type](message, {
           ...options,
           autoClose: options.autoClose ?? true,
-          autoCloseTime: options.autoCloseTime ?? 5000
+          autoCloseTime: options.autoCloseTime ?? 5000,
+          onClose: () => {
+            // Decrement alert count when closed
+            alertCountRef.current = Math.max(0, alertCountRef.current - 1);
+            
+            // Call original onClose if provided
+            if (options.onClose) options.onClose();
+          }
         });
+        
+        return alertResult;
       } catch (error) {
-        console.error('Erro ao mostrar alerta:', error, message);
+        console.error('Error showing alert:', error, message);
         return 'error';
       }
     } else {
-      // Fallback para quando o contexto não está disponível
-      console.log(`🔔 Alerta ${type} (simulado):`, message);
+      // Fallback for when context is not available
+      console.log(`🔔 Alert ${type} (simulated):`, message);
       return 'simulated';
     }
   };
   
-  // Retorna versão protegida contra loops
+  // Expose safe alert methods
   return {
     success: (message, options) => guardAlert('success', message, options),
     error: (message, options) => guardAlert('error', message, options),
     warning: (message, options) => guardAlert('warning', message, options),
     info: (message, options) => guardAlert('info', message, options),
     
-    // Método para remover alerta
+    // Method to remove alert
     remove: (id) => {
       if (context?.remove) {
         context.remove(id);
       }
     },
     
-    // Flags para debugging
+    // Debugging flags
     _isInitialRender: initialRenderRef.current,
     _areAlertsEnabled: enableAlerts,
-    _resetCache: () => alertCache.messages.clear()
+    _resetCache: () => {
+      globalAlertCache.messages.clear();
+      globalAlertCache.lastAlertTime = 0;
+      alertCountRef.current = 0;
+    }
   };
 };
 
