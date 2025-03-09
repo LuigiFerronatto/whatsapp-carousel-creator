@@ -1,5 +1,5 @@
-/* Steps.module.css */
-
+/* steps.module.css */
+/* Estilos base comuns para todos os steps */
 
 .container {
   display: flex;
@@ -42,4 +42,146 @@
   font-size: var(--fs-p1);
   color: var(--dove-gray-2);
   line-height: 1.5;
+}
+
+/* Seções comuns */
+.sectionTitle {
+  font-size: var(--fs-p1);
+  font-weight: var(--fw-bold);
+  color: var(--blip-blue-brand);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--wave);
+}
+
+/* Botões e ações comuns */
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--wave);
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-surface-2);
+  color: var(--text-color-default);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.backButton:hover {
+  background-color: var(--color-surface-3);
+}
+
+.nextButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-surface-primary);
+  color: var(--alabaster);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nextButton:hover:not(:disabled) {
+  background-color: var(--blip-dark);
+}
+
+.nextButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Loading states comuns */
+.loadingSpinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--alabaster);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Mensagens de validação comuns */
+.validationMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--vis-vis);
+  border-radius: var(--radius-md);
+  color: var(--chilean-fire);
+  font-size: var(--fs-p2);
+  margin-top: 0.75rem;
+}
+
+/* Cards e seções comuns */
+.card {
+  background-color: var(--color-surface-0);
+  border: 1px solid var(--wave);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-1);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+/* Responsividade comum */
+@media (max-width: 1200px) {
+  .container {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .backButton, .nextButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .stepTitle {
+    font-size: var(--fs-h4);
+  }
+  
+  .stepDescription {
+    font-size: var(--fs-p2);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+  
+  .introSection {
+    margin-bottom: 0.75rem;
+  }
 }
