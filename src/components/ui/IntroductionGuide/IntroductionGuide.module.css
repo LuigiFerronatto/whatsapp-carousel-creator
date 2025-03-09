@@ -1,27 +1,25 @@
 /* IntroductionGuide.module.css */
 .overlay {
   position: fixed;
-  inset: 0; /* Shorthand moderno para top, right, bottom, left */
-  background-color: rgba(0, 0, 0, 0.75);
+  inset: 0; /* Modern shorthand for top, right, bottom, left */
+  background-color: var(--color-backdrop);
   backdrop-filter: blur(4px);
   display: grid;
   place-items: center;
-  z-index: 1000;
-  padding: clamp(1rem, 5vw, 2rem);
-  animation: fadeIn 0.3s var(--ease-out);
+  z-index: var(--z-modal);
+  padding: clamp(var(--spacing-4), 5vw, var(--spacing-6));
+  animation: fadeIn 0.3s ease-out;
 }
 
 .guideContainer {
   background-color: var(--color-surface-0);
   border-radius: var(--radius-xl);
-  box-shadow: 
-    0 10px 25px -5px rgba(0, 0, 0, 0.1),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  width: 500px; /* Largura fixa */
-  height: 450px; /* Altura fixa */
+  box-shadow: var(--shadow-3);
+  width: 500px; /* Fixed width */
+  height: 450px; /* Fixed height */
   position: relative;
   overflow: hidden;
-  animation: slideUp 0.4s var(--ease-out);
+  animation: slideUp 0.4s ease-out;
   border: 1px solid var(--color-surface-2);
   display: flex;
   flex-direction: column;
@@ -29,8 +27,8 @@
 
 .closeButton {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
   background: var(--color-surface-1);
   border: 1px solid var(--color-surface-2);
   cursor: pointer;
@@ -41,43 +39,41 @@
   display: grid;
   place-items: center;
   border-radius: var(--radius-circle);
-  transition: all 0.2s var(--ease-out);
+  transition: all var(--transition-fast);
 }
 
 .closeButton:hover {
   background-color: var(--color-surface-2);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
   transform: rotate(90deg);
 }
 
 .closeButton:focus-visible {
-  outline: 2px solid var(--color-surface-primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .guideContent {
   flex: 1;
-  padding: 2.5rem; /* Padding fixo */
+  padding: var(--spacing-8); /* Fixed padding */
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  overflow: hidden; /* Permite scroll se o conteúdo for muito grande */
+  gap: var(--spacing-5);
+  overflow: hidden; /* Allows scrolling if content is too large */
 }
 
 .iconContainer {
   width: 72px;
   height: 72px;
-  background: linear-gradient(135deg, var(--blip-light) 0%, var(--blip-lighter) 100%);
   color: var(--blip-dark);
   border-radius: var(--radius-circle);
   display: grid;
   place-items: center;
   margin: 0 auto;
-  transition: transform 0.3s var(--ease-out);
-  box-shadow: 0 4px 12px rgba(var(--blip-rgb), 0.2);
+  transition: transform var(--transition-normal);
 }
 
 .iconContainer:hover {
@@ -85,9 +81,9 @@
 }
 
 .guideTitle {
-  font-size: var(--fs-h4); /* Tamanho fixo */
+  font-size: var(--fs-h4); /* Fixed size */
   font-weight: var(--fw-bold);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
   line-height: 1.2;
 }
 
@@ -102,8 +98,8 @@
 .progressIndicator {
   display: flex;
   justify-content: center;
-  gap: 0.75rem;
-  margin: 1rem 0;
+  gap: var(--spacing-3);
+  margin: var(--spacing-4) 0;
 }
 
 .progressDot {
@@ -112,7 +108,7 @@
   background-color: var(--color-surface-2);
   border-radius: var(--radius-circle);
   cursor: pointer;
-  transition: all 0.3s var(--ease-out);
+  transition: all var(--transition-normal);
 }
 
 .progressDot:hover {
@@ -121,35 +117,35 @@
 }
 
 .activeDot {
-  background-color: var(--color-surface-primary);
+  background-color: var(--color-primary);
   transform: scale(1.2);
-  box-shadow: 0 0 0 4px rgba(var(--blip-rgb), 0.2);
+  box-shadow: 0 0 0 4px rgba(30, 107, 241, 0.2);
 }
 
 .guideActions {
-  padding: 1.5rem 2.5rem;
+  padding: var(--spacing-5) var(--spacing-8);
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--spacing-4);
   border-top: 1px solid var(--color-surface-1);
 }
 
 .actionButton {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--spacing-3);
   font-weight: var(--fw-semibold);
   border-radius: var(--radius-lg);
-  padding: 0.75rem 1.25rem;
+  padding: var(--spacing-3) var(--spacing-5);
   cursor: pointer;
-  transition: all 0.3s var(--ease-out);
+  transition: all var(--transition-normal);
   font-size: var(--fs-p3);
 }
 
 .backButton {
   composes: actionButton;
   background-color: var(--color-surface-1);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
   border: 1px solid var(--color-surface-2);
 }
 
@@ -160,22 +156,22 @@
 
 .nextButton {
   composes: actionButton;
-  background: linear-gradient(135deg, var(--color-surface-primary) 0%, var(--blip-dark) 100%);
-  color: var(--alabaster);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--blip-dark) 100%);
+  color: var(--color-bright);
   border: none;
-  box-shadow: 0 4px 12px rgba(var(--blip-rgb), 0.3);
+  box-shadow: 0 4px 12px rgba(30, 107, 241, 0.3);
 }
 
 .nextButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(var(--blip-rgb), 0.4);
+  box-shadow: 0 6px 16px rgba(30, 107, 241, 0.4);
 }
 
 .nextButton:active {
   transform: translateY(0);
 }
 
-/* Melhorias de acessibilidade */
+/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   .overlay,
   .guideContainer,
@@ -188,7 +184,7 @@
   }
 }
 
-/* Animações refinadas */
+/* Refined animations */
 @keyframes fadeIn {
   from { 
     opacity: 0;
@@ -211,17 +207,17 @@
   }
 }
 
-/* Responsividade melhorada */
+/* Improved responsiveness */
 @media (max-width: 576px) {
   .guideContainer {
     height: auto;
     max-height: 90vh;
     overflow-y: auto;
-    margin: 1rem;
+    margin: var(--spacing-4);
   }
   
   .guideContent {
-    gap: 1rem;
+    gap: var(--spacing-4);
   }
   
   .iconContainer {
@@ -231,7 +227,7 @@
   
   .guideActions {
     flex-direction: column-reverse;
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
   
   .actionButton {

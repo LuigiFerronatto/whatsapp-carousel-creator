@@ -1,8 +1,8 @@
 // components/steps/StepTwo.js
-import React, { useState, useEffect, useCallback  } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
-import AlertMessage from '../ui/AlertMessage/AlertMessage';
+import { useAlert } from '../ui/AlertMessage/AlertContext'; // Adicionar esta importação
 import Input from '../ui/Input/Input';
 import Hints, { HintsGroup } from '../ui/Hints/Hints';
 import Button from '../ui/Button/Button';
@@ -37,6 +37,9 @@ const StepTwo = ({
   isStepValid,
   saveDraftManually
 }) => {
+  // Inicializar sistema de alertas
+  const alert = useAlert();
+  
   const [showHints, setShowHints] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
   const [validationMessages, setValidationMessages] = useState({});
@@ -61,43 +64,97 @@ const StepTwo = ({
     }
   }, [templateName, bodyText]);
 
+  // Mostrar erros recebidos como propriedades como alertas
+  useEffect(() => {
+    if (error) {
+      alert.error(error, { 
+        position: 'top-center',
+        autoCloseTime: 7000 
+      });
+    }
+  }, [error, alert]);
+
   const isTemplateNameValid = templateName.length >= 3;
   const isBodyTextValid = bodyText.length > 0;
 
   const validateCards = () => {
     const messages = {};
     let allValid = true;
+    let validationErrors = [];
 
     cards.slice(0, numCards).forEach((card, index) => {
       if (!card.bodyText) {
         messages[`card-${index}`] = `O texto do Card ${index + 1} é obrigatório`;
+        validationErrors.push(`Card ${index + 1}: texto obrigatório`);
         allValid = false;
       }
 
       if (card.buttons.some(button => !button.text)) {
         messages[`card-${index}-buttons`] = `Todos os botões do Card ${index + 1} devem ter texto`;
+        validationErrors.push(`Card ${index + 1}: todos os botões precisam de texto`);
         allValid = false;
       }
 
       card.buttons.forEach((button, btnIndex) => {
         if (button.type === 'URL' && !button.url) {
           messages[`card-${index}-button-${btnIndex}`] = `URL é obrigatório para o botão ${btnIndex + 1}`;
+          validationErrors.push(`Card ${index + 1}, Botão ${btnIndex + 1}: URL obrigatório`);
           allValid = false;
         }
         if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) {
           messages[`card-${index}-button-${btnIndex}`] = `Número de telefone é obrigatório para o botão ${btnIndex + 1}`;
+          validationErrors.push(`Card ${index + 1}, Botão ${btnIndex + 1}: número de telefone obrigatório`);
           allValid = false;
         }
       });
     });
 
     setValidationMessages(messages);
+    
+    // Se tivermos erros, mostramos um alerta com as informações
+    if (!allValid && validationErrors.length > 0) {
+      alert.error(`Problemas de validação encontrados:\n${validationErrors.join('\n')}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+    }
+    
     return allValid;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    // Validar nome do template
+    if (!isTemplateNameValid) {
+      alert.warning("O nome do template deve ter pelo menos 3 caracteres", {
+        position: 'top-center'
+      });
+      return;
+    }
+    
+    // Validar texto de introdução
+    if (!isBodyTextValid) {
+      alert.warning("A mensagem de introdução é obrigatória", {
+        position: 'top-center'
+      });
+      return;
+    }
+    
+    // Validar os cards
     if (validateCards()) {
-      handleCreateTemplate();
+      try {
+        // Tenta criar o template
+        await handleCreateTemplate();
+        // Em caso de sucesso, mostra alerta (mesmo que a função já troque de tela)
+        alert.success("Template criado com sucesso!", {
+          position: 'top-right'
+        });
+      } catch (err) {
+        // Capturar e mostrar erros como alertas
+        alert.error(`Erro ao criar template: ${err.message || 'Falha desconhecida'}`, {
+          position: 'top-center',
+          autoCloseTime: 7000
+        });
+      }
     }
   };
 
@@ -105,10 +162,16 @@ const StepTwo = ({
     saveDraftManually();
     setSavedBeforeUpload(true);
     
+    // Adicionar alerta de sucesso
+    alert.success("Rascunho salvo com sucesso!", {
+      position: 'bottom-right',
+      autoCloseTime: 3000
+    });
+    
     setTimeout(() => {
       setSavedBeforeUpload(false);
     }, 5000);
-  }, [saveDraftManually]);
+  }, [saveDraftManually, alert]);
 
   const isAllValid = isTemplateNameValid && isBodyTextValid && Object.keys(validationMessages).length === 0;
 
@@ -168,8 +231,8 @@ const StepTwo = ({
       </div>
 
       <div className={styles.contentWrapper}>
-        <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
-          <div className={styles.basicDetailsSection}>
+        <div className={`${styles.formContainer}${showPreview ? styles.withPreview : ''}`}>
+          <div className={steps.containerCard}>
             <h3>Informações Básicas do Template</h3>
 
             <div className={progressbar.progressContainer}>
@@ -201,7 +264,7 @@ const StepTwo = ({
               maxLength={64}
               error={!isTemplateNameValid && templateName ? "O nome do template deve ter pelo menos 3 caracteres." : ""}
               hintMessage={showHints ? "Escolha um nome descritivo, sem espaços." : ""}
-              hintVariant="simple"
+              hintVariant="info"
               hintList={["Use _ para separar palavras", "Exemplo: 'promo_verao' ou 'lancamento_produto'"]}
               size="medium"
               fullWidth
@@ -254,7 +317,7 @@ const StepTwo = ({
             />
           </div>
 
-          <div className={styles.cardEditorSection}>
+          <div className={steps.containerCard}>
             <h3>Conteúdo dos Cards</h3>
 
             <div className={styles.cardTabs}>
@@ -296,10 +359,11 @@ const StepTwo = ({
 
             <Button
               onClick={() => setStep(1)}
-              variant="primary"
+              variant="outline"
               color="content"
               iconLeft={<FiChevronLeft />}
               size='large'
+              fullWidth
               
             >
               Voltar
@@ -330,8 +394,6 @@ const StepTwo = ({
               {loading ? 'Processando...' : 'Criar Template'}
             </Button>
           </div>
-
-          {error && <AlertMessage error={error} />}
         </div>
 
         {showPreview && (

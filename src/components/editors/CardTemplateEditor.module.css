@@ -1,8 +1,8 @@
 /* CardTemplateEditor.module.css */
 .cardContainer {
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
-  border: 1px solid var(--wave);
+  margin-bottom: var(--spacing-5);
+  padding: var(--spacing-5);
+  border: 1px solid var(--color-border-2);
   border-left-width: 4px;
   border-radius: var(--radius-lg);
   background-color: var(--color-surface-0);
@@ -17,20 +17,20 @@
 }
 
 .invalidCard {
-  border-color: var(--color-surface-negative);
-  border-left-color: var(--color-surface-negative);
-  background-color: rgba(255, 224, 224, 0.05);
+  border-color: var(--color-negative);
+  border-left-color: var(--color-negative);
+  background-color: rgba(249, 159, 159, 0.05);
 }
 
 .collapsedCard {
-  padding: 1rem;
+  padding: var(--spacing-4);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
 }
 
 .cardTitleSection {
@@ -41,11 +41,11 @@
 .cardTitle {
   font-size: var(--fs-h4);
   font-weight: var(--fw-bold);
-  margin: 0 0 0.25rem 0;
-  color: var(--text-color-default);
+  margin: 0 0 var(--spacing-1) 0;
+  color: var(--color-content-default);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .cardIndicator {
@@ -58,7 +58,7 @@
 .cardActions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .validationBadge {
@@ -68,8 +68,8 @@
   width: 24px;
   height: 24px;
   border-radius: var(--radius-circle);
-  background-color: var(--cinderella);
-  color: var(--color-surface-negative);
+  background-color: rgba(249, 159, 159, 0.2);
+  color: var(--color-negative);
 }
 
 .expandButton {
@@ -88,7 +88,7 @@
 
 .expandButton:hover {
   background-color: var(--color-surface-2);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
 }
 
 .expanded {
@@ -99,24 +99,24 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
-  padding: 0.25rem 0;
+  padding: var(--spacing-1) 0;
 }
 
 .fileHandleLabel {
   font-weight: var(--fw-bold);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
   opacity: 0.6;
 }
 
 .fileHandleWrapper {
   display: flex;
   align-items: center;
-  background-color: var(--whisper);
+  background-color: var(--color-surface-1);
   border-radius: var(--radius-sm);
-  padding: 0.25rem 0.5rem;
+  padding: var(--spacing-1) var(--spacing-2);
   max-width: 250px;
   position: relative;
 }
@@ -126,7 +126,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--fs-p3);
-  color: var(--color-surface-primary);
+  color: var(--color-primary);
 }
 
 .copyButton {
@@ -136,17 +136,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.5rem;
+  margin-left: var(--spacing-2);
   width: 20px;
   height: 20px;
   padding: 0;
   border-radius: 3px;
   position: relative;
-  color: var(--color-surface-primary);
+  color: var(--color-primary);
 }
 
 .copyButton:hover {
-  background-color: var(--hover-light);
+  background-color: var(--color-hover);
 }
 
 .copyIcon {
@@ -157,7 +157,7 @@
 .tooltipText {
   position: absolute;
   background-color: var(--color-success);
-  color: var(--jewel);
+  color: var(--color-positive);
   font-size: 10px;
   padding: 2px 6px;
   border-radius: var(--radius-sm);
@@ -179,32 +179,32 @@
 .previewButton {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--spacing-1);
   background: none;
   border: none;
   font-size: var(--fs-p3);
-  color: var(--color-surface-primary);
-  padding: 0.25rem 0.5rem;
+  color: var(--color-primary);
+  padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .previewButton:hover {
-  background-color: var(--hover-light);
+  background-color: var(--color-hover);
   text-decoration: underline;
 }
 
 .validationMessage {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  background-color: rgba(255, 224, 224, 0.3);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: rgba(249, 159, 159, 0.1);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
   font-size: var(--fs-p3);
-  color: var(--milano-red);
+  color: var(--color-negative);
   animation: fadeIn var(--transition-normal);
 }
 
@@ -217,12 +217,12 @@
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  color: var(--milano-red);
+  color: var(--color-negative);
 }
 
 .imagePreviewContainer {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-2);
@@ -238,8 +238,8 @@
 
 .closePreviewButton {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
   width: 28px;
   height: 28px;
   border-radius: var(--radius-circle);
@@ -272,17 +272,17 @@
 /* Editor Tabs */
 .editorTabs {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--wave);
-  padding-bottom: 0.5rem;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-border-2);
+  padding-bottom: var(--spacing-2);
 }
 
 .editorTab {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
   background: none;
   border: none;
   border-radius: var(--radius-md);
@@ -293,12 +293,12 @@
 }
 
 .editorTab:hover {
-  background-color: var(--whisper);
-  color: var(--text-color-default);
+  background-color: var(--color-surface-1);
+  color: var(--color-content-default);
 }
 
 .activeTab {
-  background-color: var(--blip-light);
+  background-color: rgba(197, 217, 251, 0.2);
   color: var(--blip-dark);
   font-weight: var(--fw-bold);
 }
@@ -308,30 +308,30 @@
   background-color: rgba(255, 255, 255, 0.4);
   padding: 0.1rem 0.4rem;
   border-radius: var(--radius-pill);
-  margin-left: 0.25rem;
+  margin-left: var(--spacing-1);
 }
 
 /* Card Text Section */
 .cardFieldSection {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-5);
 }
 
 .fieldHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
 }
 
 .fieldLabel {
   font-weight: var(--fw-bold);
   font-size: var(--fs-p2);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
 }
 
 .invalidInput {
-  border-color: var(--color-surface-negative);
-  background-color: rgba(255, 224, 224, 0.1);
+  border-color: var(--color-negative);
+  background-color: rgba(249, 159, 159, 0.1);
 }
 
 .invalidInput:focus {
@@ -343,20 +343,20 @@
 }
 
 @keyframes highlightChange {
-  0%, 100% { border-color: var(--wave); }
-  50% { border-color: var(--color-surface-primary); }
+  0%, 100% { border-color: var(--color-border-2); }
+  50% { border-color: var(--color-primary); }
 }
 
 /* Buttons Section */
 .buttonsSection {
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
 }
 
 .buttonsList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
 }
 
 .buttonItem {
@@ -369,52 +369,53 @@
 }
 
 .noButtonsMessage {
-  background-color: var(--cinderella);
-  color: var(--color-surface-negative);
-  padding: 1rem;
+  background-color: rgba(249, 159, 159, 0.1);
+  color: var(--color-negative);
+  padding: var(--spacing-4);
   text-align: center;
   border-radius: var(--radius-md);
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
   font-size: var(--fs-p2);
   font-weight: var(--fw-bold);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .addButton {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px dashed var(--wave);
+  padding: var(--spacing-3);
+  border: 2px dashed var(--color-border-2);
   border-radius: var(--radius-md);
-  color: var(--color-surface-primary);
-  background-color: var(--whisper);
+  color: var(--color-primary);
+  background-color: var(--color-surface-1);
   font-weight: var(--fw-bold);
   cursor: pointer;
   transition: all var(--transition-fast);
-  margin-top: 1rem;
+  margin-top: var(--spacing-4);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .addButton:hover {
-  background-color: var(--hover-light);
-  border-color: var(--color-surface-primary);
+  background-color: var(--color-hover);
+  border-color: var(--color-primary);
   transform: translateY(-2px);
 }
+
 /* Collapsed Preview Styles */
 .collapsedPreview {
-  border-top: 1px dashed var(--wave);
-  padding-top: 0.75rem;
-  margin-top: 0.5rem;
+  border-top: 1px dashed var(--color-border-2);
+  padding-top: var(--spacing-3);
+  margin-top: var(--spacing-2);
 }
 
 .collapsedField {
   display: flex;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
 }
 
 .collapsedField:last-of-type {
@@ -431,7 +432,7 @@
 
 .collapsedValue {
   font-size: var(--fs-p3);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
 }
 
 .emptyText {
@@ -442,13 +443,13 @@
 .collapsedValidation {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background-color: var(--cinderella);
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-2);
+  background-color: rgba(249, 159, 159, 0.1);
   border-radius: var(--radius-sm);
   font-size: var(--fs-p3);
-  color: var(--milano-red);
+  color: var(--color-negative);
 }
 
 .validationIcon {
@@ -463,12 +464,12 @@
 @media (max-width: 768px) {
   .cardHeader {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--spacing-2);
   }
   
   .expandButton {
     align-self: flex-end;
-    margin-top: -2rem;
+    margin-top: calc(-1 * var(--spacing-6));
   }
   
   .fileHandleInfo {
@@ -478,75 +479,27 @@
   
   .editorTabs {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--spacing-1);
   }
   
   .editorTab {
     width: 100%;
     justify-content: flex-start;
-    }
-    
-    .fieldHeader {
-      flex-direction: column;
-      align-items: flex-start;
-    }
   }
+    
+  .fieldHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
   
-
 @media (max-width: 480px) {
   .cardTitle {
     font-size: var(--fs-p1);
   }
-
   
   .fileHandleWrapper {
     max-width: 100%;
     width: 100%;
   }
-  
-}
-
-/* Adicione ao seu StepTwo.module.css */
-.whatsappRequirement {
-  margin: 0.75rem 0 1.25rem 0;
-  padding: 0.75rem 1rem;
-  background-color: var(--blip-light);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  font-size: var(--fs-p3);
-  color: var(--blip-dark);
-  border-left: 3px solid var(--color-surface-primary);
-}
-
-.whatsappRequirement strong {
-  font-weight: var(--fw-bold);
-}
-
-.infoIcon {
-  flex-shrink: 0;
-  color: var(--blip-dark);
-}
-
-/* Adicione ao seu CardTemplateEditor.module.css */
-.whatsappRequirement {
-  margin: 0 0 1rem 0;
-  padding: 0.75rem;
-  background-color: var(--blip-light);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  font-size: var(--fs-p3);
-  color: var(--blip-dark);
-  border-left: 3px solid var(--color-surface-primary);
-}
-
-.whatsappRequirement strong {
-  font-weight: var(--fw-bold);
-}
-
-.infoIcon {
-  flex-shrink: 0;
 }

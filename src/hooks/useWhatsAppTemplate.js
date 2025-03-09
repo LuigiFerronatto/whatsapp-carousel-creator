@@ -1,5 +1,6 @@
 // hooks/useWhatsAppTemplate.js
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useAlertSafe } from './useAlertSafe'; // Usar versão segura do useAlert
 import { validateTemplate, validatePhoneNumber } from '../services/validation/validationService';
 import { uploadFiles, createTemplate, sendTemplateMessage } from '../services/api/apiService';
 import { saveDraft, loadDraft, clearDraft } from '../services/storage/localStorageService';
@@ -42,6 +43,12 @@ export const useWhatsAppTemplate = () => {
   // Referência para o autosave
   const autoSaveTimerRef = useRef(null);
   
+  // Flags para evitar loop de alertas em efeitos iniciais
+  const initialLoadDone = useRef(false);
+  
+  // Usar versão segura do hook de alertas
+  const alert = useAlertSafe();
+  
   // Função auxiliar para criar um card vazio
   function createEmptyCard() {
     return {
@@ -82,15 +89,32 @@ export const useWhatsAppTemplate = () => {
     
     if (saveSuccess) {
       setSuccess('Rascunho salvo com sucesso!');
+      
+      // Mostrar alerta de sucesso
+      alert.success('Rascunho salvo com sucesso!', {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      
       setTimeout(() => setSuccess(''), 3000);
     } else {
       setError('Erro ao salvar rascunho. Verifique o espaço disponível no seu navegador.');
+      
+      // Mostrar alerta de erro
+      alert.error('Erro ao salvar rascunho. Verifique o espaço disponível no seu navegador.', {
+        position: 'top-center',
+        autoCloseTime: 5000
+      });
+      
       setTimeout(() => setError(''), 5000);
     }
-  }, [saveCurrentState]);
+  }, [saveCurrentState, alert]);
   
-  // Carregar rascunho salvo ao iniciar
+  // Carregar rascunho salvo ao iniciar - MODIFICADO PARA EVITAR LOOPS
   useEffect(() => {
+    // Evitar carregar múltiplas vezes ou após carregamentos iniciais
+    if (initialLoadDone.current) return;
+    
     const savedDraft = loadDraft();
     if (savedDraft) {
       // Restaurar estado salvo
@@ -105,9 +129,22 @@ export const useWhatsAppTemplate = () => {
       if (savedDraft.lastSavedTime) setLastSavedTime(new Date(savedDraft.lastSavedTime));
       
       setSuccess('Rascunho carregado com sucesso!');
+      
+      // Esperar a renderização inicial terminar antes de mostrar alertas
+      setTimeout(() => {
+        // Mostrar toast informativo SOMENTE quando já tivermos completado o carregamento inicial
+        alert.info('Rascunho anterior carregado com sucesso!', {
+          position: 'top-right',
+          autoCloseTime: 3000
+        });
+      }, 2000);
+      
       setTimeout(() => setSuccess(''), 3000);
     }
-  }, []);
+    
+    // Marcar como carregado para não repetir
+    initialLoadDone.current = true;
+  }, [alert]); // Dependência removida para evitar loops
   
   // Configurar alerta para prevenir o usuário de sair com alterações não salvas
   useEffect(() => {
@@ -125,6 +162,9 @@ export const useWhatsAppTemplate = () => {
   
   // Autosave quando houver mudanças - AGORA usando saveCurrentState que já foi definida
   useEffect(() => {
+    // Ignorar mudanças durante o carregamento inicial
+    if (!initialLoadDone.current) return;
+    
     // Marcar que existem mudanças não salvas - apenas se não estiver já marcado
     if (!unsavedChanges) {
       setUnsavedChanges(true);
@@ -147,86 +187,139 @@ export const useWhatsAppTemplate = () => {
     };
   }, [templateName, language, bodyText, cards, authKey, unsavedChanges, saveCurrentState]);
   
-  // Funções de validação para cada etapa
+  // Funções de validação para cada etapa com alertas para erros
   const validateStepOne = useCallback(() => {
     const errors = {};
+    const errorMessages = new Set(); // Usar Set para eliminar duplicatas
     
     if (!authKey) {
       errors.authKey = 'A chave de autorização (Router Key) é obrigatória';
+      errorMessages.push('Chave de autorização (Router Key) é obrigatória');
     }
     
-    // Removida a variável cardErrors que não era utilizada
     cards.slice(0, numCards).forEach((card, index) => {
       if (!card.fileUrl) {
         errors[`card_${index}_fileUrl`] = `URL do arquivo não informada para o card ${index + 1}`;
+        errorMessages.push(`Card ${index + 1}: URL do arquivo não informada`);
       }
     });
     
     setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [authKey, cards, numCards]);
+
+    const errorMessagesList = Array.from(errorMessages);
+    
+    // Mostrar alerta com todos os erros
+      // Mostrar alerta de erro apenas se houver mensagens
+  if (errorMessagesList.length > 0) {
+    // Usar setTimeout para prevenir possíveis loops de renderização
+    setTimeout(() => {
+      alert.error(`Problemas de validação encontrados:\n${errorMessagesList.join('\n')}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+    }, 0);
+    
+    return false;
+  }
+  
+  return true;
+}, [authKey, cards, numCards, alert]);
   
   const validateStepTwo = useCallback(() => {
     const errors = {};
+    const errorMessages = [];
     
     if (!templateName) {
       errors.templateName = 'Nome do template é obrigatório';
+      errorMessages.push('Nome do template é obrigatório');
     } else if (templateName.length < 3) {
       errors.templateName = 'Nome do template deve ter pelo menos 3 caracteres';
+      errorMessages.push('Nome do template deve ter pelo menos 3 caracteres');
     }
     
     if (!bodyText) {
       errors.bodyText = 'Texto do corpo da mensagem é obrigatório';
+      errorMessages.push('Texto do corpo da mensagem é obrigatório');
     } else if (bodyText.length > 1024) {
       errors.bodyText = `Texto do corpo excede o limite de 1024 caracteres. Atual: ${bodyText.length}`;
+      errorMessages.push(`Texto do corpo excede o limite de 1024 caracteres (${bodyText.length})`);
     }
     
     cards.slice(0, numCards).forEach((card, index) => {
       if (!card.bodyText) {
         errors[`card_${index}_bodyText`] = `Texto do card ${index + 1} é obrigatório`;
+        errorMessages.push(`Card ${index + 1}: texto é obrigatório`);
       } else if (card.bodyText.length > 160) {
         errors[`card_${index}_bodyText`] = `Texto do card ${index + 1} excede o limite de 160 caracteres`;
+        errorMessages.push(`Card ${index + 1}: texto excede limite de 160 caracteres`);
       }
       
       if (!card.buttons || card.buttons.length === 0) {
         errors[`card_${index}_buttons`] = `Adicione pelo menos um botão para o card ${index + 1}`;
+        errorMessages.push(`Card ${index + 1}: adicione pelo menos um botão`);
       } else {
         card.buttons.forEach((button, btnIndex) => {
           if (!button.text) {
             errors[`card_${index}_button_${btnIndex}_text`] = `Texto do botão ${btnIndex + 1} no card ${index + 1} é obrigatório`;
+            errorMessages.push(`Card ${index + 1}, Botão ${btnIndex + 1}: texto é obrigatório`);
           }
           
           if (button.type === 'URL' && !button.url) {
             errors[`card_${index}_button_${btnIndex}_url`] = `URL do botão ${btnIndex + 1} no card ${index + 1} é obrigatória`;
+            errorMessages.push(`Card ${index + 1}, Botão ${btnIndex + 1}: URL é obrigatória`);
           }
           
           if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) {
             errors[`card_${index}_button_${btnIndex}_phoneNumber`] = `Número de telefone do botão ${btnIndex + 1} no card ${index + 1} é obrigatório`;
+            errorMessages.push(`Card ${index + 1}, Botão ${btnIndex + 1}: número de telefone é obrigatório`);
           }
         });
       }
     });
     
     setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [templateName, bodyText, cards, numCards]);
+    
+    // Mostrar alerta com todos os erros
+    if (errorMessages.length > 0) {
+      alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+      return false;
+    }
+    
+    return true;
+  }, [templateName, bodyText, cards, numCards, alert]);
   
   const validateStepThree = useCallback(() => {
     const errors = {};
+    const errorMessages = [];
     
     if (!phoneNumber) {
       errors.phoneNumber = 'Número de telefone é obrigatório para enviar o template';
+      errorMessages.push('Número de telefone é obrigatório');
     } else {
       try {
         validatePhoneNumber(phoneNumber);
       } catch (err) {
         errors.phoneNumber = err.message;
+        errorMessages.push(err.message);
       }
     }
     
     setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [phoneNumber]);
+    
+    // Mostrar alerta com todos os erros
+    if (errorMessages.length > 0) {
+      alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+      return false;
+    }
+    
+    return true;
+  }, [phoneNumber, alert]);
   
   // Verificar se a etapa atual é válida
   const isStepValid = useCallback((currentStep) => {
@@ -398,10 +491,17 @@ export const useWhatsAppTemplate = () => {
     const standardizedCards = standardizeButtons();
     setCards(standardizedCards);
     
-    // Exibir mensagem de sucesso
+    // Exibir mensagem de sucesso e alerta
     setSuccess('Botões padronizados com sucesso em todos os cards!');
+    
+    // Mostrar alerta de sucesso
+    alert.success('Botões padronizados com sucesso em todos os cards!', {
+      position: 'top-right',
+      autoCloseTime: 3000
+    });
+    
     setTimeout(() => setSuccess(''), 3000);
-  }, [standardizeButtons]);
+  }, [standardizeButtons, alert]);
 
   /**
    * Sincroniza um tipo de botão em todos os cards
@@ -440,7 +540,13 @@ export const useWhatsAppTemplate = () => {
       
       return newCards;
     });
-  }, [numCards]);
+    
+    // Informar sobre a sincronização
+    alert.info(`Tipo de botão "${newType}" sincronizado em todos os cards`, {
+      position: 'bottom-right',
+      autoCloseTime: 3000
+    });
+  }, [numCards, alert]);
 
   /**
    * Sincroniza a adição de botões em todos os cards
@@ -469,7 +575,13 @@ export const useWhatsAppTemplate = () => {
       
       return newCards;
     });
-  }, [numCards]);
+    
+    // Informar sobre a adição de botões
+    alert.info(`Botão do tipo "${buttonType}" adicionado a todos os cards`, {
+      position: 'bottom-right',
+      autoCloseTime: 3000
+    });
+  }, [numCards, alert]);
 
   /**
    * Sincroniza a remoção de botões em todos os cards
@@ -487,7 +599,13 @@ export const useWhatsAppTemplate = () => {
       
       return newCards;
     });
-  }, [numCards]);
+    
+    // Informar sobre a remoção de botões
+    alert.warning(`Botão removido de todos os cards`, {
+      position: 'bottom-right',
+      autoCloseTime: 3000
+    });
+  }, [numCards, alert]);
   
   /**
    * Adiciona um novo card ao template
@@ -496,8 +614,19 @@ export const useWhatsAppTemplate = () => {
     if (numCards < 10) {
       setNumCards(prev => prev + 1);
       setCards(prev => [...prev, createEmptyCard()]);
+      
+      // Alerta ao adicionar card
+      alert.info(`Card ${numCards + 1} adicionado ao carrossel`, {
+        position: 'bottom-right',
+        autoCloseTime: 2000
+      });
+    } else {
+      // Alerta quando atingir o limite de cards
+      alert.warning('Limite máximo de 10 cards atingido', {
+        position: 'top-center'
+      });
     }
-  }, [numCards]);
+  }, [numCards, alert]);
   
   /**
    * Remove o último card do template
@@ -506,8 +635,19 @@ export const useWhatsAppTemplate = () => {
     if (numCards > 2) {
       setNumCards(prev => prev - 1);
       setCards(prev => prev.slice(0, prev.length - 1));
+      
+      // Alerta ao remover card
+      alert.info(`Card ${numCards} removido do carrossel`, {
+        position: 'bottom-right',
+        autoCloseTime: 2000
+      });
+    } else {
+      // Alerta quando tentar remover além do mínimo
+      alert.warning('Um carrossel precisa ter no mínimo 2 cards', {
+        position: 'top-center'
+      });
     }
-  }, [numCards]);
+  }, [numCards, alert]);
   
   /**
    * Atualiza um campo específico de um card
@@ -568,6 +708,16 @@ export const useWhatsAppTemplate = () => {
    * @param {number} cardIndex - Índice do card
    */
   const addButton = useCallback((cardIndex) => {
+    // Verificar se já possui o máximo de botões
+    const card = cards[cardIndex];
+    if (card.buttons.length >= 2) {
+      // Alerta sobre o limite de botões
+      alert.warning('Cada card pode ter no máximo 2 botões', {
+        position: 'top-center'
+      });
+      return;
+    }
+    
     // Obter o tipo de botão padrão (usar o tipo do primeiro botão do primeiro card, ou QUICK_REPLY)
     const defaultButtonType = cards[0]?.buttons[0]?.type || 'QUICK_REPLY';
     
@@ -587,8 +737,14 @@ export const useWhatsAppTemplate = () => {
     // Se tiver mais de um card, sincronizar a adição com os outros cards
     if (numCards > 1) {
       syncAddButton(cardIndex, defaultButtonType);
+    } else {
+      // Alerta sobre adição de botão apenas para o card atual
+      alert.info(`Botão adicionado ao Card ${cardIndex + 1}`, {
+        position: 'bottom-right',
+        autoCloseTime: 2000
+      });
     }
-  }, [cards, numCards, syncAddButton]);
+  }, [cards, numCards, syncAddButton, alert]);
   
   /**
    * Remove um botão de um card
@@ -606,8 +762,14 @@ export const useWhatsAppTemplate = () => {
     // Se tiver mais de um card, sincronizar a remoção com os outros cards
     if (numCards > 1) {
       syncRemoveButton(buttonIndex);
+    } else {
+      // Alerta sobre remoção de botão apenas para o card atual
+      alert.info(`Botão removido do Card ${cardIndex + 1}`, {
+        position: 'bottom-right',
+        autoCloseTime: 2000
+      });
     }
-  }, [numCards, syncRemoveButton]);
+  }, [numCards, syncRemoveButton, alert]);
   
   /**
    * Faz o upload dos arquivos dos cards para a API
@@ -624,6 +786,12 @@ export const useWhatsAppTemplate = () => {
     setSuccess('');
 
     try {
+      // Mostrar alerta de início do processo
+      alert.info('Iniciando processo de upload...', {
+        position: 'top-right',
+        autoCloseTime: 3000
+      });
+      
       setSuccess('Iniciando processo de upload...');
       
       // Fazer upload dos arquivos
@@ -637,18 +805,31 @@ export const useWhatsAppTemplate = () => {
       setUploadResults(results);
       setSuccess(`Todos os ${numCards} arquivos foram processados com sucesso!`);
       
+      // Mostrar alerta de sucesso
+      alert.success(`Todos os ${numCards} arquivos foram processados com sucesso!`, {
+        position: 'top-right'
+      });
+      
       // Salvar o estado atual
       saveCurrentState();
       
       // Avançar para a próxima etapa
       setStep(2);
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      
+      // Mostrar alerta de erro
+      alert.error(`Erro durante o processo de upload: ${errorMessage}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+      
       console.error('Erro durante o processo de upload:', err);
     } finally {
       setLoading(false);
     }
-  }, [authKey, cards, numCards, updateCard, validateStepOne, saveCurrentState]);
+  }, [authKey, cards, numCards, updateCard, validateStepOne, saveCurrentState, alert]);
   
   /**
    * Cria o template baseado nas informações fornecidas
@@ -666,6 +847,12 @@ export const useWhatsAppTemplate = () => {
     
     // Se não for consistente, padronizar os botões antes de prosseguir
     if (!consistency.isConsistent) {
+      // Mostrar alerta sobre a padronização necessária
+      alert.warning('Inconsistência detectada nos botões. O WhatsApp exige que todos os cards tenham o mesmo número e tipos de botões. Será realizada uma padronização automática.', {
+        position: 'top-center',
+        autoCloseTime: 5000
+      });
+      
       // Padronizar botões
       const standardizedCards = standardizeButtons();
       
@@ -685,6 +872,13 @@ export const useWhatsAppTemplate = () => {
         
         // Informar ao usuário que precisa preencher os campos
         setError('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.');
+        
+        // Mostrar alerta sobre campos obrigatórios vazios
+        alert.warning('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.', {
+          position: 'top-center',
+          autoCloseTime: 7000
+        });
+        
         return;
       }
       
@@ -693,6 +887,12 @@ export const useWhatsAppTemplate = () => {
       
       // Informar ao usuário sobre a padronização
       setSuccess('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.');
+      
+      // Mostrar alerta sobre a padronização automática
+      alert.success('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.', {
+        position: 'top-right',
+        autoCloseTime: 3000
+      });
       
       // Pequena pausa para o usuário ver a mensagem
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -710,6 +910,12 @@ export const useWhatsAppTemplate = () => {
       validateTemplate(templateName, bodyText, authKey, cardsToUse);
       
       setSuccess('Validações concluídas. Criando template...');
+      
+      // Mostrar alerta de criação
+      alert.info('Validações concluídas. Criando template...', {
+        position: 'top-right',
+        autoCloseTime: 3000
+      });
       
       // Criar template na API
       const { templateJson, sendTemplateJson, builderTemplateJson } = await createTemplate(
@@ -729,26 +935,46 @@ export const useWhatsAppTemplate = () => {
 
       setSuccess('Template criado com sucesso!');
       
+      // Mostrar alerta de sucesso
+      alert.success('Template criado com sucesso!', {
+        position: 'top-right'
+      });
+      
       // Salvar o estado atual
       saveCurrentState();
       
       // Avançar para a próxima etapa
       setStep(3);
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      
+      // Mostrar alerta de erro
+      alert.error(`Erro ao criar template: ${errorMessage}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+      
       console.error('Erro ao criar template:', err);
     } finally {
       setLoading(false);
     }
-  }, [templateName, language, bodyText, authKey, cards, numCards, validateStepTwo, saveCurrentState, checkButtonConsistency, standardizeButtons]);
+  }, [templateName, language, bodyText, authKey, cards, numCards, validateStepTwo, saveCurrentState, checkButtonConsistency, standardizeButtons, alert]);
   
   /**
    * Envia o template para um número de telefone
    */
-  const sendTemplate = useCallback(async () => {
-    // Validar antes de prosseguir
-    if (!validateStepThree()) {
-      setError('Por favor, corrija os erros antes de continuar.');
+  const sendTemplate = useCallback(async (phoneNumberToSend = phoneNumber) => {
+    // Verificar se temos um número de telefone
+    if (!phoneNumberToSend) {
+      const errorMsg = 'Número de telefone é obrigatório para enviar o template';
+      setError(errorMsg);
+      
+      // Mostrar alerta de erro
+      alert.error(errorMsg, {
+        position: 'top-center'
+      });
+      
       return;
     }
     
@@ -757,7 +983,13 @@ export const useWhatsAppTemplate = () => {
     setSuccess('');
 
     try {
-      const formattedPhone = validatePhoneNumber(phoneNumber);
+      // Mostrar alerta de envio
+      alert.info(`Enviando template para ${phoneNumberToSend}...`, {
+        position: 'top-right',
+        autoCloseTime: 3000
+      });
+      
+      const formattedPhone = validatePhoneNumber(phoneNumberToSend);
       
       // Validar template
       if (!finalJson || !finalJson.sendTemplate) {
@@ -767,17 +999,31 @@ export const useWhatsAppTemplate = () => {
       // Enviar template
       await sendTemplateMessage(formattedPhone, finalJson.sendTemplate, authKey);
       
-      setSuccess(`Template enviado com sucesso para ${phoneNumber}!`);
+      const successMsg = `Template enviado com sucesso para ${phoneNumberToSend}!`;
+      setSuccess(successMsg);
       
-      // Avançar para a próxima etapa
-      setStep(4);
+      // Mostrar alerta de sucesso
+      alert.success(successMsg, {
+        position: 'top-right'
+      });
+      
+      return true;
     } catch (err) {
-      setError(handleApiError(err));
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      
+      // Mostrar alerta de erro
+      alert.error(`Erro no envio: ${errorMessage}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+      
       console.error("Erro no envio:", err);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, [phoneNumber, finalJson, authKey, validateStepThree]);
+  }, [phoneNumber, finalJson, authKey, alert]);
   
   /**
    * Copia o JSON do template para a área de transferência
@@ -786,13 +1032,27 @@ export const useWhatsAppTemplate = () => {
   const copyToClipboard = useCallback((jsonType) => {
     try {
       if (!finalJson || !finalJson[jsonType]) {
-        setError('Não foi possível copiar. JSON não disponível.');
+        const errorMsg = 'Não foi possível copiar. JSON não disponível.';
+        setError(errorMsg);
+        
+        // Mostrar alerta de erro
+        alert.error(errorMsg, {
+          position: 'top-center'
+        });
+        
         return;
       }
       
       navigator.clipboard.writeText(JSON.stringify(finalJson[jsonType], null, 2))
         .then(() => {
-          setSuccess(`JSON para ${jsonType === 'createTemplate' ? 'criação do template' : 'envio do template'} copiado!`);
+          const successMsg = `JSON para ${jsonType === 'createTemplate' ? 'criação do template' : jsonType === 'sendTemplate' ? 'envio do template' : 'integração com Builder'} copiado!`;
+          setSuccess(successMsg);
+          
+          // Mostrar alerta de sucesso
+          alert.success(successMsg, {
+            position: 'bottom-right',
+            autoCloseTime: 3000
+          });
           
           // Limpar a mensagem de sucesso após 3 segundos
           setTimeout(() => {
@@ -800,12 +1060,24 @@ export const useWhatsAppTemplate = () => {
           }, 3000);
         })
         .catch(err => {
-          setError(`Erro ao copiar: ${err.message}`);
+          const errorMsg = `Erro ao copiar: ${err.message}`;
+          setError(errorMsg);
+          
+          // Mostrar alerta de erro
+          alert.error(errorMsg, {
+            position: 'top-center'
+          });
         });
     } catch (err) {
-      setError(`Erro ao copiar: ${err.message}`);
+      const errorMsg = `Erro ao copiar: ${err.message}`;
+      setError(errorMsg);
+      
+      // Mostrar alerta de erro
+      alert.error(errorMsg, {
+        position: 'top-center'
+      });
     }
-  }, [finalJson]);
+  }, [finalJson, alert]);
   
   /**
    * Reinicia o formulário para criar um novo template
@@ -823,12 +1095,19 @@ export const useWhatsAppTemplate = () => {
       setError('');
       setSuccess('');
       setValidationErrors({});
+      
       // Limpar o rascunho salvo
       clearDraft();
       setLastSavedTime(null);
       setUnsavedChanges(false);
+      
+      // Mostrar alerta de reset
+      alert.info('Template resetado. Você pode começar um novo template agora.', {
+        position: 'top-right',
+        autoCloseTime: 3000
+      });
     }
-  }, []);
+  }, [alert]);
 
   /**
    * Vai para o passo anterior no fluxo
@@ -838,8 +1117,14 @@ export const useWhatsAppTemplate = () => {
       setStep(prev => prev - 1);
       setError('');
       setSuccess('');
+      
+      // Mostrar alerta de navegação
+      alert.info(`Retornando para o passo ${step - 1}`, {
+        position: 'bottom-right',
+        autoCloseTime: 2000
+      });
     }
-  }, [step]);
+  }, [step, alert]);
 
   /**
    * Limpa as mensagens de erro e sucesso

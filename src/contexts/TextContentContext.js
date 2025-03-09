@@ -1,22 +1,60 @@
-// contexts/TextContentContext.js
-import React, { createContext } from 'react';
-import textContent from '../config/textContent.json';
+// contexts/WhatsAppTemplateContext.js
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useWhatsAppTemplate } from '../hooks/useWhatsAppTemplate';
 
-export const TextContentContext = createContext(null);
+// Criar o contexto
+const WhatsAppTemplateContext = createContext();
 
 /**
- * Provider para conteúdo de texto centralizado
- * @param {Object} props - Propriedades do componente
- * @param {React.ReactNode} props.children - Componentes filhos
- * @returns {JSX.Element} Provider component
+ * Hook para acessar o contexto do template WhatsApp
+ * @returns {Object} Dados e métodos do contexto
  */
-export const TextContentProvider = ({ children, locale = 'pt-BR' }) => {
-  // Aqui poderíamos implementar lógica para diferentes idiomas
-  // usando o parâmetro locale
+export const useWhatsAppTemplateContext = () => {
+  const context = useContext(WhatsAppTemplateContext);
+  if (!context) {
+    throw new Error('useWhatsAppTemplateContext deve ser usado dentro de WhatsAppTemplateProvider');
+  }
+  return context;
+};
+
+/**
+ * Provider para o contexto do template WhatsApp
+ * @param {Object} props.children Componentes filhos
+ * @returns {JSX.Element} Provider do contexto
+ */
+export const WhatsAppTemplateProvider = ({ children }) => {
+  // Flag para evitar alertas no carregamento inicial
+  const initialRenderRef = useRef(true);
+  
+  // Estado para controlar se devemos mostrar alertas
+  const [allowAlerts, setAllowAlerts] = useState(false);
+  
+  // Usar o hook principal
+  const templateState = useWhatsAppTemplate();
+  
+  // Efeito para habilitar alertas após o carregamento inicial
+  useEffect(() => {
+    // Aguardar 1 segundo antes de habilitar alertas
+    // Isso evita que alertas de carregamento inicial disparem loops
+    const timer = setTimeout(() => {
+      initialRenderRef.current = false;
+      setAllowAlerts(true);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Envolver o estado do template com verificação de alertas permitidos
+  const wrappedState = {
+    ...templateState,
+    // Adicionar flag para facilitar debugging
+    allowAlerts,
+    isInitialRender: initialRenderRef.current
+  };
   
   return (
-    <TextContentContext.Provider value={textContent}>
+    <WhatsAppTemplateContext.Provider value={wrappedState}>
       {children}
-    </TextContentContext.Provider>
+    </WhatsAppTemplateContext.Provider>
   );
 };

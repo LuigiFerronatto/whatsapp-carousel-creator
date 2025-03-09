@@ -4,7 +4,6 @@ import { useWhatsAppTemplateContext } from '../contexts/WhatsAppTemplateContext'
 import StepOne from './steps/StepOne';
 import StepTwo from './steps/StepTwo';
 import StepThree from './steps/StepThree';
-import StepFour from './steps/StepFour';
 import ProgressHeader from './ui/ProgressHeader/ProgressHeader';
 import IntroductionGuide from './ui/IntroductionGuide/IntroductionGuide';
 import { FiArrowUp } from 'react-icons/fi';
@@ -74,8 +73,6 @@ const WhatsAppCarouselCreator = () => {
         return <StepTwo {...templateContext} showHints={showTips} />;
       case 3:
         return <StepThree {...templateContext} />;
-      case 4:
-        return <StepFour {...templateContext} />;
       default:
         return null;
     }

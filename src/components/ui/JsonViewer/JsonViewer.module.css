@@ -1,18 +1,16 @@
 /* JsonViewer.module.css */
-@import '../../../styles/design-system.css';
-
 .jsonContainer {
   position: relative;
   border: 1px solid var(--color-surface-2);
   background-color: var(--color-surface-0);
-  padding: 1rem;
-  transition: all 0.3s ease;
-  border-radius: 0 0 1rem 1rem;
+  padding: var(--spacing-4);
+  transition: all var(--transition-normal);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .jsonContainer:hover {
   box-shadow: var(--shadow-2);
-  border-color: var(--color-surface-primary);
+  border-color: var(--color-primary);
 }
 
 .jsonContainer.fullscreen {
@@ -23,11 +21,11 @@
   bottom: 0;
   width: 100dvw;
   height: 100dvh;
-  z-index: 99999;
-  background-color: var(--alabaster);
-  padding: 2rem;
+  z-index: var(--z-modal);
+  background-color: var(--color-bright);
+  padding: var(--spacing-6);
   overflow: auto;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn var(--transition-normal);
 }
 
 @keyframes fadeIn {
@@ -36,10 +34,10 @@
 }
 
 .titleBar {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .titleIcon {
@@ -50,58 +48,58 @@
 .title {
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .toolBar {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
   justify-content: flex-end;
 }
 
 .toolButton {
   background: var(--color-surface-1);
-  border: 1px solid var(--wave);
+  border: 1px solid var(--color-border-2);
   border-radius: var(--radius-md);
-  padding: 0.5rem;
+  padding: var(--spacing-2);
   cursor: pointer;
-  color: var(--text-color-default);
-  transition: all 0.2s ease;
+  color: var(--color-content-default);
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .toolButton:hover {
-  background: var(--color-surface-primary);
+  background: var(--color-primary);
   transform: translateY(-2px);
-  color: white;
+  color: var(--color-bright);
   box-shadow: var(--shadow-1);
 }
 
 .toolButton.active,
 .toolButton.copied {
-  background: var(--color-surface-primary);
-  color: var(--alabaster);
+  background: var(--color-primary);
+  color: var(--color-bright);
 }
 
 .successIcon {
-  color: var(--mountain-meadow);
+  color: var(--color-positive);
 }
 
 .errorContainer {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--pomegranate);
-  background: var(--cinderella);
-  padding: 0.75rem;
+  gap: var(--spacing-2);
+  color: var(--color-negative);
+  background: rgba(249, 159, 159, 0.1);
+  padding: var(--spacing-3);
   border-radius: var(--radius-md);
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
 }
 
 .errorIcon {
@@ -113,7 +111,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: var(--spacing-6);
   background-color: var(--color-surface-1);
   border-radius: var(--radius-lg);
   color: var(--dove-gray-2);
@@ -122,19 +120,20 @@
 
 .emptyIcon {
   font-size: 3rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
   color: var(--blip-blue-brand);
 }
 
 .codeContainer {
   height: 40dvh;
-  background: var(--whisper);
-  margin: 0.5rem 0;
-  padding: 1rem;
+  background: var(--color-surface-1);
+  margin: var(--spacing-2) 0;
+  padding: var(--spacing-4);
   font-size: 0.8rem;
   line-height: 1.5;
   scrollbar-width: thin;
   scrollbar-color: var(--color-surface-3) var(--color-surface-1);
+  border-radius: var(--radius-md);
 }
 
 .codeContainer::-webkit-scrollbar {
@@ -158,12 +157,12 @@
 }
 
 /* Syntax Highlighting Colors */
-.string { color: var(--mountain-meadow); }
-.number { color: var(--blip-blue-brand); }
-.boolean { color: var(--geraldine); }
+.string { color: var(--color-positive); }
+.number { color: var(--color-primary); }
+.boolean { color: var(--color-negative); }
 .null { color: var(--dove-gray-2); }
 .key { 
-  color: var(--blip-pink); 
+  color: var(--extended-pink-dark); 
   font-weight: var(--fw-bold);
 }
 
@@ -178,8 +177,8 @@
     background: var(--mine-shaft-2);
   }
 
-  .string { color: var(--mint-green); }
-  .number { color: var(--sky-blue); }
-  .boolean { color: var(--coral); }
-  .key { color: var(--pastel-pink); }
+  .string { color: var(--extended-green-light); }
+  .number { color: var(--extended-blue-light); }
+  .boolean { color: var(--extended-red-light); }
+  .key { color: var(--extended-pink-light); }
 }

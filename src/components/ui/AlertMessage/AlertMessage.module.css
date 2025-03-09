@@ -1,8 +1,8 @@
 /* AlertMessage.module.css */
 .alertContainer {
   position: relative;
-  margin: 1.5rem 0;
-  padding: 1rem;
+  margin: var(--spacing-5) 0;
+  padding: var(--spacing-4);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-1);
   display: flex;
@@ -10,38 +10,57 @@
   justify-content: space-between;
   overflow: hidden;
   animation: slideIn var(--transition-normal);
+  width: 100%;
+  max-width: 500px;
+  z-index: var(--z-toast);
 }
 
 .alertContent {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--spacing-3);
   flex: 1;
 }
 
 /* Alert types */
 .success {
-  background-color: var(--magic-mint);
-  border-left: 4px solid var(--mountain-meadow);
-  color: var(--jewel);
+  background-color: rgba(132, 235, 188, 0.2);
+  border-left: 4px solid var(--color-positive);
+  color: var(--color-content-default);
+}
+
+.success .icon {
+  color: var(--color-positive);
 }
 
 .error {
-  background-color: var(--cinderella);
-  border-left: 4px solid var(--pomegranate);
-  color: var(--milano-red);
+  background-color: rgba(249, 159, 159, 0.2);
+  border-left: 4px solid var(--color-negative);
+  color: var(--color-content-default);
+}
+
+.error .icon {
+  color: var(--color-negative);
 }
 
 .warning {
-  background-color: var(--vis-vis);
-  border-left: 4px solid var(--marigold-yellow);
-  color: var(--buddha-gold);
+  background-color: rgba(253, 233, 155, 0.2);
+  border-left: 4px solid var(--extended-yellow-dark);
+  color: var(--color-content-default);
+}
+
+.warning .icon {
+  color: var(--extended-yellow-dark);
 }
 
 .info {
-  background-color: var(--blip-light);
-  border-left: 4px solid var(--color-surface-primary);
-  color: var(--blip-dark);
+  background-color: rgba(197, 217, 251, 0.2);
+  border-left: 4px solid var(--color-primary);
+  color: var(--color-content-default);
+}
+
+.info .icon {
+  color: var(--color-primary);
 }
 
 .icon {
@@ -51,6 +70,7 @@
 .message {
   font-size: var(--fs-p2);
   line-height: 1.5;
+  color: var(--color-content-default);
 }
 
 .closeButton {
@@ -61,16 +81,16 @@
   align-items: center;
   justify-content: center;
   opacity: 0.7;
-  padding: 0.25rem;
+  padding: var(--spacing-1);
   border-radius: var(--radius-circle);
-  color: inherit;
-  margin-left: 0.5rem;
+  color: var(--color-content-default);
+  margin-left: var(--spacing-2);
   transition: all var(--transition-fast);
 }
 
 .closeButton:hover {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--color-hover);
 }
 
 .progressBar {
@@ -79,15 +99,61 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .progress {
   height: 100%;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--color-pressed);
   transform-origin: left center;
   animation: progress linear forwards;
+}
+
+/* Floating styles */
+.floating {
+  position: fixed;
+  margin: 0;
+  box-shadow: var(--shadow-2);
+}
+
+/* Positioning variants */
+.position-top-right {
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  animation: slideInRight var(--transition-normal);
+}
+
+.position-top-center {
+  top: var(--spacing-4);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: slideInTop var(--transition-normal);
+}
+
+.position-top-left {
+  top: var(--spacing-4);
+  left: var(--spacing-4);
+  animation: slideInLeft var(--transition-normal);
+}
+
+.position-bottom-right {
+  bottom: var(--spacing-4);
+  right: var(--spacing-4);
+  animation: slideInRight var(--transition-normal);
+}
+
+.position-bottom-center {
+  bottom: var(--spacing-4);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: slideInBottom var(--transition-normal);
+}
+
+.position-bottom-left {
+  bottom: var(--spacing-4);
+  left: var(--spacing-4);
+  animation: slideInLeft var(--transition-normal);
 }
 
 /* Animations */
@@ -102,6 +168,50 @@
   }
 }
 
+@keyframes slideInRight {
+  from { 
+    opacity: 0; 
+    transform: translateX(100%);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from { 
+    opacity: 0; 
+    transform: translateX(-100%);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInTop {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -100%);
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes slideInBottom {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, 100%);
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, 0);
+  }
+}
+
 @keyframes progress {
   0% {
     transform: scaleX(1);
@@ -112,20 +222,37 @@
 }
 
 /* Responsiveness */
+@media (max-width: 600px) {
+  .alertContainer {
+    max-width: calc(100% - var(--spacing-8));
+  }
+  
+  .position-top-center,
+  .position-bottom-center {
+    width: calc(100% - var(--spacing-8));
+  }
+  
+  .position-top-left,
+  .position-top-right,
+  .position-bottom-left,
+  .position-bottom-right {
+    max-width: calc(100% - var(--spacing-8));
+  }
+}
+
 @media (max-width: 480px) {
   .alertContainer {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem 1rem 1.5rem;
+    padding: var(--spacing-3);
   }
 
   .closeButton {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: var(--spacing-2);
+    right: var(--spacing-2);
   }
 
   .message {
-    padding-right: 1.5rem;
+    padding-right: var(--spacing-6);
+    font-size: var(--fs-p3);
   }
 }

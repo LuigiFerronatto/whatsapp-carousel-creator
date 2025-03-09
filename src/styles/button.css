@@ -1,0 +1,99 @@
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-5);
+    font-family: var(--font-primary);
+    font-size: var(--fs-p1);
+    font-weight: var(--fw-bold);
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+  }
+  
+  /* Solid Buttons */
+  .btn-solid-primary {
+    color: var(--color-surface-0);
+    background-color: var(--btn-solid-primary-default);
+    border-color: var(--btn-solid-primary-default);
+  }
+  
+  .btn-solid-primary:hover {
+    background-color: var(--btn-solid-primary-hover);
+    box-shadow: var(--btn-solid-primary-hover-shadow);
+  }
+  
+  .btn-solid-primary:active {
+    background-color: var(--btn-solid-primary-pressed);
+    box-shadow: var(--btn-solid-primary-pressed-shadow);
+  }
+  
+  .btn-solid-primary:disabled {
+    background-color: var(--btn-solid-primary-disable);
+    pointer-events: none;
+  }
+  
+  /* Outline Buttons */
+  .btn-outline-primary {
+    color: var(--btn-outline-primary-default);
+    background-color: transparent;
+    border-color: var(--btn-outline-primary-default);
+  }
+  
+  .btn-outline-primary:hover {
+    color: var(--btn-outline-primary-hover);
+    background-color: var(--btn-outline-primary-hover-bg);
+  }
+  
+  .btn-outline-primary:active {
+    color: var(--btn-outline-primary-pressed);
+    background-color: var(--btn-outline-primary-pressed-bg);
+  }
+  
+  .btn-outline-primary:disabled {
+    color: var(--btn-outline-primary-disable);
+    border-color: var(--btn-outline-primary-disable);
+    pointer-events: none;
+  }
+  
+  /* Text Buttons */
+  .btn-text-primary {
+    color: var(--btn-text-primary-default);
+    background-color: transparent;
+    border: none;
+  }
+  
+  .btn-text-primary:hover {
+    color: var(--btn-text-primary-hover);
+    background-color: var(--btn-text-primary-hover-bg);
+  }
+  
+  .btn-text-primary:active {
+    color: var(--btn-text-primary-pressed);
+    background-color: var(--btn-text-primary-pressed-bg);
+  }
+  
+  .btn-text-primary:disabled {
+    color: var(--btn-text-primary-disable);
+    pointer-events: none;
+  }
+  
+  /* Button Sizes */
+  .btn-sm {
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: var(--fs-p2);
+  }
+  
+  .btn-lg {
+    padding: var(--spacing-4) var(--spacing-6);
+    font-size: var(--fs-p1);
+  }

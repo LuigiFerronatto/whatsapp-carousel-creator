@@ -1,86 +1,146 @@
-/* Loading.module.css */
+/* src/components/ui/PreRenderStatus/PreRenderStatus.module.css */
 .container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-3);
-  }
-  
-  .fullScreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    z-index: 9999;
-  }
-  
-  .content {
-    display: flex;
+  margin-bottom: var(--spacing-4);
+  animation: fadeIn var(--transition-normal);
+}
+
+.statusCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  background-color: rgba(197, 217, 251, 0.1);
+  border: 1px solid var(--color-border-2);
+  box-shadow: var(--shadow-1);
+  transition: all var(--transition-normal);
+}
+
+.statusCard:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+
+.statusIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-circle);
+  flex-shrink: 0;
+}
+
+.inProgress {
+  background-color: rgba(30, 107, 241, 0.1);
+  color: var(--color-primary);
+}
+
+.success {
+  background-color: rgba(0, 122, 66, 0.1);
+  color: var(--color-positive);
+}
+
+.partialSuccess {
+  background-color: rgba(197, 217, 251, 0.2);
+  color: var(--blip-dark);
+}
+
+.error {
+  background-color: rgba(249, 159, 159, 0.1);
+  color: var(--color-negative);
+}
+
+.statusIcon {
+  font-size: 20px;
+}
+
+.statusContent {
+  flex-grow: 1;
+}
+
+.statusTitle {
+  font-size: var(--fs-p1);
+  font-weight: var(--fw-semibold);
+  margin: 0 0 var(--spacing-1) 0;
+  color: var(--color-content-default);
+}
+
+.statusMessage {
+  font-size: var(--fs-p2);
+  color: var(--dove-gray-2);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.progressBar {
+  height: 4px;
+  background-color: rgba(30, 107, 241, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: var(--spacing-2);
+}
+
+.progressIndeterminate {
+  height: 100%;
+  width: 30%;
+  background-color: var(--color-primary);
+  border-radius: 2px;
+  animation: indeterminateProgress 1.5s infinite ease-in-out;
+  position: relative;
+}
+
+.formatContainer {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.formatBadge {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--fs-p3);
+  font-weight: var(--fw-semibold);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-1);
+  color: var(--dove-gray-2);
+  transition: all var(--transition-fast);
+}
+
+.formatComplete {
+  background-color: rgba(132, 235, 188, 0.1);
+  color: var(--color-positive);
+}
+
+/* Animation for the loading icon */
+.inProgress .statusIcon {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes indeterminateProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .statusCard {
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-  }
-  
-  .spinner {
-    position: relative;
-    border-radius: 50%;
-  }
-  
-  .circle {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    border-top-color: currentColor;
-    animation: spin 1s linear infinite;
-  }
-  
-  /* Tamanhos */
-  .size-small {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .size-medium {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .size-large {
-    width: 48px;
-    height: 48px;
-  }
-  
-  /* Cores */
-  .color-primary {
-    color: var(--color-surface-primary);
-  }
-  
-  .color-light {
-    color: var(--alabaster);
-  }
-  
-  .color-dark {
-    color: var(--text-color-default);
-  }
-  
-  .message {
-    margin-top: var(--spacing-2);
-    font-size: var(--fs-p2);
-    color: var(--text-color-default);
     text-align: center;
   }
   
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+  .statusContent {
+    width: 100%;
   }
+}

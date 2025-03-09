@@ -1,6 +1,7 @@
 // components/editors/CardTemplateEditor.js
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ButtonEditor from './ButtonEditor';
+import { useAlert } from '../ui/AlertMessage/AlertContext'; // Adicionar esta importação
 import { 
   FiMaximize2, 
   FiMinimize2, 
@@ -27,6 +28,9 @@ const CardTemplateEditor = ({
   validationMessage,
   numCards = 2
 }) => {
+  // Inicializar sistema de alertas
+  const alert = useAlert();
+  
   const [isExpanded, setIsExpanded] = useState(true);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -86,14 +90,25 @@ const CardTemplateEditor = ({
       const buttonType = card.buttons[0]?.type || 'QUICK_REPLY';
       const newButtons = [...card.buttons, { type: buttonType, text: '' }];
       updateButtons(newButtons);
+      
       if (index === 0 && numCards > 1) {
         for (let cardIndex = 1; cardIndex < numCards; cardIndex++) {
           const cardButtons = [...cards[cardIndex].buttons];
           cardButtons.push({ type: buttonType, text: '' });
           updateCard(cardIndex, 'buttons', cardButtons);
         }
+        
+        // Alerta quando adicionar botão no primeiro card (sincronização)
+        alert.info("Botão adicionado em todos os cards para manter a consistência exigida pelo WhatsApp.", {
+          position: 'bottom-right',
+          autoCloseTime: 4000
+        });
       } else if (index > 0) {
-        alert("Para manter a consistência do WhatsApp, adicionaremos este botão em todos os cards.");
+        // Substituir o alert padrão pelo novo sistema de alertas
+        alert.warning("Para manter a consistência do WhatsApp, adicionaremos este botão em todos os cards.", {
+          position: 'top-center'
+        });
+        
         for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
           if (cardIndex !== index) {
             const cardButtons = [...cards[cardIndex].buttons];
@@ -102,13 +117,25 @@ const CardTemplateEditor = ({
           }
         }
       }
+    } else {
+      // Alerta quando tentar adicionar mais de 2 botões
+      alert.warning("O WhatsApp permite no máximo 2 botões por card.", {
+        position: 'top-center'
+      });
     }
-  }, [card.buttons, updateButtons, cards, updateCard, index, numCards]);
+  }, [card.buttons, updateButtons, cards, updateCard, index, numCards, alert]);
 
   const removeButton = useCallback((buttonIndex) => {
     const newButtons = card.buttons.filter((_, i) => i !== buttonIndex);
     updateButtons(newButtons);
+    
     if (numCards > 1) {
+      // Alerta quando remover botão (sincronização)
+      alert.warning("O botão será removido de todos os cards para manter a consistência exigida pelo WhatsApp.", {
+        position: 'top-center',
+        autoCloseTime: 3000
+      });
+      
       for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
         if (cardIndex !== index) {
           const cardButtons = cards[cardIndex].buttons.filter((_, i) => i !== buttonIndex);
@@ -116,7 +143,7 @@ const CardTemplateEditor = ({
         }
       }
     }
-  }, [card.buttons, updateButtons, cards, updateCard, index, numCards]);
+  }, [card.buttons, updateButtons, cards, updateCard, index, numCards, alert]);
 
   const updateButtonField = useCallback((buttonIndex, field, value) => {
     const newButtons = [...card.buttons];
@@ -124,8 +151,14 @@ const CardTemplateEditor = ({
     updateButtons(newButtons);
     if (field === 'type' && index === 0 && numCards > 1) {
       syncButtonTypes(buttonIndex, value);
+      
+      // Alerta quando mudar o tipo de botão no primeiro card (sincronização)
+      alert.info(`Tipo de botão sincronizado em todos os cards: ${value}`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
     }
-  }, [card.buttons, updateButtons, syncButtonTypes, index, numCards]);
+  }, [card.buttons, updateButtons, syncButtonTypes, index, numCards, alert]);
 
   const getCardColor = useCallback(() => {
     const colors = [
@@ -133,7 +166,36 @@ const CardTemplateEditor = ({
       'var(--mountain-meadow)',
       'var(--marigold-yellow)',
       'var(--chilean-fire)',
-      'var(--windsor)'
+      'var(--windsor)',
+      'var(--extended-ocean-light)',
+      'var(--extended-ocean-dark)',
+      'var(--extended-blue-light)',
+      'var(--extended-blue-dark)',
+      'var(--extended-green-light)',
+      'var(--extended-green-dark)',
+      'var(--extended-yellow-light)',
+      'var(--extended-yellow-dark)',
+      'var(--extended-orange-light)',
+      'var(--extended-orange-dark)',
+      'var(--extended-red-light)',
+      'var(--extended-red-dark)',
+      'var(--extended-pink-light)',
+      'var(--extended-pink-dark)',
+      'var(--extended-gray-light)',
+      'rgba(30, 107, 241, 1)', // --color-surface-primary
+      'rgba(1, 114, 62, 1)', // --color-surface-positive
+      'rgba(138, 0, 0, 1)', // --color-surface-negative
+      'rgba(30, 107, 241, 1)', // --color-primary
+      'rgba(41, 41, 41, 1)', // --color-secondary
+      'rgba(0, 122, 66, 1)', // --color-positive
+      'rgba(138, 0, 0, 1)', // --color-negative
+      'rgba(230, 15, 15, 1)', // --color-delete
+      '#C5D9FB', // --blip-light
+      '#0096fa', // --blip-blue-brand
+      '#1968F0', // --blip-action
+      '#0C4EC0', // --blip-dark
+      '#072F73', // --blip-night
+      'rgba(0, 150, 250, 1)', // --color-brand
     ];
     return colors[index % colors.length];
   }, [index]);
@@ -143,13 +205,30 @@ const CardTemplateEditor = ({
       navigator.clipboard.writeText(card.fileHandle)
         .then(() => {
           setCopySuccess(true);
+          
+          // Alerta quando copiar o ID do arquivo
+          alert.success("ID do arquivo copiado para a área de transferência!", {
+            position: 'bottom-right',
+            autoCloseTime: 2000
+          });
+          
           setTimeout(() => setCopySuccess(false), 2000);
         })
         .catch(err => {
           console.error('Error copying:', err);
+          
+          // Alerta em caso de erro ao copiar
+          alert.error("Não foi possível copiar o ID do arquivo", {
+            position: 'bottom-right'
+          });
         });
+    } else {
+      // Alerta quando não houver ID para copiar
+      alert.warning("Este card não possui ID de arquivo para copiar", {
+        position: 'bottom-right'
+      });
     }
-  }, [card.fileHandle]);
+  }, [card.fileHandle, alert]);
 
   const renderTextPanel = () => (
     <div className={styles.cardFieldSection}>
@@ -269,7 +348,7 @@ const CardTemplateEditor = ({
   const renderCollapsedContent = () => (
     <div className={styles.collapsedPreview}>
       <div className={styles.collapsedField}>
-        <span className={styles.collapsedLabel}>Text:</span>
+        <span className={styles.collapsedLabel}>Texto:</span>
         <span className={styles.collapsedValue}>
           {card.bodyText ? 
             (card.bodyText.length > 40 ? card.bodyText.substring(0, 40) + '...' : card.bodyText) : 

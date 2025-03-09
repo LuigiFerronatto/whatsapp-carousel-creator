@@ -1,4 +1,4 @@
-/* StepThree.module.css - Enhanced Version */
+/* StepThree.module.css - Improved Version */
 @import '../../styles/Steps.module.css';
 @import '../../styles/design-system.css';
 
@@ -6,10 +6,10 @@
 .viewTabs {
   display: flex;
   justify-content: center;
-  margin: 1rem 0 1.5rem;
+  margin: var(--spacing-4) 0 var(--spacing-5);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-1);
-  padding: 0.5rem;
+  padding: var(--spacing-2);
   box-shadow: var(--shadow-1);
   position: relative;
   z-index: 1;
@@ -18,8 +18,8 @@
 .viewTab {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
   background: none;
   border: none;
   border-radius: var(--radius-md);
@@ -27,18 +27,18 @@
   font-weight: var(--fw-bold);
   color: var(--dove-gray-2);
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: all var(--transition-fast);
 }
 
 .viewTab:hover {
   background-color: var(--color-surface-2);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
 }
 
 .activeTab {
-  background-color: var(--whisper);
-  color: var(--color-surface-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: var(--color-surface-1);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-1);
 }
 
 .tabIcon {
@@ -47,9 +47,9 @@
 }
 
 .viewContent {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-6);
   min-height: 400px;
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn var(--transition-normal);
 }
 
 @keyframes fadeIn {
@@ -59,12 +59,12 @@
 
 /* Visual Preview Styles */
 .visualPreview {
-  background-color: var(--whisper);
+  background-color: var(--color-surface-1);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--wave);
+  border: 1px solid var(--color-border-2);
   box-shadow: var(--shadow-1);
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow var(--transition-normal);
 }
 
 .visualPreview:hover {
@@ -72,10 +72,10 @@
 }
 
 .previewHeader {
-  padding: 1rem;
+  padding: var(--spacing-4);
   text-align: center;
   background-color: var(--blip-blue-brand);
-  color: var(--alabaster);
+  color: var(--color-bright);
   position: relative;
   overflow: hidden;
 }
@@ -99,7 +99,7 @@
 .previewTitle {
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--spacing-1);
 }
 
 .previewSubtitle {
@@ -109,26 +109,26 @@
 }
 
 .previewContainer {
-  padding: 2rem;
+  padding: var(--spacing-6);
   display: flex;
   justify-content: center;
 }
 
 .templateInfo {
-  padding: 1rem;
+  padding: var(--spacing-4);
   background-color: var(--color-surface-0);
-  border-top: 1px solid var(--wave);
+  border-top: 1px solid var(--color-border-2);
 }
 
 .infoItem {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem 0;
+  padding: var(--spacing-2) 0;
   font-size: var(--fs-p2);
 }
 
 .infoItem:not(:last-child) {
-  border-bottom: 1px dashed var(--wave);
+  border-bottom: 1px dashed var(--color-border-2);
 }
 
 .infoLabel {
@@ -141,13 +141,10 @@
   font-weight: var(--fw-bold);
 }
 
-/* Preview Actions */
-
-
 .formatSelector {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .formatIcon {
@@ -158,15 +155,15 @@
 .codeView {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--spacing-6);
 }
 
 .codeSection {
-  border: 1px solid var(--wave);
+  border: 1px solid var(--color-border-2);
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .codeSection:hover {
@@ -178,9 +175,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background-color: White;
-  color: white;
+  padding: var(--spacing-4);
+  background-color: var(--color-bright);
+  color: var(--color-bright);
   position: relative;
   overflow: hidden;
 }
@@ -209,7 +206,7 @@
 
 .codeActions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
   position: relative;
   z-index: 1;
 }
@@ -223,9 +220,9 @@
   background-color: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: var(--radius-circle);
-  color: var(--alabaster);
+  color: var(--color-bright);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .codeActionButton:hover {
@@ -233,26 +230,25 @@
   transform: translateY(-2px);
 }
 
-
-/* StepFour Styles adicionados */
+/* Step Four Styles */
 .contentWrapper {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
 }
 
 .previewSection, .sendSection {
   flex: 1;
   background-color: var(--color-surface-0);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--wave);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-2);
   overflow: hidden;
 }
 
 .sectionHeader {
-  background-color: var(--whisper);
-  border-bottom: 1px solid var(--wave);
-  padding: 1rem;
+  background-color: var(--color-surface-1);
+  border-bottom: 1px solid var(--color-border-2);
+  padding: var(--spacing-4);
 }
 
 .sectionTitle {
@@ -265,38 +261,38 @@
 .actionsContainer {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  padding: 1rem;
-  border-top: 1px solid var(--wave);
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--color-border-2);
 }
 
 .sendDescription {
-  padding: 1rem;
+  padding: var(--spacing-4);
   margin: 0;
   color: var(--dove-gray-2);
 }
 
 .formGroup {
-  padding: 0 1rem 1rem;
+  padding: 0 var(--spacing-4) var(--spacing-4);
 }
 
 .label {
   display: block;
   font-weight: var(--fw-bold);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
 }
 
 .phoneInputWrapper {
   display: flex;
-  border: 1px solid var(--mercury);
-  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .phonePrefix {
   background-color: var(--color-surface-1);
-  padding: 0.75rem;
-  border-right: 1px solid var(--mercury);
+  padding: var(--spacing-3);
+  border-right: 1px solid var(--color-border-2);
   color: var(--dove-gray-2);
   font-weight: var(--fw-bold);
 }
@@ -304,24 +300,24 @@
 .phoneInput {
   flex: 1;
   border: none;
-  padding: 0.75rem;
+  padding: var(--spacing-3);
   outline: none;
 }
 
 .phoneInputWrapper:focus-within {
-  border-color: var(--blip-action);
-  box-shadow: 0 0 0 2px rgba(25, 104, 240, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(30, 107, 241, 0.1);
 }
 
 .inputHelp {
   display: block;
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
 }
 
 .sendButtonContainer {
-  padding: 0 1rem 1rem;
+  padding: 0 var(--spacing-4) var(--spacing-4);
 }
 
 .successContainer {
@@ -329,36 +325,36 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 2rem 1rem;
+  padding: var(--spacing-6) var(--spacing-4);
 }
 
 .successIcon {
   width: 72px;
   height: 72px;
-  border-radius: 50%;
-  background-color: var(--magic-mint);
-  color: var(--jewel);
+  border-radius: var(--radius-circle);
+  background-color: rgba(132, 235, 188, 0.2);
+  color: var(--color-positive);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
 }
 
 .successTitle {
-  color: var(--jewel);
-  margin-bottom: 0.5rem;
+  color: var(--color-positive);
+  margin-bottom: var(--spacing-2);
 }
 
 .successMessage {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-3);
 }
 
 .phoneDisplay {
-  background-color: var(--whisper);
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius-sm);
+  background-color: var(--color-surface-1);
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: var(--radius-md);
   font-weight: var(--fw-bold);
-  margin: 0.75rem 0;
+  margin: var(--spacing-3) 0;
   max-width: 300px;
   width: 100%;
   color: var(--blip-blue-brand);
@@ -367,28 +363,28 @@
 .successNote {
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-5);
   max-width: 320px;
 }
 
 .navigationButtons {
   display: flex;
   justify-content: space-between;
-  padding-top: 1rem;
-  border-top: 1px solid var(--wave);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-border-2);
 }
 
 .sendForm {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--spacing-5);
 }
 
 .sendTitle {
   font-size: var(--fs-h4);
   font-weight: var(--fw-bold);
   color: var(--blip-blue-brand);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
   position: relative;
   display: inline-block;
 }
@@ -396,28 +392,28 @@
 .sendTitle::after {
   content: '';
   position: absolute;
-  bottom: -0.5rem;
+  bottom: calc(-1 * var(--spacing-2));
   left: 0;
   width: 40px;
   height: 3px;
-  background-color: var(--color-surface-primary);
+  background-color: var(--color-primary);
   border-radius: 3px;
 }
 
 .formLabel {
   display: block;
   font-weight: var(--fw-bold);
-  margin-bottom: 0.5rem;
-  color: var(--text-color-default);
+  margin-bottom: var(--spacing-2);
+  color: var(--color-content-default);
 }
 
 .errorText {
-  color: var(--milano-red);
+  color: var(--color-negative);
   font-size: var(--fs-p3);
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .errorText::before {
@@ -427,20 +423,20 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  background-color: var(--pomegranate);
-  color: white;
-  border-radius: 50%;
+  background-color: var(--color-negative);
+  color: var(--color-bright);
+  border-radius: var(--radius-circle);
   font-size: 12px;
-  font-weight: bold;
+  font-weight: var(--fw-bold);
 }
 
 .helpText {
   font-size: var(--fs-p3);
   color: var(--dove-gray-2);
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .helpText::before {
@@ -452,17 +448,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--mountain-meadow);
-  color: var(--alabaster);
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-5);
+  background-color: var(--color-positive);
+  color: var(--color-bright);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 0.5rem;
+  transition: all var(--transition-fast);
+  margin-top: var(--spacing-2);
   position: relative;
   overflow: hidden;
 }
@@ -480,7 +476,7 @@
     rgba(255, 255, 255, 0) 80%
   );
   transform: rotate(30deg);
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-normal);
   pointer-events: none;
 }
 
@@ -491,12 +487,12 @@
 .sendButton:hover:not(:disabled) {
   background-color: var(--jewel);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-2);
 }
 
 .sendButton:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-1);
 }
 
 .sendButton:disabled {
@@ -509,7 +505,7 @@
   height: 18px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: var(--alabaster);
+  border-top-color: var(--color-bright);
   animation: spin 1s linear infinite;
 }
 
@@ -520,22 +516,22 @@
 
 .sendResult {
   text-align: center;
-  padding: 1rem;
+  padding: var(--spacing-4);
   animation: fadeIn 0.5s ease;
 }
 
 .sendSuccessIcon {
   width: 80px;
   height: 80px;
-  background-color: var(--magic-mint);
+  background-color: rgba(132, 235, 188, 0.2);
   border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--jewel);
-  margin: 0 auto 1.5rem;
+  color: var(--color-positive);
+  margin: 0 auto var(--spacing-5);
   animation: scaleIn 0.5s ease;
-  box-shadow: 0 4px 12px rgba(27, 167, 102, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 122, 66, 0.2);
 }
 
 @keyframes scaleIn {
@@ -546,45 +542,298 @@
 .sendSuccessTitle {
   font-size: var(--fs-h4);
   font-weight: var(--fw-bold);
-  color: var(--jewel);
-  margin-bottom: 1rem;
+  color: var(--color-positive);
+  margin-bottom: var(--spacing-4);
 }
 
 .sendSuccessMessage {
   font-size: var(--fs-p1);
-  margin-bottom: 0.75rem;
-  color: var(--text-color-default);
+  margin-bottom: var(--spacing-3);
+  color: var(--color-content-default);
 }
 
 .sendResultActions {
   display: flex;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: var(--spacing-5);
 }
 
 .sendAgainButton {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
   background-color: var(--color-surface-1);
-  color: var(--color-surface-primary);
-  border: 1px solid var(--color-surface-primary);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--fs-p2);
   font-weight: var(--fw-bold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .sendAgainButton:hover {
-  background-color: var(--whisper);
+  background-color: var(--color-surface-1);
   transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-1);
 }
 
 .sendAgainButton:active {
   transform: translateY(0);
+}
+
+/* Preview Automation */
+.previewAutomation {
+  margin-top: var(--spacing-4);
+  display: flex;
+  justify-content: center;
+}
+
+.previewButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  background-color: rgba(197, 217, 251, 0.2);
+  border: 1px solid rgba(197, 217, 251, 0.5);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--fs-p2);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.previewButton:hover {
+  background-color: rgba(197, 217, 251, 0.3);
+}
+
+.previewButton.playing {
+  background-color: rgba(132, 235, 188, 0.2);
+  color: var(--color-positive);
+}
+
+.previewButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.playIcon {
+  font-size: 18px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background-color: var(--color-surface-2);
+  border-radius: 3px;
+  margin-top: var(--spacing-1);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--color-primary);
+  transition: width var(--transition-normal);
+}
+
+.statusIndicator {
+  margin-top: var(--spacing-2);
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+}
+
+/* Enhanced DownloadOptions styles */
+.downloadOptions {
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-2);
+  overflow: hidden;
+  margin-bottom: var(--spacing-5);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--transition-normal);
+}
+
+.downloadOptions:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.downloadTitle {
+  display: flex;
+  align-items: center;
+  font-size: var(--fs-p1);
+  font-weight: var(--fw-bold);
+  color: var(--color-content-default);
+  background-color: var(--color-surface-1);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin: 0;
+  border-bottom: 1px solid var(--color-border-2);
+}
+
+.downloadIcon {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+  margin-right: var(--spacing-2);
+}
+
+.formatSelector {
+  padding: var(--spacing-4);
+}
+
+.formatOptions {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.formatOption:hover:not(:disabled) {
+  background-color: var(--color-surface-2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
+}
+
+.formatOption:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.activeFormat {
+  background-color: var(--color-primary);
+  color: var(--color-bright);
+  border-color: var(--color-primary);
+}
+
+.activeFormat:hover {
+  background-color: var(--blip-dark);
+}
+
+.formatIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.formatLabel {
+  flex-grow: 1;
+}
+
+.checkMark {
+  position: absolute;
+  right: var(--spacing-3);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.downloadActionArea {
+  padding: 0 var(--spacing-4) var(--spacing-4);
+}
+
+.downloadButton {
+  position: relative;
+  overflow: hidden;
+  height: 48px;
+  font-weight: var(--fw-semibold);
+  transition: all var(--transition-normal);
+}
+
+.downloadButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 107, 241, 0.3);
+}
+
+.progressBarContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+.progressBar {
+  flex-grow: 1;
+  height: 6px;
+  background-color: var(--color-surface-1);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blip-dark), var(--color-primary));
+  border-radius: 6px;
+  transition: width var(--transition-normal);
+}
+
+.progressPercentage {
+  flex-shrink: 0;
+  min-width: 40px;
+  font-size: 12px;
+  font-weight: var(--fw-semibold);
+  color: var(--dove-gray-2);
+}
+
+.downloadError, 
+.downloadSuccess, 
+.ffmpegError {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-2);
+  animation: fadeIn var(--transition-normal);
+}
+
+.downloadError {
+  background-color: rgba(249, 159, 159, 0.1);
+  border: 1px solid rgba(249, 159, 159, 0.2);
+}
+
+.downloadSuccess {
+  background-color: rgba(132, 235, 188, 0.1);
+  border: 1px solid rgba(132, 235, 188, 0.2);
+}
+
+.ffmpegError {
+  background-color: rgba(253, 233, 155, 0.1);
+  border: 1px solid rgba(253, 233, 155, 0.2);
+}
+
+.errorIcon {
+  color: var(--color-negative);
+  font-size: 24px;
+}
+
+.successIcon {
+  color: var(--color-positive);
+  font-size: 24px;
+}
+
+.fallbackButton {
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: var(--color-bright);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-p2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-content-default);
+}
+
+.fallbackButton:hover:not(:disabled) {
+  background-color: var(--color-surface-1);
+}
+
+.fallbackButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Responsiveness */
@@ -601,29 +850,29 @@
 @media (max-width: 768px) {
   .viewTabs {
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--spacing-2);
   }
   
   .viewTab {
     flex: 1 0 auto;
-    padding: 0.5rem 1rem;
+    padding: var(--spacing-2) var(--spacing-4);
   }
   
   .codeView {
-    gap: 1.5rem;
+    gap: var(--spacing-5);
   }
   
   .previewContainer {
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
   
   .sendView {
-    padding: 1.5rem;
+    padding: var(--spacing-5);
   }
   
   .navigationButtons {
     flex-direction: column-reverse;
-    gap: 1rem;
+    gap: var(--spacing-4);
   }
   
   .navigationButtons button {
@@ -641,25 +890,25 @@
 
 @media (max-width: 480px) {
   .container {
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
   
   .sendView {
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
   
   .viewTabs {
-    padding: 0.25rem;
-    margin: 0.5rem 0 1rem;
+    padding: var(--spacing-1);
+    margin: var(--spacing-2) 0 var(--spacing-4);
   }
   
   .viewTab {
-    padding: 0.5rem 0.75rem;
+    padding: var(--spacing-2) var(--spacing-3);
     font-size: var(--fs-p3);
   }
   
   .previewHeader {
-    padding: 0.75rem;
+    padding: var(--spacing-3);
   }
   
   .previewTitle {
@@ -671,7 +920,7 @@
   }
   
   .codeSectionHeader {
-    padding: 0.75rem;
+    padding: var(--spacing-3);
   }
   
   .codeSectionTitle {
@@ -697,317 +946,11 @@
   
   .phoneInput {
     font-size: var(--fs-p2);
-    padding: 0.5rem;
+    padding: var(--spacing-2);
   }
   
   .sendButton, .sendAgainButton {
-    padding: 0.5rem 1rem;
+    padding: var(--spacing-2) var(--spacing-4);
     font-size: var(--fs-p2);
   }
-}
-
-/* Dark mode support (optional) */
-@media (prefers-color-scheme: dark) {
-  .visualPreview,
-  .codeSection,
-  .sendView {
-    border-color: var(--mine-shaft);
-    background-color: var(--mine-shaft-2);
-  }
-  
-  .previewHeader,
-  .codeSectionHeader {
-    background-color: var(--blip-dark);
-  }
-  
-  .templateInfo,
-  .previewActions {
-    background-color: var(--mine-shaft);
-    border-color: var(--mine-shaft-2);
-  }
-  
-  .infoLabel {
-    color: var(--silver-chalice);
-  }
-  
-  .infoValue {
-    color: var(--blip-light);
-  }
-  
-  .phoneInputWrapper {
-    background-color: var(--mine-shaft);
-    border-color: var(--dove-gray);
-  }
-  
-  .phonePrefix {
-    background-color: var(--mine-shaft-2);
-    border-color: var(--dove-gray);
-  }
-  
-  .phoneInput {
-    color: var(--wild-sand);
-  }
-  
-  .helpText,
-  .sendDescription,
-  .sendSuccessNote {
-    color: var(--silver-chalice);
-  }
-}
-
-.previewAutomation {
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-}
-
-.previewButton {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: #f0f4f9;
-  border: 1px solid #d1e3f8;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  color: #1a73e8;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.previewButton:hover {
-  background-color: #e3f2fd;
-}
-
-.previewButton.playing {
-  background-color: #e0f2f1;
-  color: #00897b;
-}
-
-.previewButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.playIcon {
-  font-size: 18px;
-}
-
-.progressBar {
-  width: 100%;
-  height: 6px;
-  background-color: #e2e8f0;
-  border-radius: 3px;
-  margin-top: 6px;
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  background-color: #3b82f6;
-  transition: width 0.3s ease;
-}
-
-.statusIndicator {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  color: #4b5563;
-}
-
-/* Enhanced DownloadOptions styles */
-.downloadOptions {
-  background-color: var(--color-surface-0);
-  border-radius: 8px;
-  border: 1px solid var(--wave);
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease;
-}
-
-.downloadOptions:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.downloadTitle {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-  font-weight: var(--fw-bold);
-  color: var(--text-color-default);
-  background-color: var(--whisper);
-  padding: 14px 16px;
-  margin: 0;
-  border-bottom: 1px solid var(--wave);
-}
-
-.downloadIcon {
-  display: flex;
-  align-items: center;
-  color: var(--color-surface-primary);
-  margin-right: 10px;
-}
-
-.formatSelector {
-  padding: 16px;
-}
-
-.formatOptions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.formatOption:hover:not(:disabled) {
-  background-color: var(--color-surface-2);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.formatOption:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.activeFormat {
-  background-color: var(--color-surface-primary);
-  color: white;
-  border-color: var(--color-surface-primary);
-}
-
-.activeFormat:hover {
-  background-color: var(--blip-dark);
-}
-
-.formatIcon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.formatLabel {
-  flex-grow: 1;
-}
-
-.checkMark {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-}
-
-.downloadActionArea {
-  padding: 0 16px 16px;
-}
-
-.downloadButton {
-  position: relative;
-  overflow: hidden;
-  height: 48px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.downloadButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.progressBarContainer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.progressBar {
-  flex-grow: 1;
-  height: 6px;
-  background-color: var(--color-surface-1);
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.progressFill {
-  height: 100%;
-  background: linear-gradient(90deg, #4f46e5, #3b82f6);
-  border-radius: 6px;
-  transition: width 0.3s ease-in-out;
-}
-
-.progressPercentage {
-  flex-shrink: 0;
-  min-width: 40px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-color-muted);
-}
-
-.downloadError, 
-.downloadSuccess, 
-.ffmpegError {
-  margin-top: 16px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 8px;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-.downloadError {
-  background-color: rgba(254, 226, 226, 0.5);
-  border: 1px solid rgba(248, 113, 113, 0.2);
-}
-
-.downloadSuccess {
-  background-color: rgba(209, 250, 229, 0.5);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.ffmpegError {
-  background-color: rgba(254, 243, 199, 0.5);
-  border: 1px solid rgba(251, 191, 36, 0.2);
-}
-
-.errorIcon {
-  color: #ef4444;
-  font-size: 24px;
-}
-
-.successIcon {
-  color: #10b981;
-  font-size: 24px;
-}
-
-.fallbackButton {
-  margin-top: 8px;
-  padding: 8px 16px;
-  background-color: white;
-  border: 1px solid var(--wave);
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--text-color-default);
-}
-
-.fallbackButton:hover:not(:disabled) {
-  background-color: var(--color-surface-1);
-}
-
-.fallbackButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }

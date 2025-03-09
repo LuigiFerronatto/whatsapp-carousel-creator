@@ -1,6 +1,6 @@
-// src/components/StepThree.js
+// src/components/StepThree.js - Versão com alertas contextuais
 import React, { useState, useRef, useEffect } from 'react';
-import AlertMessage from '../ui/AlertMessage/AlertMessage';
+import { useAlert } from '../ui/AlertMessage/AlertContext'; // Adicionar esta importação
 import CarouselPreview from '../previews/CarouselPreview';
 import Button from '../ui/Button/Button';
 import JsonViewer from '../ui/JsonViewer/JsonViewer';
@@ -43,7 +43,8 @@ const DownloadOptions = ({
   isGeneratingPreview,
   downloadStatus,
   areDownloadButtonsDisabled,
-  interactionDisabled
+  interactionDisabled,
+  alert // Passar o sistema de alertas para esse componente
 }) => {
   return (
     <div className={styles.downloadOptions}>
@@ -183,7 +184,8 @@ const PreviewContent = ({
   isGeneratingPreview,
   setIsGeneratingPreview,
   previewFormat,
-  setPreviewFormat
+  setPreviewFormat,
+  alert // Passar o sistema de alertas para esse componente
 }) => {
   // Obter funções de controle do carrossel
   const { goToNextCard, goToPrevCard, goToCard, isInitialized, interactionDisabled } = useCarouselControl();
@@ -191,13 +193,26 @@ const PreviewContent = ({
   const [preRenderStarted, setPreRenderStarted] = useState(false);
   const [areDownloadButtonsDisabled, setAreDownloadButtonsDisabled] = useState(false);
 
-  // Função para atualizar status com informações de progresso
+  // Função para atualizar status com informações de progresso e mostrar alertas
   const updateStatusWithProgress = (status) => {
     setDownloadStatus({
       ...status,
       message: status.message || 'Processando...',
       progress: status.progress || 0
     });
+    
+    // Adicionar alertas baseados no status
+    if (status.status === 'success') {
+      alert.success(`Download concluído: ${previewFormat.toUpperCase()} pronto!`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+    } else if (status.status === 'error') {
+      alert.error(`Falha ao gerar ${previewFormat.toUpperCase()}: ${status.message}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+    }
   };
 
   // Verificar se os botões de download devem estar desabilitados
@@ -240,6 +255,12 @@ const PreviewContent = ({
               console.log(`Pré-renderização: ${status.message || status.status} ${status.progress || ''}`);
             }
           );
+          
+          // Alerta quando a pré-renderização for concluída
+          alert.info("Pré-renderização concluída. O download será mais rápido agora!", {
+            position: 'bottom-right',
+            autoCloseTime: 3000
+          });
         } catch (error) {
           console.error("Erro durante pré-renderização:", error);
           // Silenciosamente falha, já que é apenas otimização
@@ -306,6 +327,9 @@ const PreviewContent = ({
   const captureSequence = async () => {
     // Garantir que o carrossel está inicializado antes de começar
     if (!isInitialized) {
+      alert.error("O carrossel ainda não está inicializado. Tente novamente em instantes.", {
+        position: 'top-center'
+      });
       setDownloadStatus({ 
         status: 'error', 
         message: 'O carrossel ainda não está inicializado. Tente novamente em instantes.' 
@@ -335,6 +359,11 @@ const PreviewContent = ({
         await downloadPreview.downloadFile(blob, fileName);
         
         setDownloadStatus({ status: 'success', message: 'Download concluído!', progress: 100 });
+        
+        // Mostrar alerta de sucesso
+        alert.success(`${previewFormat.toUpperCase()} gerado com sucesso!`, {
+          position: 'bottom-right'
+        });
         
         // Reset status após um delay
         setTimeout(() => {
@@ -450,6 +479,12 @@ const PreviewContent = ({
         progress: 100 
       });
       
+      // Mostrar alerta de sucesso
+      alert.success(`${previewFormat.toUpperCase()} gerado com sucesso!`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      
       // Reset status after a delay
       setTimeout(() => {
         setDownloadStatus({ status: 'idle', message: '' });
@@ -460,6 +495,12 @@ const PreviewContent = ({
       setDownloadStatus({
         status: 'error',
         message: `Falha ao gerar ${previewFormat.toUpperCase()}: ${error?.message || 'Erro desconhecido'}. Tente usar a opção de imagem estática.`
+      });
+      
+      // Mostrar alerta de erro
+      alert.error(`Erro na geração do ${previewFormat.toUpperCase()}: ${error?.message || 'Falha desconhecida'}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
       });
     } finally {
       // Voltar para o primeiro card após a captura
@@ -492,6 +533,12 @@ const PreviewContent = ({
       
       setDownloadStatus({ status: 'success', message: 'Download concluído!' });
       
+      // Mostrar alerta de sucesso
+      alert.success("Imagem estática gerada com sucesso!", {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      
       // Reset status after a delay
       setTimeout(() => {
         setDownloadStatus({ status: 'idle', message: '' });
@@ -501,6 +548,12 @@ const PreviewContent = ({
       setDownloadStatus({
         status: 'error',
         message: 'Falha ao capturar pré-visualização. Tente novamente.'
+      });
+      
+      // Mostrar alerta de erro
+      alert.error(`Erro ao gerar imagem: ${error.message || 'Falha desconhecida'}`, {
+        position: 'top-center',
+        autoCloseTime: 5000
       });
     } finally {
       setIsGeneratingPreview(false);
@@ -559,6 +612,7 @@ const PreviewContent = ({
           downloadStatus={downloadStatus}
           areDownloadButtonsDisabled={areDownloadButtonsDisabled}
           interactionDisabled={interactionDisabled}
+          alert={alert} // Passar o sistema de alertas
         />
       </div>
 
@@ -586,6 +640,9 @@ const StepThree = ({
   sendTemplate,
   loading
 }) => {
+  // Inicializar sistema de alertas
+  const alert = useAlert();
+  
   // State
   const [activeView, setActiveView] = useState('send');
   const [justCopied, setJustCopied] = useState({
@@ -603,6 +660,22 @@ const StepThree = ({
   const [previewFormat, setPreviewFormat] = useState('mp4');
   const [downloadStatus, setDownloadStatus] = useState({ status: 'idle', message: '' });
 
+  // Mostrar alertas para erros e sucessos recebidos como propriedades
+  useEffect(() => {
+    if (error) {
+      alert.error(error, { 
+        position: 'top-center',
+        autoCloseTime: 7000 
+      });
+    }
+    
+    if (success) {
+      alert.success(success, { 
+        position: 'top-right' 
+      });
+    }
+  }, [error, success, alert]);
+
   // Inicializar downloadPreview
   useEffect(() => {
     const initializeDownloadService = async () => {
@@ -618,11 +691,17 @@ const StepThree = ({
           status: 'error',
           message: 'Não foi possível carregar a ferramenta de geração de vídeo. Você ainda pode baixar uma imagem estática.'
         });
+        
+        // Mostrar alerta de erro
+        alert.warning('Não foi possível carregar as ferramentas de vídeo. A opção de imagem estática ainda está disponível.', {
+          position: 'top-center',
+          autoCloseTime: 7000
+        });
       }
     };
 
     initializeDownloadService();
-  }, []);
+  }, [alert]);
 
   // Formatar telefone para exibição
   const formatPhoneDisplay = (phone) => {
@@ -644,12 +723,18 @@ const StepThree = ({
     }
   };
 
-  // Handle copy with visual feedback
+  // Handle copy with visual feedback e mostrar alerta
   const handleCopy = (jsonType) => {
     copyToClipboard(jsonType);
     setJustCopied({
       ...justCopied,
       [jsonType]: true
+    });
+
+    // Mostrar alerta de sucesso ao copiar
+    alert.info(`JSON do tipo "${jsonType}" copiado para a área de transferência`, {
+      position: 'bottom-right',
+      autoCloseTime: 2000
     });
 
     setTimeout(() => {
@@ -660,11 +745,13 @@ const StepThree = ({
     }, 2000);
   };
 
-  // Handle download JSON
+  // Handle download JSON e mostrar alerta
   const handleDownload = (jsonType) => {
     // Verifica se há um JSON válido para download
     if (!finalJson || !finalJson[jsonType]) {
-      console.error(`Tipo de JSON "${jsonType}" não disponível para download`);
+      alert.error(`Tipo de JSON "${jsonType}" não disponível para download`, {
+        position: 'top-center'
+      });
       return;
     }
 
@@ -686,9 +773,46 @@ const StepThree = ({
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       }, 100);
+      
+      // Mostrar alerta de sucesso
+      alert.success(`JSON "${jsonType}" baixado com sucesso`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
     } catch (error) {
       console.error('Erro ao fazer download do JSON:', error);
-      alert('Falha ao baixar o JSON. Por favor, tente novamente.');
+      alert.error(`Falha ao baixar o JSON. ${error.message || 'Tente novamente.'}`, {
+        position: 'top-center'
+      });
+    }
+  };
+  
+  // Enviar o template para o número de telefone
+  const handleSendTemplate = async () => {
+    if (!phoneNumber) {
+      alert.warning("É necessário fornecer um número de telefone válido", {
+        position: 'top-center'
+      });
+      return;
+    }
+    
+    try {
+      // Tenta enviar o template
+      await sendTemplate(phoneNumber);
+      setSendSuccess(true);
+      
+      // Mostrar alerta de sucesso
+      alert.success(`Template enviado com sucesso para ${formatPhoneDisplay(phoneNumber)}`, {
+        position: 'top-right'
+      });
+    } catch (error) {
+      console.error('Erro ao enviar template:', error);
+      
+      // Mostrar alerta de erro
+      alert.error(`Falha ao enviar o template: ${error.message || 'Erro desconhecido'}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
     }
   };
 
@@ -748,6 +872,7 @@ const StepThree = ({
                   setIsGeneratingPreview={setIsGeneratingPreview}
                   previewFormat={previewFormat}
                   setPreviewFormat={setPreviewFormat}
+                  alert={alert} // Passar o sistema de alertas
                 />
               </CarouselControlProvider>
 
@@ -781,14 +906,7 @@ const StepThree = ({
                       <Button
                         variant="solid"
                         color="primary"
-                        onClick={async () => {
-                          try {
-                            await sendTemplate(phoneNumber);
-                            setSendSuccess(true);
-                          } catch (error) {
-                            console.error('Erro ao enviar template:', error);
-                          }
-                        }}
+                        onClick={handleSendTemplate}
                         disabled={!phoneNumber || loading}
                         loading={loading}
                         iconLeft={<FiSend />}
@@ -909,16 +1027,18 @@ const StepThree = ({
 
 
         <Button
-          onClick={resetForm}
+          onClick={() => {
+            resetForm();
+            alert.info("Iniciando um novo template. Dados anteriores foram limpos.", {
+              position: 'top-right',
+              autoCloseTime: 3000
+            });
+          }}
           size='large'
         >
           Criar Novo Template
         </Button>
       </div>
-
-      {/* Error and success messages */}
-      {error && <AlertMessage error={error} />}
-      {success && <AlertMessage success={success} />}
     </div>
   );
 };

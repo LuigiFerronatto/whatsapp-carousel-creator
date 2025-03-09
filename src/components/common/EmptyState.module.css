@@ -7,9 +7,9 @@
   padding: var(--spacing-4);
   text-align: center;
   min-height: 300px;
-  border-radius: var(--border-radius-md);
+  border-radius: var(--radius-lg);
   background-color: var(--color-surface-1);
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn var(--transition-normal);
 }
 
 @keyframes fadeIn {
@@ -32,28 +32,28 @@
 .iconContainer {
   width: 80px;
   height: 80px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: var(--spacing-4);
-  color: var(--alabaster);
+  color: var(--color-bright);
 }
 
 .type-first-access {
-  background-color: var(--blip-action);
+  background-color: var(--color-primary);
 }
 
 .type-post-action {
-  background-color: var(--mountain-meadow);
+  background-color: var(--color-positive);
 }
 
 .type-no-results {
-  background-color: var(--buddha-gold);
+  background-color: var(--extended-yellow-dark);
 }
 
 .type-error {
-  background-color: var(--pomegranate);
+  background-color: var(--color-negative);
 }
 
 .typeIcon {
@@ -70,7 +70,7 @@
 }
 
 .title {
-  color: var(--text-color-default);
+  color: var(--color-content-default);
   font-size: var(--fs-h3);
   margin-bottom: var(--spacing-2);
   font-weight: var(--fw-bold);

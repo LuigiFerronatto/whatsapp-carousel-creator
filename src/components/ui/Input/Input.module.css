@@ -1,289 +1,267 @@
-/* Input.module.css */
+/* Input.module.css - Improved */
 .container {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-    position: relative;
-    width: 100%;
-  }
-  
-  /* Sizing variations */
-  .sizeSmall .inputWrapper {
-    min-height: 32px;
-  }
-  
-  .sizeMedium .inputWrapper {
-    min-height: 40px;
-  }
-  
-  .sizeLarge .inputWrapper {
-    min-height: 48px;
-  }
-  
-  .sizeSmall .input, .sizeSmall .textarea {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-  }
-  
-  .sizeMedium .input, .sizeMedium .textarea {
-    padding: 0.625rem 1rem;
-    font-size: 1rem;
-  }
-  
-  .sizeLarge .input, .sizeLarge .textarea {
-    padding: 0.75rem 1.25rem;
-    font-size: 1.125rem;
-  }
-  
-  /* Inline mode (not full width) */
-  .inline {
-    width: auto;
-    display: inline-flex;
-  }
-  
-  .label {
-    font-size: var(--fs-p2, 0.85rem);
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: var(--text-color-default, #333);
-    transition: color 0.2s ease-in-out;
-  }
-  
-  .requiredMark {
-    color: var(--color-surface-negative, #e53935);
-    margin-left: 0.25rem;
-  }
-  
-  .inputWrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    background-color: var(--color-surface-0, #fff);
-    border: 1px solid var(--wave, #ddd);
-    border-radius: var(--radius-md, 0.375rem);
-    transition: all 0.2s ease-in-out;
-  }
-  
-  .input, .textarea {
-    width: 100%;
-    border: none;
-    background-color: transparent;
-    font-size: 1rem;
-    color: var(--text-color-default, #333);
-    outline: none;
-    flex: 1;
-  }
-  
-  .textarea {
-    resize: vertical;
-    min-height: 80px;
-    line-height: 1.5;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-  }
-  
-  .input::placeholder, .textarea::placeholder {
-    color: var(--dove-gray-2, #6b7280);
-    opacity: 0.7;
-  }
-  
-  /* Focus state */
-  .focused .inputWrapper {
-    border-color: var(--color-surface-primary, #2563eb);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-  
-  .focused .label {
-    color: var(--color-surface-primary, #2563eb);
-  }
-  
-  /* Error state */
-  .hasError .inputWrapper {
-    border-color: var(--color-surface-negative, #e53935);
-  }
-  
-  .hasError.focused .inputWrapper {
-    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
-  }
-  
-  .hasError .label {
-    color: var(--color-surface-negative, #e53935);
-  }
-  
-  .inputError {
-    border-color: var(--color-surface-negative, #e53935);
-  }
-  
-  /* Disabled state */
-  .disabled {
-    opacity: 0.6;
-    pointer-events: none;
-  }
-  
-  .disabled .inputWrapper {
-    background-color: var(--color-surface-2, #f5f5f5);
-    border-color: var(--wave, #ddd);
-  }
-  
-  .disabled .input, .disabled .textarea {
-    cursor: not-allowed;
-  }
-  
-  /* Read-only state */
-  .readOnly .inputWrapper {
-    background-color: var(--color-surface-1, #f9f9f9);
-    border-style: dashed;
-  }
-  
-  .readOnly .input, .readOnly .textarea {
-    cursor: default;
-  }
-  
-  /* Icons */
-  .icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--dove-gray-2, #6b7280);
-    min-width: 2.5rem;
-    height: 100%;
-    pointer-events: none;
-  }
-  
-  .iconLeft .input, .iconLeft .textarea {
-    padding-left: 0;
-  }
-  
-  .iconRight .input, .iconRight .textarea {
-    padding-right: 0;
-  }
-  
-  /* Password toggle */
-  .passwordToggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    padding: 0;
-    margin-right: 0.5rem;
-    color: var(--dove-gray-2, #6b7280);
-    cursor: pointer;
-    transition: color 0.2s ease;
-  }
-  
-  .passwordToggle:hover {
-    color: var(--text-color-default, #333);
-  }
-  
-  .passwordToggle:focus {
-    outline: none;
-  }
-  
-  /* Clear button */
-  .clearButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    padding: 0;
-    margin-right: 0.5rem;
-    color: var(--dove-gray-2, #6b7280);
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-  }
-  
-  .clearButton:hover {
-    opacity: 1;
-  }
-  
-  /* Wrapper específico para o componente de hint */
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--spacing-4);
+  position: relative;
+  width: 100%;
+}
 
-  .bottomContent {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
-  }
-  
-  /* Ajuste do contador para ficar à esquerda */
-  .counterWrapper {
-    flex-shrink: 1;
-    margin: 0.7rem 0 0 1rem; /* Espaço entre o contador e as dicas */
-    display: flex;
-    align-items: center;
-    min-width: auto;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 640px) {
-    .bottomContent {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      width: 100%;
-    }
-    
-    /* Ajuste do contador para ficar à esquerda */
-    .counterWrapper {
-      flex-shrink: 1;
-      margin: 0.7rem 0 0 1rem; /* Espaço entre o contador e as dicas */
-      display: flex;
-      align-items: center;
-      min-width: auto;
-    }
-  }
+/* Sizing variations */
+.sizeSmall .inputWrapper {
+  min-height: 32px;
+}
 
+.sizeMedium .inputWrapper {
+  min-height: 40px;
+}
 
-  .visibilityToggle {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--color-surface-primary);
-    font-size: var(--fs-p3);
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    transition: color var(--transition-fast);
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-  
-  .visibilityToggle:hover {
-    color: var(--blip-dark);
-  }
+.sizeLarge .inputWrapper {
+  min-height: 48px;
+}
 
+.sizeSmall .input, .sizeSmall .textarea {
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: var(--fs-p2);
+}
 
-  /* Add these styles to your Input.module.css file */
+.sizeMedium .input, .sizeMedium .textarea {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--fs-p1);
+}
 
+.sizeLarge .input, .sizeLarge .textarea {
+  padding: var(--spacing-3) var(--spacing-5);
+  font-size: var(--fs-p1);
+}
+
+/* Inline mode (not full width) */
+.inline {
+  width: auto;
+  display: inline-flex;
+}
+
+.label {
+  font-size: var(--fs-p2);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--spacing-2);
+  color: var(--color-content-default);
+  transition: color var(--transition-fast);
+}
+
+.requiredMark {
+  color: var(--color-negative);
+  margin-left: var(--spacing-1);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: var(--color-surface-0);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.input, .textarea {
+  width: 100%;
+  border: none;
+  background-color: transparent;
+  font-size: var(--fs-p1);
+  color: var(--color-content-default);
+  outline: none;
+  flex: 1;
+  font-family: var(--font-primary);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+  padding-top: var(--spacing-3);
+  padding-bottom: var(--spacing-3);
+}
+
+.input::placeholder, .textarea::placeholder {
+  color: var(--dove-gray-2);
+  opacity: 0.7;
+}
+
+/* Focus state */
+.focused .inputWrapper {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 107, 241, 0.1);
+}
+
+.focused .label {
+  color: var(--color-primary);
+}
+
+/* Error state */
+.hasError .inputWrapper {
+  border-color: var(--color-negative);
+}
+
+.hasError.focused .inputWrapper {
+  box-shadow: 0 0 0 3px rgba(138, 0, 0, 0.1);
+}
+
+.hasError .label {
+  color: var(--color-negative);
+}
+
+.inputError {
+  border-color: var(--color-negative);
+}
+
+/* Disabled state */
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.disabled .inputWrapper {
+  background-color: var(--color-surface-2);
+  border-color: var(--color-border-2);
+}
+
+.disabled .input, .disabled .textarea {
+  cursor: not-allowed;
+}
+
+/* Read-only state */
+.readOnly .inputWrapper {
+  background-color: var(--color-surface-1);
+  border-style: dashed;
+}
+
+.readOnly .input, .readOnly .textarea {
+  cursor: default;
+}
+
+/* Icons */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dove-gray-2);
+  min-width: 2.5rem;
+  height: 100%;
+  pointer-events: none;
+}
+
+.iconLeft .input, .iconLeft .textarea {
+  padding-left: 0;
+}
+
+.iconRight .input, .iconRight .textarea {
+  padding-right: 0;
+}
+
+/* Password toggle */
+.passwordToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-right: var(--spacing-2);
+  color: var(--dove-gray-2);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.passwordToggle:hover {
+  color: var(--color-content-default);
+}
+
+.passwordToggle:focus {
+  outline: none;
+}
+
+/* Clear button */
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-right: var(--spacing-2);
+  color: var(--dove-gray-2);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.clearButton:hover {
+  opacity: 1;
+}
+
+/* Bottom content wrapper */
+.bottomContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Counter positioning */
+.counterWrapper {
+  flex-shrink: 1;
+  margin: var(--spacing-3) 0 0 var(--spacing-4);
+  display: flex;
+  align-items: center;
+  min-width: auto;
+}
+
+/* Visibility toggle */
+.visibilityToggle {
+  position: absolute;
+  right: var(--spacing-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--fs-p3);
+  cursor: pointer;
+  padding: var(--spacing-1) var(--spacing-2);
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.visibilityToggle:hover {
+  color: var(--blip-dark);
+}
+
+/* Optional badge */
 .optionalBadge {
   display: inline-block;
-  margin-left: 8px;
-  font-size: 0.75rem;
+  margin-left: var(--spacing-2);
+  font-size: var(--fs-p3);
   font-weight: normal;
-  color: var(--optional-badge-color, #666);
-  background-color: var(--optional-badge-bg, #f0f0f0);
+  color: var(--dove-gray-2);
+  background-color: var(--color-surface-1);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   vertical-align: middle;
 }
 
-/* You can add alternative styles or themes */
 .optionalBadgeSubtle {
-  border: 1px solid var(--optional-badge-border, #ddd);
+  border: 1px solid var(--color-border-2);
   background-color: transparent;
 }
 
 .optionalBadgeOutlined {
-  border: 1px solid var(--optional-badge-border, #ddd);
+  border: 1px solid var(--color-border-2);
   background-color: transparent;
-  border-radius: 12px;
+  border-radius: var(--radius-pill);
   padding: 1px 8px;
 }
 
@@ -311,7 +289,7 @@
   position: absolute;
   width: 99%;
   height: 100%;
-  right: 8px;
+  right: var(--spacing-2);
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -319,9 +297,9 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 4px;
+  padding: var(--spacing-1);
   cursor: pointer;
-  color: var(--input-icon-color, #666);
+  color: var(--dove-gray-2);
   z-index: 2;
 }
 
@@ -330,26 +308,26 @@
   top: 100%;
   left: 0;
   right: 0;
-  background-color: white;
-  border: 1px solid var(--input-border-color, #ccc);
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  margin-top: 4px;
+  background-color: var(--color-surface-0);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  z-index: var(--z-dropdown);
+  margin-top: var(--spacing-1);
   overflow: hidden;
 }
 
 .searchContainer {
-  padding: 8px;
-  border-bottom: 1px solid var(--input-border-color, #eee);
+  padding: var(--spacing-2);
+  border-bottom: 1px solid var(--color-border-3);
 }
 
 .searchInput {
   width: 100%;
-  padding: 8px;
-  border: 1px solid var(--input-border-color, #ddd);
-  border-radius: 4px;
-  font-size: 14px;
+  padding: var(--spacing-2);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-p2);
 }
 
 .optionsList {
@@ -361,24 +339,24 @@
 }
 
 .option {
-  padding: 8px 12px;
+  padding: var(--spacing-2) var(--spacing-3);
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 }
 
 .option:hover {
-  background-color: var(--input-hover-bg, #f5f5f5);
+  background-color: var(--color-hover);
 }
 
 .selectedOption {
-  background-color: var(--input-selected-bg, #f0f7ff);
-  font-weight: 500;
+  background-color: rgba(197, 217, 251, 0.2);
+  font-weight: var(--fw-semibold);
 }
 
 .optionCheckbox {
-  margin-right: 8px;
+  margin-right: var(--spacing-2);
 }
 
 .optionLabel {
@@ -386,41 +364,56 @@
 }
 
 .noOptions {
-  padding: 12px;
+  padding: var(--spacing-3);
   text-align: center;
-  color: var(--input-placeholder-color, #999);
+  color: var(--dove-gray-2);
 }
 
 .createOption {
-  background-color: var(--primary-color, #0066cc);
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-bright);
   border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  margin-top: 8px;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-1) var(--spacing-3);
+  margin-top: var(--spacing-2);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--fs-p2);
 }
 
 .createOption:hover {
-  background-color: var(--primary-color-dark, #0055aa);
+  background-color: var(--blip-dark);
 }
 
 .dropdownOpen .dropdownInput {
-  border-color: var(--input-focus-border-color, #0066cc);
+  border-color: var(--color-primary);
 }
 
-/* Estilo para o ícone no dropdown */
+/* Icon in dropdown */
 .isDropdown .icon {
-  margin-right: 30px; /* Espaço para o toggle do dropdown */
+  margin-right: 30px; /* Space for dropdown toggle */
 }
 
-/* Estado aberto do dropdown */
+/* Open dropdown state */
 .dropdownOpen .dropdownToggle {
-  color: var(--color-surface-primary, #2563eb);
+  color: var(--color-primary);
 }
 
-/* Botão de limpeza dentro do dropdown */
+/* Clear button in dropdown */
 .isDropdown .clearButton {
-  margin-right: 30px; /* Espaço para o toggle do dropdown */
+  margin-right: 30px; /* Space for dropdown toggle */
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .bottomContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .counterWrapper {
+    flex-shrink: 1;
+    margin: var(--spacing-3) 0 0 var(--spacing-4);
+  }
 }

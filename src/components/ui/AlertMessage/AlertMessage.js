@@ -4,7 +4,7 @@ import { FiAlertCircle, FiCheckCircle, FiInfo, FiX } from 'react-icons/fi';
 import styles from './AlertMessage.module.css';
 
 /**
- * Enhanced AlertMessage component for displaying notifications
+ * Enhanced AlertMessage component for displaying notifications with customizable positioning
  * 
  * @param {Object} props Component properties
  * @param {string} props.success Success message text
@@ -14,6 +14,9 @@ import styles from './AlertMessage.module.css';
  * @param {boolean} props.autoClose Whether the alert should auto-close
  * @param {number} props.autoCloseTime Time in ms before auto-closing
  * @param {Function} props.onClose Callback function when alert is closed
+ * @param {string} props.position Positioning of alert ('top-right', 'top-center', 'top-left', 'bottom-right', 'bottom-center', 'bottom-left')
+ * @param {boolean} props.floating Whether the alert should float over content
+ * @param {string} props.className Additional class names
  * @returns {JSX.Element|null} AlertMessage component or null if no message
  */
 const AlertMessage = ({ 
@@ -23,7 +26,11 @@ const AlertMessage = ({
   warning,
   autoClose = true,
   autoCloseTime = 5000,
-  onClose = () => {}
+  onClose = () => {},
+  position = 'top-right',
+  floating = true,
+  className = '',
+  ...restProps
 }) => {
   // Determine message type and content
   const [visible, setVisible] = useState(true);
@@ -78,8 +85,21 @@ const AlertMessage = ({
     }
   };
 
+  // Combine classes for positioning and floating
+  const containerClasses = [
+    styles.alertContainer,
+    styles[type],
+    floating ? styles.floating : '',
+    styles[`position-${position}`],
+    className
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`${styles.alertContainer} ${styles[type]}`} role="alert">
+    <div 
+      className={containerClasses} 
+      role="alert"
+      {...restProps}
+    >
       <div className={styles.alertContent}>
         {getIcon()}
         <div className={styles.message}>{message}</div>

@@ -1,4 +1,3 @@
-// components/common/Button.js
 import React from 'react';
 import styles from './Button.module.css';
 
@@ -9,14 +8,15 @@ import styles from './Button.module.css';
  * @param {Object} props Component properties
  * @param {React.ReactNode} props.children Button content/label
  * @param {string} props.variant Button style variant (solid, outline, text)
- * @param {string} props.color Button color scheme (primary, content, success, danger)
- * @param {string} props.size Button size (small, medium, large)
+ * @param {string} props.color Button color scheme (primary, content, positive, negative)
+ * @param {string} props.size Button size (large, medium, small)
  * @param {string} props.type Button HTML type attribute
  * @param {boolean} props.disabled Whether the button is disabled
  * @param {boolean} props.loading Whether to show loading spinner
  * @param {boolean} props.fullWidth Whether the button should take full width
- * @param {boolean} props.mediumWidth Whether the button should take medium width
  * @param {boolean} props.rounded Whether the button should have fully rounded corners
+ * @param {boolean} props.showLabel Whether to display the button label
+ * @param {boolean} props.iconOnly Whether the button is an icon-only button
  * @param {React.ReactNode} props.iconLeft Icon to display at the left of text
  * @param {React.ReactNode} props.iconRight Icon to display at the right of text
  * @param {string} props.className Additional CSS classes
@@ -36,8 +36,9 @@ const Button = ({
   disabled = false,
   loading = false,
   fullWidth = false,
-  mediumWidth = false,
   rounded = false,
+  showLabel = true,
+  iconOnly = false,
   iconLeft,
   iconRight,
   className = '',
@@ -48,6 +49,9 @@ const Button = ({
   tooltipProps,
   ...restProps
 }) => {
+  // Determine if the button is icon-only
+  const isIconOnly = iconOnly || (!showLabel && (iconLeft || iconRight));
+
   // Construct CSS class names dynamically
   const buttonClasses = [
     styles.button,
@@ -57,14 +61,14 @@ const Button = ({
     disabled ? styles.disabled : '',
     loading ? styles.loading : '',
     fullWidth ? styles.fullWidth : '',
-    mediumWidth ? styles.mediumWidth : '',
     rounded ? styles.rounded : '',
+    isIconOnly ? styles.iconOnly : '',
     className
   ].filter(Boolean).join(' ');
   
   // Loading spinner component
   const LoadingSpinner = () => (
-    <div className={styles.loadingIcon}>
+    <div className={styles.loadingIcon} aria-hidden="true">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <circle className={styles.loadingCircle} cx="12" cy="12" r="10" 
           stroke="currentColor" strokeWidth="4" fill="none" />
@@ -78,12 +82,15 @@ const Button = ({
     className: buttonClasses,
     disabled: disabled || loading,
     onClick: !loading && !disabled ? onClick : undefined,
+    "aria-busy": loading ? "true" : undefined,
+    "aria-disabled": disabled ? "true" : undefined,
   };
 
   // Add href and target for link-like buttons
   if (Component === 'a') {
     componentProps.href = href;
     componentProps.target = target;
+    componentProps.rel = target === '_blank' ? 'noopener noreferrer' : undefined;
   }
 
   // Add type for button elements
@@ -95,9 +102,9 @@ const Button = ({
   const buttonContent = (
     <>
       {loading && <LoadingSpinner />}
-      {!loading && iconLeft && <span className={styles.iconLeft}>{iconLeft}</span>}
-      {children && <span className={styles.text}>{children}</span>}
-      {!loading && iconRight && <span className={styles.iconRight}>{iconRight}</span>}
+      {!loading && iconLeft && <span className={styles.iconLeft} aria-hidden="true">{iconLeft}</span>}
+      {showLabel && children && <span className={styles.text}>{children}</span>}
+      {!loading && iconRight && <span className={styles.iconRight} aria-hidden="true">{iconRight}</span>}
     </>
   );
 
@@ -125,11 +132,11 @@ const Button = ({
 };
 
 // Tooltip component (you'll need to replace this with your actual Tooltip implementation)
-const Tooltip = ({ children, text, ...props }) => {
+const Tooltip = ({ children, text, position = 'top', ...props }) => {
   return (
     <div className={styles.tooltipWrapper} {...props}>
       {children}
-      <span className={styles.tooltipText}>{text}</span>
+      <span className={`${styles.tooltipText} ${styles[`tooltip-${position}`]}`}>{text}</span>
     </div>
   );
 };

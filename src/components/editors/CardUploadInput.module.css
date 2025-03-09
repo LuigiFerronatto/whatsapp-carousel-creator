@@ -16,20 +16,20 @@
 }
 
 .evenCard {
-  border-top: 4px solid var(--color-surface-primary);
+  border-top: 4px solid var(--color-primary);
 }
 
 .oddCard {
-  border-top: 4px solid var(--mountain-meadow);
+  border-top: 4px solid var(--color-positive);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  background-color: var(--whisper);
-  border-bottom: 1px solid var(--wave);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-surface-1);
+  border-bottom: 1px solid var(--color-border-2);
 }
 
 .cardNumber {
@@ -38,7 +38,7 @@
   font-size: var(--fs-p1);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
 }
 
 .fileTypeSelect {
@@ -49,8 +49,8 @@
 
 .select {
   appearance: none;
-  padding: 0.4rem 2rem 0.4rem 2.25rem;
-  border: 1px solid var(--wave);
+  padding: var(--spacing-1) var(--spacing-6) var(--spacing-1) var(--spacing-7);
+  border: 1px solid var(--color-border-2);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-0);
   font-size: var(--fs-p2);
@@ -60,13 +60,13 @@
 
 .select:focus {
   outline: none;
-  border-color: var(--color-surface-primary);
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 107, 241, 0.1);
 }
 
 .fileTypeIconWrapper {
   position: absolute;
-  left: 0.5rem;
+  left: var(--spacing-2);
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -81,16 +81,16 @@
 }
 
 .cardBody {
-  padding: 1rem;
+  padding: var(--spacing-4);
   flex-grow: 1;
 }
 
 .uploadMethods {
   display: flex;
   border-radius: var(--radius-md);
-  margin-bottom: 1rem;
-  background-color: var(--whisper);
-  padding: 0.25rem;
+  margin-bottom: var(--spacing-4);
+  background-color: var(--color-surface-1);
+  padding: var(--spacing-1);
 }
 
 .methodButton {
@@ -98,38 +98,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
   border: none;
   background: none;
   border-radius: var(--radius-md);
   font-size: var(--fs-p2);
   cursor: pointer;
   transition: all var(--transition-fast);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
 }
 
 .methodButton:hover {
-  background-color: var(--color-surface-1);
+  background-color: var(--color-hover);
 }
 
 .activeMethod {
   background-color: var(--color-surface-0);
-  color: var(--color-surface-primary);
+  color: var(--color-primary);
   font-weight: var(--fw-bold);
   box-shadow: var(--shadow-1);
 }
 
 .formGroup {
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
 }
 
 .label {
   display: block;
   font-size: var(--fs-p2);
   font-weight: var(--fw-bold);
-  margin-bottom: 0.5rem;
-  color: var(--text-color-default);
+  margin-bottom: var(--spacing-2);
+  color: var(--color-content-default);
 }
 
 .inputGroup {
@@ -139,9 +139,9 @@
 
 .input {
   flex: 1;
-  padding: 0.75rem;
-  padding-right: 4rem;
-  border: 1px solid var(--wave);
+  padding: var(--spacing-3);
+  padding-right: var(--spacing-8);
+  border: 1px solid var(--color-border-2);
   border-radius: var(--radius-md);
   font-size: var(--fs-p2);
   transition: all var(--transition-fast);
@@ -150,55 +150,55 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--color-surface-primary);
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 107, 241, 0.1);
 }
 
 .inputError {
-  border-color: var(--color-surface-negative);
-  background-color: rgba(255, 224, 224, 0.05);
+  border-color: var(--color-negative);
+  background-color: rgba(249, 159, 159, 0.05);
 }
 
 .clearButton, .testButton {
   position: absolute;
-  right: 0.5rem;
+  right: var(--spacing-2);
   top: 50%;
   transform: translateY(-50%);
   background-color: transparent;
   color: var(--dove-gray-2);
   border: none;
   border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
+  padding: var(--spacing-1) var(--spacing-2);
   cursor: pointer;
   font-size: var(--fs-p3);
   transition: all var(--transition-fast);
   white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--spacing-1);
 }
 
 .clearButton {
-  color: var(--color-surface-negative);
+  color: var(--color-negative);
 }
 
 .clearButton:hover {
-  background-color: var(--cinderella);
-  color: var(--milano-red);
+  background-color: rgba(249, 159, 159, 0.1);
+  color: var(--color-negative);
 }
 
 .testButton {
-  color: var(--color-surface-primary);
+  color: var(--color-primary);
 }
 
 .testButton:hover {
-  background-color: var(--blip-light);
+  background-color: rgba(197, 217, 251, 0.2);
   color: var(--blip-dark);
 }
 
 .helpText, .errorText {
   font-size: var(--fs-p3);
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
 }
 
 .helpText {
@@ -206,10 +206,10 @@
 }
 
 .errorText {
-  color: var(--color-surface-negative);
+  color: var(--color-negative);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--spacing-1);
 }
 
 .dropArea {
@@ -217,34 +217,34 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
-  border: 2px dashed var(--wave);
+  padding: var(--spacing-6) var(--spacing-4);
+  border: 2px dashed var(--color-border-2);
   border-radius: var(--radius-md);
-  background-color: var(--whisper);
+  background-color: var(--color-surface-1);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .dropArea:hover {
-  background-color: var(--hover-light);
+  background-color: var(--color-hover);
   border-color: var(--blip-light);
 }
 
 .dragging {
-  background-color: var(--blip-light);
-  border-color: var(--color-surface-primary);
+  background-color: rgba(197, 217, 251, 0.2);
+  border-color: var(--color-primary);
 }
 
 .uploadIcon {
   color: var(--blip-blue-brand);
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-3);
 }
 
 .dropText {
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
-  margin-bottom: 0.5rem;
-  color: var(--text-color-default);
+  margin-bottom: var(--spacing-2);
+  color: var(--color-content-default);
 }
 
 .dropHint {
@@ -255,26 +255,26 @@
 .errorMessage {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--milano-red);
-  padding: 0.75rem;
-  background-color: var(--cinderella);
+  gap: var(--spacing-2);
+  color: var(--color-negative);
+  padding: var(--spacing-3);
+  background-color: rgba(249, 159, 159, 0.1);
   border-radius: var(--radius-md);
   font-size: var(--fs-p2);
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
 }
 
 .previewSection {
-  padding: 1rem;
-  background-color: var(--whisper);
-  border-top: 1px solid var(--wave);
+  padding: var(--spacing-4);
+  background-color: var(--color-surface-1);
+  border-top: 1px solid var(--color-border-2);
 }
 
 .previewHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-3);
 }
 
 .previewTitle {
@@ -284,14 +284,14 @@
 }
 
 .checkIcon {
-  color: var(--mountain-meadow);
+  color: var(--color-positive);
 }
 
 .previewContent {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--wild-sand);
+  background-color: var(--color-surface-0);
   border-radius: var(--radius-md);
   overflow: hidden;
   position: relative;
@@ -310,23 +310,23 @@
 .previewActions {
   display: flex;
   justify-content: center;
-  margin-top: 0.75rem;
+  margin-top: var(--spacing-3);
 }
 
 .viewOriginalLink {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  color: var(--color-surface-primary);
+  gap: var(--spacing-1);
+  color: var(--color-primary);
   font-size: var(--fs-p3);
   text-decoration: none;
-  padding: 0.25rem 0.5rem;
+  padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
 }
 
 .viewOriginalLink:hover {
-  background-color: var(--hover-light);
+  background-color: var(--color-hover);
   text-decoration: underline;
 }
 
@@ -337,7 +337,7 @@
   }
   
   .dropArea {
-    padding: 1.5rem 1rem;
+    padding: var(--spacing-5) var(--spacing-4);
   }
 }
 
@@ -345,7 +345,7 @@
   .cardHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: var(--spacing-2);
   }
   
   .fileTypeSelect {

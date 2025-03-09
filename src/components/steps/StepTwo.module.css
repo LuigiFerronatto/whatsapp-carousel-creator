@@ -1,4 +1,4 @@
-/* StepTwo.module.css com adições para o editor formatado e variáveis */
+/* StepTwo.module.css */
 @import '../../styles/Steps.module.css';
 @import '../../styles/design-system.css';
 
@@ -6,37 +6,37 @@
 .viewControls {
   display: flex;
   justify-content: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
 }
 
 .viewToggle, .hintsToggle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
   background: none;
   border: none;
   font-size: var(--fs-p3);
-  color: var(--color-surface-primary);
+  color: var(--color-primary);
   cursor: pointer;
-  padding: 0.4rem 0.6rem;
+  padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-md);
   transition: background-color var(--transition-fast);
 }
 
 .viewToggle:hover, .hintsToggle:hover {
-  background-color: var(--hover-light);
+  background-color: var(--color-hover);
 }
 
 .hintsToggle.active {
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
+  background-color: var(--color-primary);
+  color: var(--color-bright);
 }
 
 /* Content Layout */
 .contentWrapper {
   display: flex;
-  gap: 2rem;
+  gap: var(--spacing-6);
   width: 100%;
 }
 
@@ -44,7 +44,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-5);
   width: 100%;
 }
 
@@ -52,209 +52,32 @@
   max-width: 60%;
 }
 
-/* Variable Manager */
-/* .variableManagerContainer {
-  padding: 1rem;
-  background-color: var(--whisper);
-  border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--blip-light);
-  box-shadow: var(--shadow-1);
-  animation: fadeIn 0.3s ease;
-} */
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* .variableManagerHeader {
-  margin-bottom: 1rem;
-}
-
-.variableManagerTitle {
-  font-size: var(--fs-p1);
-  font-weight: var(--fw-bold);
-  color: var(--blip-blue-brand);
-  margin-bottom: 0.5rem;
-}
-
-.variableManagerDescription {
-  color: var(--dove-gray-2);
-  font-size: var(--fs-p2);
-}
-
-.variableList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.variableItem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background-color: var(--color-surface-0);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--wave);
-  transition: all var(--transition-fast);
-}
-
-.variableItem:hover {
-  background-color: var(--color-surface-1);
-  box-shadow: var(--shadow-1);
-}
-
-.variableIndex {
-  background-color: var(--color-system);
-  color: var(--blip-dark);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-p3);
-  flex-shrink: 0;
-}
-
-.variableInput {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid var(--wave);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.variableInput:focus {
-  outline: none;
-  border-color: var(--color-surface-primary);
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
-}
-
-.removeVariableBtn {
-  background-color: var(--color-surface-1);
-  color: var(--dove-gray-2);
-  border: none;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-circle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.removeVariableBtn:hover {
-  background-color: var(--cinderella);
-  color: var(--color-surface-negative);
-}
-
-.addVariableContainer {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.newVariableInput {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid var(--wave);
-  border-radius: var(--radius-sm);
-}
-
-.newVariableInput:focus {
-  outline: none;
-  border-color: var(--color-surface-primary);
-  box-shadow: 0 0 0 3px rgba(25, 104, 240, 0.15);
-}
-
-.addVariableBtn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--blip-light);
-  color: var(--blip-dark);
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.addVariableBtn:hover:not(:disabled) {
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
-}
-
-.addVariableBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.variableTips {
-  background-color: var(--color-surface-0);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  display: flex;
-  gap: 0.75rem;
-  font-size: var(--fs-p3);
-  color: var(--dove-gray-2);
-  border-left: 3px solid var(--blip-light);
-} */
-/* 
-.tipIconWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background-color: var(--blip-light);
-  border-radius: var(--radius-circle);
-  flex-shrink: 0;
-}
-
-.tipIcon {
-  color: var(--blip-dark);
-}
-
-.variableTips p {
-  margin: 0 0 0.5rem 0;
-  font-weight: var(--fw-bold);
-}
-
-.variableTips ul {
-  margin: 0;
-  padding-left: 1.25rem;
-}
-
-.variableTips li {
-  margin-bottom: 0.25rem;
-} */
-
 /* Form Sections */
 .basicDetailsSection, .cardEditorSection {
   background-color: var(--color-surface-0);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: var(--spacing-5);
   box-shadow: var(--shadow-1);
-  border: 1px solid var(--wave);
+  border: 1px solid var(--color-border-2);
 }
 
 .sectionTitle {
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
   color: var(--blip-blue-brand);
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--wave);
+  margin-bottom: var(--spacing-5);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--color-border-2);
 }
-
 
 /* Form Elements */
 .formGroup {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-5);
 }
 
 .customSelect {
@@ -263,25 +86,25 @@
 
 /* Card Navigation */
 .cardNavigation {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-5);
 }
 
 .cardTabs {
   display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-4);
   overflow: visible;
-  padding-bottom: 0.5rem;
+  padding-bottom: var(--spacing-2);
 }
 
 .cardTab {
   flex: 0 0 auto;
-  padding: 0.75rem 1rem;
+  padding: var(--spacing-3) var(--spacing-4);
   background-color: var(--color-surface-1);
-  border: 1px solid var(--wave);
+  border: 1px solid var(--color-border-2);
   border-radius: var(--radius-md);
   font-size: var(--fs-p2);
-  color: var(--text-color-default);
+  color: var(--color-content-default);
   cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
@@ -292,9 +115,9 @@
 }
 
 .activeCardTab {
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
-  border-color: var(--color-surface-primary);
+  background-color: var(--color-primary);
+  color: var(--color-bright);
+  border-color: var(--color-primary);
   font-weight: var(--fw-bold);
 }
 
@@ -304,8 +127,8 @@
   right: -6px;
   width: 18px;
   height: 18px;
-  background-color: var(--color-surface-negative);
-  color: var(--alabaster);
+  background-color: var(--color-negative);
+  color: var(--color-bright);
   border-radius: var(--radius-circle);
   font-size: 12px;
   display: flex;
@@ -317,7 +140,7 @@
 .activeCardEditor {
   max-height: auto;
   overflow: visible;
-  padding-right: 0.5rem;
+  padding-right: var(--spacing-2);
   scrollbar-width: thin;
 }
 
@@ -339,29 +162,29 @@
 .cardContentEditor {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-5);
 }
 
 .cardTextEditor {
-  background-color: var(--whisper);
+  background-color: var(--color-surface-1);
   border-radius: var(--radius-md);
-  padding: 1rem;
-  border: 1px solid var(--wave);
+  padding: var(--spacing-4);
+  border: 1px solid var(--color-border-2);
 }
 
 .cardTextLabel {
   display: block;
   font-size: var(--fs-p2);
   font-weight: var(--fw-bold);
-  margin-bottom: 0.75rem;
-  color: var(--text-color-default);
+  margin-bottom: var(--spacing-3);
+  color: var(--color-content-default);
 }
 
 /* Preview Container */
 .previewContainer {
   flex: 0 0 30%;
   position: sticky;
-  top: 1rem;
+  top: var(--spacing-4);
   align-self: flex-start;
 }
 
@@ -373,35 +196,58 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--wave);
+  border: 1px solid var(--color-border-2);
 }
 
 .previewTitle {
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
-  padding: 1rem;
+  padding: var(--spacing-4);
   text-align: center;
   background-color: var(--blip-blue-brand);
-  color: var(--alabaster);
+  color: var(--color-bright);
   margin: 0;
 }
 
 .previewSubtitle {
   font-size: var(--fs-p3);
-  padding: 0.5rem 1rem;
+  padding: var(--spacing-2) var(--spacing-4);
   text-align: center;
-  background-color: var(--whisper);
+  background-color: var(--color-surface-1);
   margin: 0;
   color: var(--dove-gray-2);
-  border-bottom: 1px solid var(--wave);
+  border-bottom: 1px solid var(--color-border-2);
 }
 
 .previewContent {
-  padding: 0.5rem;
+  padding: var(--spacing-2);
   display: flex;
   justify-content: center;
   flex: 1;
   overflow-y: auto;
+}
+
+/* WhatsApp requirements notice */
+.whatsappRequirement {
+  margin: var(--spacing-3) 0 var(--spacing-5) 0;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: rgba(197, 217, 251, 0.2);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  font-size: var(--fs-p3);
+  color: var(--blip-dark);
+  border-left: 3px solid var(--color-primary);
+}
+
+.whatsappRequirement strong {
+  font-weight: var(--fw-bold);
+}
+
+.infoIcon {
+  flex-shrink: 0;
+  color: var(--blip-dark);
 }
 
 /* Responsiveness */
@@ -416,7 +262,7 @@
 
   .previewContainer {
     position: static;
-    margin-top: 1.5rem;
+    margin-top: var(--spacing-5);
     width: 100%;
     flex: 0 0 auto;
     height: auto;
@@ -432,7 +278,7 @@
   .progressContainer {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: var(--spacing-4);
   }
   
   .progressBarWrapper {
@@ -450,51 +296,6 @@
 
 @media (max-width: 480px) {
   .container {
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
-}
-
-/* Adicione ao seu StepTwo.module.css */
-.whatsappRequirement {
-  margin: 0.75rem 0 1.25rem 0;
-  padding: 0.75rem 1rem;
-  background-color: var(--blip-light);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  font-size: var(--fs-p3);
-  color: var(--blip-dark);
-  border-left: 3px solid var(--color-surface-primary);
-}
-
-.whatsappRequirement strong {
-  font-weight: var(--fw-bold);
-}
-
-.infoIcon {
-  flex-shrink: 0;
-  color: var(--blip-dark);
-}
-
-/* Adicione ao seu CardTemplateEditor.module.css */
-.whatsappRequirement {
-  margin: 0 0 1rem 0;
-  padding: 0.75rem;
-  background-color: var(--blip-light);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  font-size: var(--fs-p3);
-  color: var(--blip-dark);
-  border-left: 3px solid var(--color-surface-primary);
-}
-
-.whatsappRequirement strong {
-  font-weight: var(--fw-bold);
-}
-
-.infoIcon {
-  flex-shrink: 0;
 }

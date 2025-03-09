@@ -1,39 +1,29 @@
-/* // HintSystem.module.css */
+/* HintSystem.module.css - Improved version */
 .hintContainer {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
   border-radius: var(--radius-md);
-  font-size: var(--fs-p2);
-  margin-top: 0.75rem;
+  font-size: var(--fs-p3);
+  margin-top: var(--spacing-3);
   word-break: normal;
   word-wrap: break-word;
   transition: all var(--transition-fast);
   position: relative;
   overflow: hidden;
   max-width: 100%;
-}
-
-.hintContainer::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 4px;
-  border-radius: 2px 0 0 2px;
+  border-left: 3px solid transparent;
 }
 
 .hintIconWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-circle);
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
-  box-shadow: var(--shadow-1);
+  color: inherit;
 }
 
 .hintContent {
@@ -41,50 +31,41 @@
 }
 
 .hintTitle {
-  font-weight: var(--fw-bold);
-  margin-bottom: 0.5rem;
-  font-size: var(--fs-p1);
-  letter-spacing: -0.01em;
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--spacing-1);
+  font-size: var(--fs-p2);
+  color: var(--color-content-default);
   position: relative;
   display: inline-block;
 }
 
 .hintMessage {
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.5;
+  color: var(--color-content-default);
 }
 
 .hintList {
-  margin: 0.75rem 0 0.25rem;
-  padding-left: 1.5rem;
+  margin: var(--spacing-2) 0 var(--spacing-1);
+  padding-left: var(--spacing-5);
 }
 
 .hintList li {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
   position: relative;
-}
-
-.hintList li::before {
-  content: '';
-  position: absolute;
-  left: -1rem;
-  top: 0.5rem;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background-color: currentColor;
-  opacity: 0.6;
+  color: var(--color-content-default);
 }
 
 .hintAction {
-  margin-top: 0.75rem;
+  margin-top: var(--spacing-2);
   display: inline-flex;
   align-items: center;
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   font-size: var(--fs-p3);
   cursor: pointer;
   text-decoration: none;
   transition: all var(--transition-fast);
+  color: var(--color-primary);
 }
 
 .hintAction:hover {
@@ -92,158 +73,122 @@
 }
 
 .hintAction svg {
-  margin-left: 0.25rem;
+  margin-left: var(--spacing-1);
 }
 
-/* Simple variant - more subtle with less visual noise */
-.simple {
-  padding: 0.625rem 0.75rem;
-  background-color: var(--whisper);
-  border: 1px solid var(--box);
-  margin-top: 0.5rem;
-  font-size: var(--fs-p3);
-  box-shadow: none;
-}
-
-.simple::before {
-  display: none;
-}
-
-.simple .hintIconWrapper {
-  width: 20px;
-  height: 20px;
-  background: transparent;
-  color: var(--blip-action);
-  box-shadow: none;
-}
-
-.simple .hintTitle {
-  font-size: var(--fs-p2);
-  color: var(--dove-gray);
-}
-
-/* Contextual variants with clear visual differentiation */
+/* Info variant */
 .info {
-  background-color: rgba(197, 217, 251, 0.2);
-  color: var(--blip-night);
-}
-
-.info::before {
-  background-color: var(--blip-blue-brand);
+  background-color: rgba(197, 217, 251, 0.1);
+  border-left-color: var(--color-primary);
+  color: var(--color-content-default);
 }
 
 .info .hintIconWrapper {
-  background-color: var(--blip-blue-brand);
-  color: var(--alabaster);
+  color: var(--color-primary);
 }
 
+/* Warning variant */
 .warning {
-  background-color: rgba(251, 197, 197, 0.3);
-  color: var(--pomegranate);
-}
-
-.warning::before {
-  background-color: var(--milano-red);
+  background-color: rgba(253, 233, 155, 0.1);
+  border-left-color: var(--extended-yellow-dark);
+  color: var(--color-content-default);
 }
 
 .warning .hintIconWrapper {
-  background-color: var(--milano-red);
-  color: var(--alabaster);
+  color: var(--extended-yellow-dark);
 }
 
+/* Success variant */
 .success {
-  background-color: rgba(132, 235, 188, 0.2);
-  color: var(--jewel);
-}
-
-.success::before {
-  background-color: var(--mountain-meadow);
+  background-color: rgba(132, 235, 188, 0.1);
+  border-left-color: var(--color-positive);
+  color: var(--color-content-default);
 }
 
 .success .hintIconWrapper {
-  background-color: var(--mountain-meadow);
-  color: var(--alabaster);
+  color: var(--color-positive);
 }
 
+/* Error variant */
+.error {
+  background-color: rgba(249, 159, 159, 0.1);
+  border-left-color: var(--color-negative);
+  color: var(--color-content-default);
+}
+
+.error .hintIconWrapper {
+  color: var(--color-negative);
+}
+
+/* WhatsApp variant */
 .whatsapp {
-  background-color: rgba(197, 217, 251, 0.25);
-  color: var(--blip-night);
-  border-left: none;
-}
-
-.whatsapp::before {
-  background-color: var(--color-surface-primary);
+  background-color: rgba(197, 217, 251, 0.1);
+  border-left-color: var(--color-primary);
+  color: var(--color-content-default);
 }
 
 .whatsapp .hintIconWrapper {
-  background-color: var(--color-surface-primary);
-  color: var(--alabaster);
+  color: var(--color-primary);
 }
 
 /* Feature-specific hint styles */
 .buttonHint {
-  background-color: var(--box);
-  border-radius: var(--radius-md);
-}
-
-.buttonHint::before {
-  background-color: var(--blip-blue-brand);
+  background-color: rgba(197, 217, 251, 0.05);
+  border-left-color: var(--color-primary);
 }
 
 .textHint {
-  background-color: var(--whisper);
-  border-radius: var(--radius-md);
+  background-color: rgba(0, 0, 0, 0.03);
+  border-left-color: var(--color-border-2);
 }
 
-.textHint::before {
-  background-color: var(--cloud);
+/* Simple variant - more subtle with less visual noise */
+.simple {
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: rgba(197, 217, 251, 0.05);
+  border: 1px solid var(--color-border-3);
+  border-left: 2px solid var(--color-primary);
+  margin-top: var(--spacing-2);
+  font-size: var(--fs-p3);
+  box-shadow: none;
 }
 
 /* Detailed variant with extra emphasis */
 .detailed {
-  padding: 1.25rem;
-  background-color: var(--whisper);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-1);
-}
-
-.detailed::before {
-  width: 6px;
+  padding: var(--spacing-4);
+  border-left-width: 4px;
 }
 
 .detailed .hintIconWrapper {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
 }
 
 .detailed .hintTitle {
-  font-size: var(--fs-h4);
-  margin-bottom: 0.75rem;
-}
-
-.detailed .hintList li {
-  margin-bottom: 0.75rem;
+  font-size: var(--fs-p1);
+  margin-bottom: var(--spacing-2);
+  font-weight: var(--fw-bold);
 }
 
 /* Animated variant for important notifications */
 .animated {
-  animation: pulseHighlight 2s ease-in-out;
+  animation: subtlePulse 2s ease-in-out;
 }
 
-@keyframes pulseHighlight {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(25, 104, 240, 0); }
-  50% { box-shadow: 0 0 0 6px rgba(25, 104, 240, 0.2); }
+@keyframes subtlePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+  50% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
 }
 
 /* Dismissable hints */
 .dismissable {
-  padding-right: 2.5rem;
+  padding-right: var(--spacing-8);
 }
 
 .dismissButton {
   position: absolute;
-  right: 0.75rem;
-  top: 0.75rem;
+  right: var(--spacing-2);
+  top: var(--spacing-2);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -260,23 +205,25 @@
 
 .dismissButton:hover {
   opacity: 0.8;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Interactive list with checkboxes */
 .checkList {
   list-style: none;
-  padding-left: 0.25rem;
+  padding-left: var(--spacing-1);
 }
 
 .checkItem {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+  color: var(--color-content-default);
 }
 
 .checkbox {
-  margin-top: 0.25rem;
+  margin-top: var(--spacing-1);
 }
 
 /* Media queries for better responsive behavior */
@@ -287,11 +234,11 @@
   }
   
   .hintIconWrapper {
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--spacing-1);
   }
   
   .detailed {
-    padding: 1rem;
+    padding: var(--spacing-3);
   }
 }
 
@@ -299,50 +246,51 @@
 .hintsGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin: 1rem 0;
+  gap: var(--spacing-3);
+  margin: var(--spacing-3) 0;
 }
 
 /* Progress variant */
 .progress {
-  background-color: var(--whisper);
+  background-color: rgba(197, 217, 251, 0.05);
 }
 
 .progressBar {
-  height: 4px;
-  background-color: var(--blip-blue-brand);
+  height: 3px;
+  background-color: var(--color-primary);
   border-radius: var(--radius-pill);
-  margin-top: 0.75rem;
+  margin-top: var(--spacing-2);
   transition: width var(--transition-normal);
 }
 
 /* Social proof variant */
 .socialProof {
-  background-color: rgba(197, 217, 251, 0.15);
-  border: 1px solid rgba(197, 217, 251, 0.5);
+  background-color: rgba(197, 217, 251, 0.05);
+  border: 1px solid var(--color-border-3);
+  border-left: 3px solid var(--color-primary);
 }
 
 .socialProof .socialCount {
   display: inline-block;
-  font-weight: var(--fw-bold);
-  color: var(--blip-blue-brand);
+  font-weight: var(--fw-semibold);
+  color: var(--color-primary);
 }
 
 /* Emphasis for importance */
 .important .hintTitle::after {
   content: '';
   display: block;
-  width: 100%;
+  width: 40px;
   height: 2px;
   background-color: currentColor;
   opacity: 0.3;
-  margin-top: 0.25rem;
+  margin-top: var(--spacing-1);
 }
 
 /* Compact variant for dense UIs */
 .compact {
-  padding: 0.5rem 0.75rem;
-  font-size: var(--fs-p3);
+  padding: var(--spacing-2) var(--spacing-2);
+  font-size: var(--fs-p4);
 }
 
 .compact .hintIconWrapper {
@@ -353,4 +301,28 @@
 .compact .hintIconWrapper svg {
   width: 12px;
   height: 12px;
+}
+
+/* WhatsApp requirement notice - Using the style you prefer */
+.whatsappRequirement {
+  margin: 0 0 var(--spacing-4) 0;
+  padding: var(--spacing-3);
+  background-color: rgba(197, 217, 251, 0.1);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  font-size: var(--fs-p3);
+  color: var(--color-content-default);
+  border-left: 3px solid var(--color-primary);
+}
+
+.whatsappRequirement strong {
+  font-weight: var(--fw-semibold);
+  color: var(--color-content-default);
+}
+
+.infoIcon {
+  flex-shrink: 0;
+  color: var(--color-primary);
 }

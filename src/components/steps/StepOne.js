@@ -1,7 +1,7 @@
 // components/steps/StepOne.js
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CardUploadInput from '../editors/CardUploadInput';
-import AlertMessage from '../ui/AlertMessage/AlertMessage';
+import { useAlert } from '../ui/AlertMessage/AlertContext'; // Adicionar esta importação
 import Button from '../ui/Button/Button';
 import { 
   FiUpload, 
@@ -32,7 +32,7 @@ const StepOne = ({
   updateCard, 
   handleAddCard, 
   handleRemoveCard, 
-  handleUploadFiles, 
+  handleUploadFiles: uploadFiles, 
   loading, 
   error, 
   success, 
@@ -46,6 +46,9 @@ const StepOne = ({
     return localStorage.getItem('remember_auth_key') === 'true';
   });
   const [showTips, setShowTips] = useState(true);
+  
+  // Inicializar sistema de alertas
+  const alert = useAlert();
   
   // Refs
   const uploadSectionRef = useRef(null);
@@ -76,20 +79,70 @@ const StepOne = ({
     uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
   
-  // Save draft before upload
+  // Save draft before upload - Com alerta adicionado
   const handleSaveBeforeUpload = useCallback(() => {
     saveDraftManually();
     setSavedBeforeUpload(true);
     
+    // Adicionar alerta de sucesso
+    alert.success("Rascunho salvo com sucesso!", {
+      position: 'bottom-right',
+      autoCloseTime: 3000
+    });
+    
     setTimeout(() => {
       setSavedBeforeUpload(false);
     }, 3000);
-  }, [saveDraftManually]);
+  }, [saveDraftManually, alert]);
   
   // Check if all cards have valid URLs
   const allCardsHaveUrls = useCallback(() => {
     return cards.slice(0, numCards).every(card => card.fileUrl?.trim());
   }, [cards, numCards]);
+
+  // Wrapper para verificar e mostrar alertas antes do upload
+  const handleUploadFiles = useCallback(async () => {
+    try {
+      if (!authKey) {
+        alert.error("Chave de autorização (Router Key) é obrigatória para continuar", {
+          position: 'top-center'
+        });
+        return;
+      }
+      
+      if (!allCardsHaveUrls()) {
+        alert.warning("Adicione URLs para todos os cards antes de continuar", {
+          position: 'top-center'
+        });
+        return;
+      }
+      
+      // Chamar a função original de upload
+      await uploadFiles();
+      
+      // Mostrar alerta de sucesso se não ocorreu erro
+      alert.success("Upload de arquivos concluído com sucesso!", {
+        position: 'top-right'
+      });
+    } catch (err) {
+      // Capturar e mostrar erros como alertas
+      alert.error(`Erro no upload dos arquivos: ${err.message || 'Erro desconhecido'}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
+    }
+  }, [authKey, allCardsHaveUrls, uploadFiles, alert]);
+
+  // Mostrar alertas para erros e sucessos existentes
+  useEffect(() => {
+    if (error) {
+      alert.error(error, { position: 'top-center' });
+    }
+    
+    if (success) {
+      alert.success(success, { position: 'top-right' });
+    }
+  }, [error, success, alert]);
 
   return (
     <div className={steps.container}>
@@ -265,10 +318,6 @@ const StepOne = ({
           </div>
         )}
       </div>
-      
-      {/* Error and success messages */}
-      {error && <AlertMessage error={error} />}
-      {success && <AlertMessage success={success} />}
       
       {/* Upload summary */}
       {uploadResults.length > 0 && (

@@ -21,7 +21,7 @@
   
   .progressFill {
     height: 100%;
-    background-color: var(--mountain-meadow);
+    background-color: var(--color-primary);
     border-radius: var(--radius-pill);
     transition: width var(--transition-normal);
   }

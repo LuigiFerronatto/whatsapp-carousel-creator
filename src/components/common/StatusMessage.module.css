@@ -1,22 +1,197 @@
 /* StatusMessage.module.css */
 .errorContainer {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background-color: var(--cinderella);
-    color: var(--milano-red);
-    border-radius: 4px;
-    border: 1px solid var(--geraldine);
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: rgba(249, 159, 159, 0.2);
+  color: var(--color-negative);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-error);
+}
+
+.successContainer {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: rgba(132, 235, 188, 0.2);
+  color: var(--color-positive);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-success);
+}
+
+.messageTitle {
+  font-weight: var(--fw-bold);
+}
+
+/* StatusFeedback.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin: var(--spacing-4) 0;
+  width: 100%;
+}
+
+.message {
+  display: flex;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-md);
+  animation: slideIn var(--transition-normal);
+  position: relative;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error {
+  background-color: rgba(249, 159, 159, 0.2);
+  border-left: 4px solid var(--color-negative);
+  color: var(--color-negative);
+}
+
+.success {
+  background-color: rgba(132, 235, 188, 0.2);
+  border-left: 4px solid var(--color-positive);
+  color: var(--color-positive);
+}
+
+.validation {
+  background-color: rgba(197, 217, 251, 0.2);
+  border-left: 4px solid var(--color-primary);
+  color: var(--blip-dark);
+}
+
+.iconContainer {
+  display: flex;
+  align-items: flex-start;
+  margin-right: var(--spacing-3);
+  padding-top: var(--spacing-1);
+}
+
+.content {
+  flex: 1;
+}
+
+.content p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.validationTitle {
+  font-weight: var(--fw-bold);
+  margin-bottom: var(--spacing-2) !important;
+}
+
+.validationList {
+  margin: 0;
+  padding-left: var(--spacing-5);
+  font-size: var(--fs-p2);
+}
+
+.validationList li {
+  margin-bottom: var(--spacing-1);
+}
+
+.validationList li:last-child {
+  margin-bottom: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  padding: var(--spacing-1);
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+  margin-left: var(--spacing-2);
+}
+
+.closeButton:hover {
+  opacity: 1;
+}
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-1);
+  font-size: var(--fs-p3);
+  color: var(--dove-gray-2);
+  transition: background-color var(--transition-normal);
+}
+
+.unsaved {
+  background-color: var(--color-hover);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: var(--color-hover);
+  }
+  50% {
+    background-color: rgba(197, 217, 251, 0.2);
+  }
+  100% {
+    background-color: var(--color-hover);
+  }
+}
+
+.statusInfo {
+  display: flex;
+  align-items: center;
+}
+
+.statusIcon {
+  margin-right: var(--spacing-2);
+}
+
+.saveButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--color-surface-0);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-p3);
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: all var(--transition-fast);
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: rgba(197, 217, 251, 0.2);
+  color: var(--blip-dark);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .message {
+    padding: var(--spacing-2) var(--spacing-3);
   }
   
-  .successContainer {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background-color: var(--magic-mint);
-    color: var(--jewel);
-    border-radius: 4px;
-    border: 1px solid var(--shamrock);
+  .statusBar {
+    padding: var(--spacing-1) var(--spacing-2);
   }
-  
-  .messageTitle {
-    font-weight: var(--fw-bold);
+}
+
+@media (max-width: 480px) {
+  .validationList {
+    padding-left: var(--spacing-4);
   }
+}

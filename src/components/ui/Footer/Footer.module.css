@@ -1,68 +1,68 @@
 /* components/ui/Footer/Footer.module.css */
 .footer {
-    margin-top: 4rem;
-    padding: 2rem 0;
-    border-top: 1px solid var(--color-surface-2);
-  }
-  
+  margin-top: var(--spacing-8);
+  padding: var(--spacing-6) 0;
+  border-top: 1px solid var(--color-border-2);
+}
+
+.footerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.footerInfo {
+  color: var(--color-content-default);
+}
+
+.footerInfo p {
+  margin: 0;
+  font-size: var(--fs-p2);
+}
+
+.footerActions {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+}
+
+.footerLink,
+.footerButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-circle);
+  border: 1px solid var(--color-border-2);
+  background: var(--color-surface-1);
+  color: var(--color-content-default);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.footerLink:hover,
+.footerButton:hover {
+  background: var(--color-surface-2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
+}
+
+.footerLink svg,
+.footerButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 768px) {
   .footerContent {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: column;
+    text-align: center;
   }
-  
-  .footerInfo {
-    color: var(--text-color-default);
-  }
-  
-  .footerInfo p {
-    margin: 0;
-    font-size: var(--fs-p2);
-  }
-  
+
   .footerActions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-  }
-  
-  .footerLink,
-  .footerButton {
-    display: flex;
-    align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--color-surface-2);
-    background: var(--color-surface-1);
-    color: var(--text-color-default);
-    transition: all 0.2s ease;
-    cursor: pointer;
   }
-  
-  .footerLink:hover,
-  .footerButton:hover {
-    background: var(--color-surface-2);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .footerLink svg,
-  .footerButton svg {
-    width: 20px;
-    height: 20px;
-  }
-  
-  @media (max-width: 768px) {
-    .footerContent {
-      flex-direction: column;
-      text-align: center;
-    }
-  
-    .footerActions {
-      justify-content: center;
-    }
-  }
+}
