@@ -801,25 +801,17 @@ const StepThree = ({
       await sendTemplate(phoneNumber);
       setSendSuccess(true);
       
-      // Mostrar alerta de sucesso
-      alert.success(`Template enviado com sucesso para ${formatPhoneDisplay(phoneNumber)}`, {
-        position: 'top-right'
-      });
+      // Não é necessário mostrar outro alerta aqui, pois já está sendo mostrado no sendTemplate do useWhatsAppTemplate
     } catch (error) {
       console.error('Erro ao enviar template:', error);
-      
-      // Mostrar alerta de erro
-      alert.error(`Falha ao enviar o template: ${error.message || 'Erro desconhecido'}`, {
-        position: 'top-center',
-        autoCloseTime: 7000
-      });
+      // O alerta de erro já está sendo mostrado no sendTemplate
     }
   };
 
   return (
     <div className={steps.container}>
       {/* Introduction section */}
-      <div className={steps.introSection}>
+      <div className={steps.introStepWrapper}>
         <h2 className={steps.stepTitle}>Template Concluído</h2>
         <p className={steps.stepDescription}>
           Seu template foi criado com sucesso! Veja abaixo a prévia de como ficará para seus clientes,

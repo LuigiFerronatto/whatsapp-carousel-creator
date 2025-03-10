@@ -278,13 +278,15 @@ const CardTemplateEditor = ({
   const renderButtonsPanel = () => (
     <div className={styles.buttonsSection}>
       {index === 0 && numCards > 1 && (
-        <div className={styles.whatsappRequirement}>
-          <FiInfo size={16} className={styles.infoIcon} />
-          <div>
-            <strong>Requisito do WhatsApp:</strong> Todos os cards devem ter o mesmo número e tipos de botões.
-            As alterações feitas no Card 1 serão sincronizadas automaticamente com os outros cards.
-          </div>
-        </div>
+        <Hints
+        variant="whatsapp"
+        isCompact
+        title="Melhores Práticas para Botões:"
+        list={[
+          <strong>"Requisito do WhatsApp:"</strong>, "Todos os cards devem ter o mesmo número e tipos de botões.",
+          "As alterações feitas no Card 1 serão sincronizadas automaticamente com os outros cards."
+        ]}
+      />
       )}
     
       {card.buttons.length > 0 ? (

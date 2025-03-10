@@ -25,7 +25,7 @@ export const useFileUpload = () => {
         if (!blobService) {
           throw new Error('Serviço de upload não configurado');
         }
-
+  
         // Configurar callback de progresso
         const onProgress = (progress) => {
           setUploadProgress(progress);
@@ -37,27 +37,37 @@ export const useFileUpload = () => {
             });
           }
         };
-
+  
         // Realizar upload
         const result = await blobService.uploadFile(file, {
           onProgress
         });
-
+  
         setUploadedFile(result);
         
         alert.success(`Upload do arquivo "${file.name}" concluído com sucesso!`, {
           position: 'top-right',
           autoCloseTime: 3000
         });
-
+  
         return result;
         
       } catch (azureError) {
         console.warn('Falha no upload para Azure, usando fallback:', azureError);
         
-        // Criar URL temporal simulando upload bem-sucedido
+        // CORREÇÃO: Em vez de usar URL.createObjectURL que tem vida útil temporária,
+        // cria um fallback que emula URL persistentes simuladas
+  
+        // 1. Converte o arquivo para base64 (será mais estável para persistência)
+        const base64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+  
+        // 2. Usa esta URL persistente em vez da blob URL temporária
         const simulatedResult = {
-          url: URL.createObjectURL(file),
+          url: base64, // URL base64 é persistente no armazenamento
           type: file.type.startsWith('image/') ? 'image' : 'video',
           name: file.name
         };

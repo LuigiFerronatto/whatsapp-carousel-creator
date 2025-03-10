@@ -23,6 +23,7 @@ import styles from './CardUploadInput.module.css';
 /**
  * Componente aprimorado para upload ou seleção de URL para cada cartão do carrossel
  * Design refinado e UX simplificada com foco na experiência do usuário
+ * Corrigido para lidar corretamente com URLs e uploads de arquivo
  * 
  * @param {Object} props Propriedades do componente
  * @param {number} props.index Índice do cartão
@@ -49,6 +50,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
   const fileInputRef = useRef(null);
   const dropAreaRef = useRef(null);
   const previewImgRef = useRef(null);
+  const urlInputRef = useRef(null);
   
   // Hook customizado para upload de arquivos
   const { 
@@ -61,15 +63,54 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
 
   // Atualiza preview quando a URL do cartão muda
   useEffect(() => {
+    // Só iniciar carregamento se houver uma URL válida
     if (card.fileUrl) {
+      // Resetar estados de erro
       setUrlValidationError('');
       setPreviewError(false);
-      setLoadingPreview(true);
-      setPreviewUrl(card.fileUrl);
+      
+      // Iniciar carregamento apenas se o preview ainda não estiver visível
+      if (!previewUrl || previewUrl !== card.fileUrl) {
+        setLoadingPreview(true);
+        setPreviewUrl(card.fileUrl);
+      }
+      
+      // Para tipo URL, verificar pré-carregamento fora do DOM
+      if (card.fileType === 'image') {
+        // Criar um objeto de imagem para pré-carregar
+        const preloadImg = new Image();
+        
+        // Definir handlers antes de definir src
+        preloadImg.onload = () => {
+          // Só atualizar estado se o componente ainda estiver montado e a URL não mudou
+          setLoadingPreview(false);
+          setPreviewError(false);
+        };
+        
+        preloadImg.onerror = () => {
+          // Só atualizar estado se o componente ainda estiver montado e a URL não mudou
+          setLoadingPreview(false);
+          setPreviewError(true);
+          console.error(`Erro ao carregar imagem para Card ${index + 1}: ${card.fileUrl}`);
+          
+          // Feedback visual sobre o erro
+          alert.warning(`Não foi possível carregar a imagem do Card ${index + 1}. Verifique se a URL está correta.`, {
+            position: 'bottom-right',
+            autoCloseTime: 4000
+          });
+        };
+        
+        // Iniciar carregamento
+        preloadImg.src = card.fileUrl;
+      }
+      // Vídeos serão tratados pelos eventos onLoadedData/onError no componente de vídeo
     } else {
+      // Se não há URL, limpar o preview
       setPreviewUrl('');
+      setLoadingPreview(false);
+      setPreviewError(false);
     }
-  }, [card.fileUrl, forceRender]);
+  }, [card.fileUrl, card.fileType, index, alert]);
 
   // Monitora drag & drop para melhorar UX
   useEffect(() => {
@@ -184,7 +225,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       }
       return;
     }
-
+  
     try {
       // Determina o tipo de arquivo (imagem ou vídeo)
       const fileType = file.type.startsWith('image/') ? 'image' : 'video';
@@ -229,21 +270,25 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
         ? file.name.substring(0, 18) + '...' + file.name.slice(-8)
         : file.name;
       
-      // Atualiza o card com URL e metadados
+      // Atualiza o card com URL e metadados - URL manipulada da mesma forma para uploads e URLs
       updateCard(index, 'fileUrl', uploadResult.url);
       updateCard(index, 'fileType', fileType);
       updateCard(index, 'fileName', displayName);
       updateCard(index, 'fileSize', file.size);
       updateCard(index, 'uploadDate', new Date().toISOString());
       updateCard(index, 'hasFile', true);
+      updateCard(index, 'uploadMethod', 'file'); // Marcar como upload de arquivo
       
-      // Atualiza preview local
-      setPreviewUrl(uploadResult.url);
-      
-      // Forçar re-renderização para garantir que a imagem seja atualizada
+      // CORREÇÃO: Adicionar pequeno atraso para garantir que o estado seja atualizado
       setTimeout(() => {
-        setPreviewUrl(uploadResult.url + '?t=' + Date.now());
-        setForceRender(prev => prev + 1);
+        // Garantir que a URL seja tratada como uma URL externa normal após o upload
+        // Isso garante que o tratamento seja consistente entre URLs de upload e manuais
+        setPreviewUrl(''); // Limpar primeiro
+        setTimeout(() => {
+          setPreviewUrl(uploadResult.url); // Definir novamente para forçar re-renderização
+          setLoadingPreview(false); // Importante: definir como falso após URL ser aplicada
+          setPreviewError(false);
+        }, 50);
       }, 100);
       
       // Alerta de sucesso com animação
@@ -282,7 +327,10 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      setLoadingPreview(false);
+      
+      // CORREÇÃO: Não desativa o loading aqui, será tratado após o timeout
+      // para garantir que a imagem apareça
+      
       // Remover classe de upload
       dropAreaRef.current?.classList.remove(styles.uploading);
       setUploadProgress(0);
@@ -328,21 +376,59 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     }
   }, [index, updateCard]);
 
-  // Manipulador de mudança de URL
+  // Manipulador de mudança de URL - CORRIGIDO para não enviar URLs para o Azure
   const handleUrlChange = useCallback((e) => {
-    const url = e.target.value;
-    updateCard(index, 'fileUrl', url);
-    validateUrl(url);
-    setUploadMethod('url');
+    const url = e.target.value.trim();
     
-    // Reset o preview error quando a URL mudar
-    setPreviewError(false);
-    
-    // Se a URL estiver vazia, limpar outros campos relacionados
     if (!url) {
+      updateCard(index, 'fileUrl', '');
       updateCard(index, 'hasFile', false);
+      setUrlValidationError('');
+      setPreviewUrl('');
+      return;
     }
-  }, [index, updateCard, validateUrl]);
+    
+    // Validar a URL antes de aplicar
+    if (validateUrl(url)) {
+      // Mostrar feedback de carregamento
+      setLoadingPreview(true);
+      setPreviewError(false);
+      
+      // Atualizar card com a URL diretamente (sem enviar para Azure)
+      updateCard(index, 'fileUrl', url);
+      updateCard(index, 'uploadMethod', 'url'); // Marcar como URL externa
+      updateCard(index, 'hasFile', true);
+      
+      // Definir data/hora de "upload" (na verdade, quando a URL foi adicionada)
+      updateCard(index, 'uploadDate', new Date().toISOString());
+      
+      // Para URLs, não temos tamanho do arquivo, mas podemos definir um nome descritivo
+      const urlParts = url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      updateCard(index, 'fileName', fileName || `url-${index + 1}`);
+      
+      // Atualizar preview
+      setPreviewUrl(url);
+      
+      // Mostrar alerta de sucesso
+      alert.success(`URL configurada para o Card ${index + 1}!`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      
+      // Salvar o rascunho após a alteração
+      if (typeof window.saveCurrentDraft === 'function') {
+        window.saveCurrentDraft();
+      }
+    }
+  }, [index, updateCard, validateUrl, alert]);
+
+  // Aplicar URL quando o usuário pressionar Enter
+  const handleUrlKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      handleUrlChange(e);
+    }
+  }, [handleUrlChange]);
 
   // Usa URL de teste
   const handleTestUrlClick = useCallback(() => {
@@ -367,12 +453,14 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       updateCard(index, 'fileUrl', newUrl);
       updateCard(index, 'fileType', 'image');
       updateCard(index, 'fileName', `imagem-teste-${index + 1}.png`);
+      updateCard(index, 'uploadMethod', 'url'); // Marcar como URL
       updateCard(index, 'fileSize', 124500);
       updateCard(index, 'uploadDate', new Date().toISOString());
       updateCard(index, 'hasFile', true);
       
-      setUploadMethod('url');
+      setUploadMethod('url'); // Mudar para método URL
       validateUrl(newUrl);
+      setPreviewUrl(newUrl);
       
       // Mostrar alerta de sucesso
       setTimeout(() => {
@@ -409,6 +497,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       updateCard(index, 'fileName', '');
       updateCard(index, 'fileSize', null);
       updateCard(index, 'hasFile', false);
+      updateCard(index, 'uploadMethod', ''); // Limpar método de upload
       
       // Limpar o preview
       setPreviewUrl('');
@@ -416,6 +505,11 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       // Resetar o input de arquivo
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
+      }
+      
+      // Resetar o input de URL
+      if (urlInputRef.current) {
+        urlInputRef.current.value = '';
       }
       
       // Resetar quaisquer erros
@@ -537,6 +631,27 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     img.src = card.fileUrl;
   }, [card.fileUrl, card.fileType, index, alert, updateCard]);
 
+  const videoRef = useRef(null);
+
+const handleVideoLoad = useCallback(() => {
+  setLoadingPreview(false);
+  setPreviewError(false);
+  
+  // Adicionar classe de sucesso temporária para feedback visual
+  const videoElement = videoRef.current;
+  if (videoElement) {
+    videoElement.classList.add(styles.loadSuccess);
+    setTimeout(() => {
+      if (videoElement) {
+        videoElement.classList.remove(styles.loadSuccess);
+      }
+    }, 500);
+  }
+  
+  // Log para depuração
+  console.log(`Vídeo carregado com sucesso para o Card ${index + 1}`);
+}, [index]);
+
   // Obtém ícone do tipo de arquivo
   const getFileTypeIcon = useCallback(() => {
     return card.fileType === 'image' ? 
@@ -546,9 +661,23 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
 
   // Atualização do status da imagem de preview
   const handlePreviewLoad = useCallback(() => {
+    console.log(`Imagem/vídeo carregado com sucesso para Card ${index + 1}`);
+    
+    // CORREÇÃO: Definir estados de carregamento independentemente do método
     setLoadingPreview(false);
     setPreviewError(false);
-  }, []);
+    
+    // Adicionar feedback visual de sucesso
+    const element = card.fileType === 'image' ? previewImgRef.current : videoRef.current;
+    if (element) {
+      element.classList.add(styles.loadSuccess);
+      setTimeout(() => {
+        if (element) {
+          element.classList.remove(styles.loadSuccess);
+        }
+      }, 500);
+    }
+  }, [index, card.fileType]);
 
   const handlePreviewError = useCallback(() => {
     setLoadingPreview(false);
@@ -563,6 +692,15 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
 
   // Classe CSS do cartão baseada no índice e status
   const cardClass = `${styles.cardContainer} ${index % 2 === 0 ? styles.evenCard : styles.oddCard} ${card.fileUrl ? styles.hasContent : ''}`;
+
+  // Quando o componente montar, verifique se já existe uma URL e defina o método de upload correto
+  useEffect(() => {
+    if (card.fileUrl) {
+      // Se foi marcado como upload ou se tem fileSize, consideramos como um arquivo carregado
+      // caso contrário, consideramos como uma URL externa
+      setUploadMethod(card.uploadMethod === 'file' || card.fileSize ? 'file' : 'url');
+    }
+  }, [card.fileUrl, card.uploadMethod, card.fileSize]);
 
   return (
     <div className={cardClass}>
@@ -581,12 +719,6 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
           <div className={styles.cardNumber}>
             Cartão {index + 1}
           </div>
-          
-          {card.fileName && (
-            <div className={styles.fileNameDisplay} title={card.fileName}>
-              {card.fileName}
-            </div>
-          )}
         </div>
 
         <div className={styles.fileTypeSelect}>
@@ -601,9 +733,6 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
           </select>
           <div className={styles.fileTypeIconWrapper}>
             {getFileTypeIcon()}
-          </div>
-          <div className={styles.fileTypeInfo} title="Compatibilidade de arquivos">
-            <FiInfo size={14} />
           </div>
         </div>
       </div>
@@ -638,22 +767,25 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
               <Input
                 type="url"
                 clearable
+                ref={urlInputRef}
                 value={card.fileUrl || ''}
-                onChange={handleUrlChange}
+                onChange={(e) => validateUrl(e.target.value)} // Validar ao digitar
+                onBlur={handleUrlChange} // Aplicar ao sair do campo
+                onKeyDown={handleUrlKeyDown} // Aplicar ao pressionar Enter
                 onClear={handleClearFile}
                 placeholder="https://exemplo.com/imagem.jpg"
                 error={urlValidationError}
                 aria-label="URL do arquivo de mídia"
               />
               
-              <div className={styles.urlActions}>
+              <div className={styles.urlHelpActions}>
+                <span className={styles.urlHint}>Cole uma URL direta para uma imagem ou vídeo</span>
                 <Button
                   variant="text"
                   size="small"
                   color="primary"
                   onClick={handleTestUrlClick}
                   iconLeft={<FiTrendingUp size={14} />}
-                  className={styles.testUrlButton}
                 >
                   Usar URL de teste
                 </Button>
@@ -764,36 +896,47 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
               </button>
               
               {card.fileType === 'image' ? (
-                <img 
-                  ref={previewImgRef}
-                  src={previewUrl} 
-                  alt={`Pré-visualização do Cartão ${index + 1}`} 
-                  className={`${styles.previewImage} ${loadingPreview ? styles.hidden : ''} ${previewError ? styles.hidden : ''}`}
-                  loading="lazy"
-                  onLoad={handlePreviewLoad}
-                  onError={handlePreviewError}
-                />
-              ) : (
-                <div className={styles.videoWrapper}>
-                  <video 
-                    src={previewUrl} 
-                    className={`${styles.previewVideo} ${loadingPreview ? styles.hidden : ''} ${previewError ? styles.hidden : ''}`}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    onLoadedData={handlePreviewLoad}
-                    onError={handlePreviewError}
-                    poster="/static/video-poster.jpg"
-                  />
-                  {card.fileType === 'video' && !previewError && !loadingPreview && (
-                    <div className={styles.videoOverlay}>
-                      <div className={styles.videoFormatInfo}>
-                        <span>MP4, WebM</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+  // Renderização de imagem com tratamento correto de carregamento
+<img 
+  ref={previewImgRef}
+  src={previewUrl} 
+  alt={`Pré-visualização do Cartão ${index + 1}`} 
+  className={`${styles.previewImage} ${previewError ? styles.hidden : ''}`}
+  loading="lazy"
+  onLoad={handlePreviewLoad}
+  onError={handlePreviewError}
+  style={{ 
+    opacity: loadingPreview ? 0 : 1,
+    transition: 'opacity 0.3s ease'
+  }}
+/>
+) : (
+  // Renderização de vídeo com tratamento correto de carregamento
+  <div className={styles.videoWrapper}>
+    <video 
+  ref={videoRef}
+  src={previewUrl} 
+  className={`${styles.previewVideo} ${previewError ? styles.hidden : ''}`}
+  controls
+  playsInline
+  preload="metadata"
+  onLoadedData={handlePreviewLoad}
+  onError={handlePreviewError}
+  style={{ 
+    opacity: loadingPreview ? 0 : 1,
+    transition: 'opacity 0.3s ease'
+  }}
+  poster="/static/video-poster.jpg"
+/>
+    {!previewError && !loadingPreview && (
+      <div className={styles.videoOverlay}>
+        <div className={styles.videoFormatInfo}>
+          <span>MP4, WebM</span>
+        </div>
+      </div>
+    )}
+  </div>
+)}
             </div>
           </div>
         )}

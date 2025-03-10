@@ -770,3 +770,215 @@
     scroll-behavior: auto !important;
   }
 }
+
+.loadSuccess {
+  animation: pulseSuccess 0.5s ease;
+}
+
+@keyframes pulseSuccess {
+  0% {
+    filter: brightness(1.3) contrast(1.1);
+  }
+  100% {
+    filter: brightness(1) contrast(1);
+  }
+}
+
+.previewImage, .previewVideo {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: all 0.3s ease;
+  background-color: var(--color-surface-0);
+}
+
+
+/* Estilo para corrigir problemas de loading e melhorar a UX */
+
+/* Ajustar o loader para não bloquear interação com o vídeo */
+.previewLoader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(var(--color-surface-1-rgb), 0.7); /* Use rgba para transparência */
+  z-index: 5;
+  pointer-events: none; /* Importante: permite clicar no vídeo mesmo com o loader visível */
+}
+
+/* Melhorar o indicator de carregamento */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(197, 217, 251, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: var(--spacing-3);
+}
+
+/* Posicionamento adequado do conteúdo de vídeo */
+.videoWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Melhorias visuais para o estado de loading */
+.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, 
+    rgba(var(--color-surface-1-rgb), 0.1),
+    rgba(var(--color-surface-1-rgb), 0.1)
+  );
+  z-index: 2;
+}
+
+/* Para um efeito de pulso suave durante carregamento */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.6; }
+}
+
+.loading.previewContent {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Animação de sucesso refinada */
+.loadSuccess {
+  animation: successFade 0.6s ease-out;
+}
+
+@keyframes successFade {
+  0% {
+    filter: brightness(1.5) saturate(1.2);
+  }
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* Melhorias visuais para as ações de preview */
+.previewActions {
+  margin-top: var(--spacing-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.previewActionGroup {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+/* Estilo para o botão de remover */
+.removeMediaButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(var(--color-surface-1-rgb), 0.8);
+  color: var(--color-negative);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.removeMediaButton:hover {
+  background-color: var(--color-negative);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Garantir que o estado de erro não tenha problemas */
+.error .previewLoader {
+  display: none;
+}
+
+/* Comportamento de hover refinado para o conteúdo do preview */
+.previewContent:hover .removeMediaButton {
+  opacity: 1;
+}
+
+.removeMediaButton {
+  opacity: 0.7;
+}
+
+/* Melhorar o estado visual de erro */
+.error.previewContent {
+  border: 1px solid var(--color-negative);
+}
+
+/* Estilo para mensagem de erro */
+.previewErrorMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  text-align: center;
+  color: var(--color-negative);
+  padding: var(--spacing-4);
+  z-index: 5;
+}
+
+/* Estilos para vídeo e imagem */
+.previewVideo, .previewImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: all 0.3s ease;
+  background-color: var(--color-surface-0);
+  position: relative;
+  z-index: 3; /* Garantir que o vídeo fique acima do loader */
+}
+
+/* Melhoria para área de arrastar e soltar */
+.dropArea {
+  border: 2px dashed var(--color-border-2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  text-align: center;
+  transition: all 0.2s ease;
+  background-color: var(--color-surface-0);
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* Para posicionamento absoluto do preview */
+  overflow: hidden; /* Para conter o conteúdo de preview */
+}
+
+/* Adicionar uma variável CSS para a cor de surface-1 em formato RGB para uso com transparência */
+:root {
+  --color-surface-1-rgb: 245, 245, 245; /* Valores RGB para cor clara */
+}
+
+[data-theme="dark"] {
+  --color-surface-1-rgb: 45, 45, 45; /* Valores RGB para cor escura */
+}

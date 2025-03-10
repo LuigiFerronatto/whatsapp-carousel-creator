@@ -125,6 +125,7 @@
   background-color: rgba(197, 217, 251, 0.1);
   border-left-color: var(--color-primary);
   color: var(--color-content-default);
+  margin: 1rem 0;
 }
 
 .whatsapp .hintIconWrapper {

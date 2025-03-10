@@ -1150,14 +1150,9 @@ export const useWhatsAppTemplate = () => {
       const errorMsg = 'Número de telefone é obrigatório para enviar o template';
       setError(errorMsg);
       
-      // Mostrar alerta de erro
-      setTimeout(() => {
-        if (alert && typeof alert.error === 'function') {
-          alert.error(errorMsg, {
-            position: 'top-center'
-          });
-        }
-      }, 0);
+      alert.error(errorMsg, {
+        position: 'top-center'
+      });
       
       return;
     }
@@ -1165,21 +1160,16 @@ export const useWhatsAppTemplate = () => {
     setLoading(true);
     setError('');
     setSuccess('');
-
+  
     try {
-      // Mostrar alerta de envio
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Enviando template para ${phoneNumberToSend}...`, {
-            position: 'top-right',
-            autoCloseTime: 3000
-          });
-        }
-      }, 0);
+      // Mostrar alerta de envio apenas uma vez
+      alert.info(`Enviando template para ${phoneNumberToSend}...`, {
+        position: 'top-right',
+        autoCloseTime: 3000
+      });
       
       const formattedPhone = validatePhoneNumber(phoneNumberToSend);
       
-      // Validar template
       if (!finalJson || !finalJson.sendTemplate) {
         throw new Error('Template não disponível para envio. Por favor, complete a etapa 2 primeiro.');
       }
@@ -1188,31 +1178,30 @@ export const useWhatsAppTemplate = () => {
       await sendTemplateMessage(formattedPhone, finalJson.sendTemplate, authKey);
       
       const successMsg = `Template enviado com sucesso para ${phoneNumberToSend}!`;
+      
+      // Definir o sucesso apenas uma vez
       setSuccess(successMsg);
       
-      // Mostrar alerta de sucesso
+      // Mostrar alerta de sucesso apenas uma vez
+      alert.success(successMsg, {
+        position: 'top-right',
+        autoCloseTime: 3000
+      });
+      
+      // Limpar o sucesso após 3 segundos
       setTimeout(() => {
-        if (alert && typeof alert.success === 'function') {
-          alert.success(successMsg, {
-            position: 'top-right'
-          });
-        }
-      }, 0);
+        setSuccess('');
+      }, 3000);
       
       return true;
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
       
-      // Mostrar alerta de erro
-      setTimeout(() => {
-        if (alert && typeof alert.error === 'function') {
-          alert.error(`Erro no envio: ${errorMessage}`, {
-            position: 'top-center',
-            autoCloseTime: 7000
-          });
-        }
-      }, 0);
+      alert.error(`Erro no envio: ${errorMessage}`, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
       
       console.error("Erro no envio:", err);
       throw err;

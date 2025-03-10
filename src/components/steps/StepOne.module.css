@@ -1,32 +1,4 @@
-/* StepOne.module.css */
-.authHeader {
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--spacing-5);
-}
-
-.authIconContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 46px;
-  height: 46px;
-  background-color: rgba(197, 217, 251, 0.2);
-  color: var(--blip-dark);
-  border-radius: var(--radius-circle);
-  margin-right: var(--spacing-3);
-}
-
-.authTitle {
-  font-size: var(--fs-h4);
-  font-weight: var(--fw-bold);
-  color: var(--blip-dark);
-}
-
-.authInputContainer {
-  display: flex;
-  position: relative;
-}
+/* StepOne.module.css - Melhorado */
 
 .authOptions {
   display: flex;
@@ -42,6 +14,11 @@
   font-size: var(--fs-p3);
   color: var(--color-content-default);
   cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.rememberKeyLabel:hover {
+  color: var(--color-primary);
 }
 
 .rememberKeyCheckbox {
@@ -51,41 +28,137 @@
   cursor: pointer;
 }
 
+.securityNote {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--fs-p4);
+  color: var(--dove-gray-2);
+}
+
+/* Layout de duas colunas */
+.twoColumnLayout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
+}
+
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* Painel de status de upload */
+.uploadSummaryCard {
+  background-color: var(--color-surface-1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  border: 1px solid var(--color-border-2);
+  position: sticky;
+  top: var(--spacing-5);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--transition-fast);
+}
+
+.uploadSummaryCard:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--color-border-2);
+  color: var(--blip-blue-brand);
+}
+
+.summaryHeader h3 {
+  margin: 0;
+  font-size: var(--fs-p1);
+}
+
+.uploadStats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-p2);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px dashed var(--color-border-2);
+}
+
+.statLabel {
+  color: var(--dove-gray-2);
+}
+
+.statValue {
+  font-weight: var(--fw-bold);
+  color: var(--blip-blue-brand);
+}
+
+.statusActions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-3);
+}
+
 /* Cards control section */
 .cardsControlSection {
   padding: var(--spacing-5);
   background-color: var(--color-surface-1);
   border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-5);
   border: 1px solid var(--color-border-2);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--transition-fast);
+}
+
+.cardsControlSection:hover {
+  box-shadow: var(--shadow-2);
 }
 
 .controlHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-3);
   margin-bottom: var(--spacing-4);
 }
 
-.controlTitle {
+.controlHeader h3 {
   font-size: var(--fs-p1);
   font-weight: var(--fw-bold);
   color: var(--blip-blue-brand);
+  margin: 0;
 }
 
 .cardCounter {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background-color: var(--color-surface-0);
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-1);
 }
 
 .cardCountLabel {
-  margin-right: var(--spacing-3);
   font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-medium);
+  color: var(--color-content-default);
 }
 
 .buttonGroup {
@@ -95,6 +168,11 @@
   border-radius: var(--radius-pill);
   padding: var(--spacing-1);
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: box-shadow var(--transition-fast);
+}
+
+.buttonGroup:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 .controlButton {
@@ -114,7 +192,7 @@
 .controlButton:hover:not(:disabled) {
   background-color: rgba(197, 217, 251, 0.2);
   color: var(--blip-dark);
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .controlButton:disabled {
@@ -123,7 +201,7 @@
 }
 
 .cardCount {
-  min-width: 2rem;
+  min-width: 2.5rem;
   text-align: center;
   font-weight: var(--fw-bold);
   font-size: var(--fs-p1);
@@ -140,6 +218,10 @@
   font-size: var(--fs-p2);
   color: var(--dove-gray-2);
   margin-top: var(--spacing-2);
+  padding: var(--spacing-3);
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-md);
+  border-left: 3px solid rgba(197, 217, 251, 0.5);
 }
 
 .cardTipsContainer {
@@ -152,15 +234,16 @@
   color: var(--color-primary);
   font-size: var(--fs-p3);
   padding: 0;
-  text-decoration: underline;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
+  text-decoration: underline;
+  transition: all var(--transition-fast);
 }
-
 .tipsToggle:hover {
   color: var(--blip-dark);
+  transform: translateY(-1px);
 }
 
 .cardTips {
@@ -188,55 +271,120 @@
 
 .cardTips li {
   margin-bottom: var(--spacing-1);
+  position: relative;
+}
+
+.cardTips li::marker {
+  color: var(--color-primary);
 }
 
 .jumpToCardsButton {
   margin-top: var(--spacing-4);
   width: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
 }
 
-/* Grid of cards */
+.jumpToCardsButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
+}
+
+.jumpToCardsButton:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--color-primary);
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease-out;
+}
+
+.jumpToCardsButton:hover:after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Grid de cards */
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--spacing-5);
   margin-bottom: var(--spacing-5);
+  animation: fadeInUp 0.5s ease;
 }
 
-/* Form elements */
-.formGroup {
-  margin-bottom: var(--spacing-3);
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.label {
-  display: block;
-  font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
-  margin-bottom: var(--spacing-2);
-  color: var(--color-content-default);
-}
-
-.helpText {
-  font-size: var(--fs-p3);
-  color: var(--dove-gray-2);
-  max-width: 300px;
-}
-
-.validationMessage {
-  color: var(--extended-yellow-dark);
-  font-size: var(--fs-p2);
-  margin-top: var(--spacing-3);
-  text-align: center;
-  padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(253, 233, 155, 0.2);
-  border-radius: var(--radius-md);
+/* Barra de progresso de upload */
+.uploadProgressContainer {
+  margin-top: var(--spacing-4);
   width: 100%;
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  animation: fadeIn 0.3s ease;
+}
+
+.uploadProgressBar {
+  height: 10px;
+  background-color: var(--color-surface-1);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.uploadProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-positive));
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+.uploadProgressText {
+  text-align: center;
+  font-size: var(--fs-p3);
+  color: var(--color-content-muted);
+  font-weight: var(--fw-medium);
+}
+
+/* Informações de fileHandle */
+.fileHandleInfo {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--spacing-2);
-  box-shadow: var(--shadow-1);
+  gap: 8px;
+  background-color: var(--color-surface-0);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin: 12px 0;
+  color: var(--color-primary);
+  font-size: 14px;
+  border-left: 3px solid var(--color-primary);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Upload summary */
@@ -247,6 +395,7 @@
   border: 1px solid rgba(197, 217, 251, 0.5);
   border-radius: var(--radius-lg);
   animation: fadeIn var(--transition-normal);
+  box-shadow: var(--shadow-1);
 }
 
 @keyframes fadeIn {
@@ -259,12 +408,18 @@
   font-size: var(--fs-p1);
   margin-bottom: var(--spacing-3);
   color: var(--blip-blue-brand);
+  position: relative;
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--color-border-2);
 }
 
 .summaryList {
   list-style-type: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-3);
 }
 
 .summaryItem {
@@ -272,14 +427,15 @@
   align-items: center;
   padding: var(--spacing-3);
   font-size: var(--fs-p2);
-  border-bottom: 1px solid var(--color-border-2);
   background-color: var(--color-surface-0);
   border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-2);
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
 }
 
-.summaryItem:last-child {
-  margin-bottom: 0;
+.summaryItem:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
 }
 
 .successStatus {
@@ -288,13 +444,55 @@
   margin-left: var(--spacing-2);
 }
 
+.summaryItem:has(.successStatus) {
+  border-left-color: var(--color-positive);
+}
+
+.cachedStatus {
+  color: var(--color-primary);
+  font-weight: var(--fw-bold);
+  margin-left: var(--spacing-2);
+}
+
+.summaryItem:has(.cachedStatus) {
+  border-left-color: var(--color-primary);
+}
+
 .simulatedStatus {
   color: var(--extended-yellow-dark);
   font-weight: var(--fw-bold);
   margin-left: var(--spacing-2);
 }
 
+.summaryItem:has(.simulatedStatus) {
+  border-left-color: var(--extended-yellow-dark);
+}
+
 /* Responsiveness */
+@media (max-width: 992px) {
+  .twoColumnLayout {
+    grid-template-columns: 1fr;
+  }
+  
+  .uploadSummaryCard {
+    position: static;
+    margin-bottom: var(--spacing-4);
+  }
+  
+  .uploadStats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-3);
+  }
+  
+  .statRow {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-1);
+  }
+}
+
 @media (max-width: 768px) {
   .cardsGrid {
     grid-template-columns: 1fr;
@@ -311,14 +509,22 @@
     justify-content: space-between;
   }
   
-  .actionButtons {
-    flex-direction: column;
+  .uploadStats {
+    grid-template-columns: 1fr;
+  }
+  
+  .statRow {
+    flex-direction: row;
+  }
+  
+  .summaryList {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    padding: var(--spacing-4);
+    padding: var(--spacing-3);
   }
   
   .buttonGroup {
@@ -333,25 +539,10 @@
   .authIconContainer {
     margin-bottom: var(--spacing-2);
   }
+  
+  .authOptions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
 }
-
-
-.fileHandleInfo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: var(--color-surface-1);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  margin-top: 12px;
-  color: var(--color-primary);
-  font-size: 14px;
-}
-
-/* Adicione ao seu StepOne.module.css */
-.cachedStatus {
-  color: var(--color-primary);
-  font-weight: var(--fw-bold);
-  margin-left: var(--spacing-2);
-}
-

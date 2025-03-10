@@ -1,5 +1,5 @@
 // components/steps/StepTwo.js - Versão melhorada
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
 import { useAlert } from '../ui/AlertMessage/AlertContext';
@@ -15,7 +15,12 @@ import {
   FiEyeOff,
   FiInfo,
   FiCheckCircle,
-  FiAlertTriangle
+  FiAlertTriangle,
+  FiCopy,
+  FiCornerRightDown,
+  FiRefreshCw,
+  FiEdit,
+  FiSmile
 } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
@@ -60,6 +65,13 @@ const StepTwo = ({
   const [savedBeforeUpload, setSavedBeforeUpload] = useState(false);
   const [buttonConsistencyStatus, setButtonConsistencyStatus] = useState({ isConsistent: true, message: "" });
   const [focusedInput, setFocusedInput] = useState({ cardIndex: null, buttonIndex: null });
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+  const [templateNameSuggestions, setTemplateNameSuggestions] = useState([]);
+  const [showNameSuggestions, setShowNameSuggestions] = useState(false);
+  
+  // Refs
+  const previewRef = useRef(null);
+  const formContainerRef = useRef(null);
 
   // Verificar consistência de botões quando os cards ou numCards mudarem
   useEffect(() => {
@@ -101,6 +113,29 @@ const StepTwo = ({
   // Status de validação
   const isTemplateNameValid = templateName && templateName.length >= 3;
   const isBodyTextValid = bodyText && bodyText.length > 0;
+
+  // Gerar sugestões de nome de template com base no bodyText
+  useEffect(() => {
+    if (bodyText && !templateName) {
+      const words = bodyText
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, '')
+        .split(' ')
+        .filter(word => word.length > 3)
+        .slice(0, 3);
+      
+      if (words.length > 0) {
+        const suggestions = [
+          words.join('_').substring(0, 20),
+          `carousel_${words[0]}`,
+          `template_${words[0]}`
+        ];
+        
+        setTemplateNameSuggestions(suggestions);
+        setShowNameSuggestions(true);
+      }
+    }
+  }, [bodyText, templateName]);
 
   // Validação completa de cards e botões
   const validateCards = useCallback(() => {
@@ -185,6 +220,12 @@ const StepTwo = ({
 
             // Pequena pausa para processar as mudanças
             await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Mostrar alerta de sucesso para padronização
+            alert.success("Botões padronizados com sucesso!", {
+              position: 'bottom-right',
+              autoCloseTime: 3000
+            });
           }
         } else {
           // Usuário escolheu revisar manualmente
@@ -278,6 +319,49 @@ const StepTwo = ({
     // Se a função isStepValid estiver disponível, usar ela
     return isStepValid(2);
   }, [isStepValid, isTemplateNameValid, isBodyTextValid, validateCards]);
+  
+  // Função para copiar texto para o clipboard
+  const copyToClipboard = useCallback((text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert.info("Texto copiado para a área de transferência", {
+        position: 'bottom-right',
+        autoCloseTime: 2000
+      });
+    }).catch(err => {
+      console.error('Erro ao copiar texto: ', err);
+      alert.error("Falha ao copiar texto", {
+        position: 'bottom-right'
+      });
+    });
+  }, [alert]);
+
+  // Aplicar uma sugestão de nome de template
+  const applyNameSuggestion = useCallback((suggestion) => {
+    setTemplateName(suggestion);
+    setShowNameSuggestions(false);
+    
+    alert.success("Nome do template aplicado!", {
+      position: 'bottom-right',
+      autoCloseTime: 2000
+    });
+  }, [setTemplateName, alert]);
+
+  // Toggle para expandir/recolher a prévia
+  const togglePreviewExpanded = useCallback(() => {
+    setPreviewExpanded(!previewExpanded);
+    
+    if (previewRef.current) {
+      if (!previewExpanded) {
+        // Expandindo a prévia: salva o scroll atual, depois faz scroll para a prévia
+        setTimeout(() => {
+          previewRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      } else {
+        // Recolhendo a prévia: retorna para onde estava
+        formContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [previewExpanded]);
 
   // Calcula o percentual de conclusão baseado no progresso
   const completionPercentage = [
@@ -303,7 +387,7 @@ const StepTwo = ({
 
   return (
     <div className={steps.container}>
-      <div className={steps.introSection}>
+      <div className={steps.introStepWrapper}>
         <h2 className={steps.stepTitle}>Criação de Template</h2>
         <p className={steps.stepDescription}>
           Configure os detalhes do seu template, adicione os textos iniciais dos cartões, adicione formatação para os textos e veja o preview logo ao lado!
@@ -334,94 +418,157 @@ const StepTwo = ({
             {showHints ? "Ocultar dicas" : "Mostrar dicas"}
           </Button>
         </div>
+        
+        {/* Barra de progresso da etapa */}
+        <div className={steps.stepProgressContainer}>
+          <div className={steps.stepProgressBar}>
+            <div 
+              className={steps.stepProgressFill} 
+              style={{width: `${completionPercentage}%`}}
+            ></div>
+          </div>
+          <span className={steps.stepProgressText}>
+            {completionPercentage === 100 ? 'Pronto para continuar!' : `${completionPercentage}% completo`}
+          </span>
+        </div>
       </div>
 
-      <div className={styles.contentWrapper}>
-        <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
+
+      <div className={`${styles.contentWrapper} ${previewExpanded ? styles.previewExpanded : ''}`}>
+        <div 
+          className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}
+          ref={formContainerRef}
+        >
           <div className={steps.containerCard}>
-            <h3>Informações Básicas do Template</h3>
-
-            <div className={progressbar.progressContainer}>
-              <div className={progressbar.progressBarWrapper}>
-                <div className={progressbar.progressBar}>
-                  <div
-                    className={progressbar.progressFill}
-                    style={{ width: `${completionPercentage}%` }}
-                  />
-                </div>
-
-                <span className={progressbar.progressText}>
-                  {completionPercentage === 100 ?
-                    '✓ Todos os campos preenchidos!' :
-                    `${completionPercentage}% concluído`}
-                </span>
+            <div className={steps.sectionHeader}>
+              <div className={steps.sectionIconContainer}>
+              <FiEdit size={24}/>
               </div>
+              <h3>Informações Básicas</h3>
             </div>
 
-            <Input
-              id="templateName"
-              name="templateName"
-              label="Nome do Template"
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-              placeholder="Exemplo: meu_carrossel_promocional"
-              required
-              minLength={3}
-              maxLength={64}
-              error={validationMessages.templateName || (templateName && !isTemplateNameValid ? "O nome do template deve ter pelo menos 3 caracteres." : "")}
-              hintMessage={showHints ? "Escolha um nome descritivo, sem espaços." : ""}
-              hintVariant="info"
-              hintList={["Use _ para separar palavras", "Exemplo: 'promo_verao' ou 'lancamento_produto'"]}
-              size="medium"
-              fullWidth
-              clearable
-              variant="templateName"
-              allowFormatting
-              validateOnChange
-              hintIsCompact={true}
-            />
+            <div className={styles.formFields}>
+              <div className={styles.templateNameWrapper}>
+                <Input
+                  id="templateName"
+                  name="templateName"
+                  label="Nome do Template"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder="Exemplo: meu_carrossel_promocional"
+                  required
+                  minLength={3}
+                  maxLength={64}
+                  error={validationMessages.templateName || (templateName && !isTemplateNameValid ? "O nome do template deve ter pelo menos 3 caracteres." : "")}
+                  hintMessage={showHints ? "Escolha um nome descritivo, sem espaços." : ""}
+                  hintVariant="info"
+                  hintList={["Use _ para separar palavras", "Exemplo: 'promo_verao' ou 'lancamento_produto'"]}
+                  size="medium"
+                  fullWidth
+                  clearable
+                  variant="templateName"
+                  allowFormatting
+                  validateOnChange
+                  hintIsCompact={true}
+                />
+                
+                {/* {showNameSuggestions && templateNameSuggestions.length > 0 && (
+                  <div className={styles.nameSuggestions}>
+                    <span className={styles.suggestionLabel}>Sugestões de nome:</span>
+                    <div className={styles.suggestionButtons}>
+                      {templateNameSuggestions.map((suggestion, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          color="primary"
+                          size="small"
+                          onClick={() => applyNameSuggestion(suggestion)}
+                          className={styles.suggestionButton}
+                        >
+                          {suggestion}
+                          <FiCornerRightDown size={14} />
+                        </Button>
+                      ))}
+                    </div>
+                    <button 
+                      className={styles.dismissSuggestions}
+                      onClick={() => setShowNameSuggestions(false)}
+                    >
+                      Dispensar sugestões
+                    </button>
+                  </div>
+                )} */}
 
-            <Input
-              id="language"
-              name="language"
-              label="Idioma do Template"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              placeholder="Escolha um idioma"
-              required
-              isDropdown={true}
-              options={languageOptions}
-              optionLabelKey="name"
-              optionValueKey="code"
-              hintMessage={showHints ? "Selecione o idioma principal do seu template. O idioma correto facilita a aprovação pelo WhatsApp." : ""}
-              hintVariant="simple"
-              size="medium"
-              fullWidth
-              hintIsCompact={true}
-              searchable
-            />
+                </div>
 
-            <Input
-              id="bodyText"
-              name="bodyText"
-              type="textarea"
-              label="Mensagem de introdução"
-              value={bodyText}
-              onChange={(e) => setBodyText(e.target.value)}
-              placeholder="Esse texto aparecerá antes do carrossel. Seja claro e envolvente para seus clientes."
-              maxLength={1024}
-              rows={3}
-              required
-              error={validationMessages.bodyText || (bodyText === "" ? "A mensagem de introdução é obrigatória." : "")}
-              hintMessage={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
-              textFormatting
-              hintVariant="simple"
-              size="medium"
-              fullWidth
-              showCharCounter
-              clearable
-              hintIsCompact={true}
-            />
+              <Input
+                id="language"
+                name="language"
+                label="Idioma do Template"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                placeholder="Escolha um idioma"
+                required
+                isDropdown={true}
+                options={languageOptions}
+                optionLabelKey="name"
+                optionValueKey="code"
+                hintMessage={showHints ? "Selecione o idioma principal do seu template. O idioma correto facilita a aprovação pelo WhatsApp." : ""}
+                hintVariant="simple"
+                size="medium"
+                fullWidth
+                hintIsCompact={true}
+                searchable
+              />
+
+              <div className={styles.bodyTextContainer}>
+                <Input
+                  id="bodyText"
+                  name="bodyText"
+                  type="textarea"
+                  label="Mensagem de introdução"
+                  value={bodyText}
+                  onChange={(e) => setBodyText(e.target.value)}
+                  placeholder="Esse texto aparecerá antes do carrossel. Seja claro e envolvente para seus clientes."
+                  maxLength={1024}
+                  rows={3}
+                  required
+                  error={validationMessages.bodyText || (bodyText === "" ? "A mensagem de introdução é obrigatória." : "")}
+                  hintMessage={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
+                  textFormatting
+                  hintVariant="simple"
+                  size="medium"
+                  fullWidth
+                  showCharCounter
+                  clearable
+                  hintIsCompact={true}
+                />
+                
+                {/* <div className={styles.textActions}>
+                  <Button
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    iconLeft={<FiCopy size={14} />}
+                    onClick={() => copyToClipboard(bodyText)}
+                    className={styles.textActionButton}
+                  >
+                    Copiar texto
+                  </Button>
+                  
+                  <Button
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    iconLeft={<FiSmile size={14} />}
+                    onClick={() => setBodyText(prev => prev + " 👋")}
+                    className={styles.textActionButton}
+                  >
+                    Adicionar emoji
+                  </Button>
+                </div> */}
+              </div>
+            </div>
           </div>
 
           {/* Alerta de inconsistência de botões */}
@@ -451,7 +598,12 @@ const StepTwo = ({
           )}
 
           <div className={steps.containerCard}>
-            <h3>Conteúdo dos Cards</h3>
+          <div className={steps.sectionHeader}>
+              <div className={steps.sectionIconContainer}>
+              <FiEdit size={24}/>
+              </div>
+              <h3>Conteúdo dos Cards</h3>
+            </div>
 
             <div className={styles.cardTabs}>
               {cards.slice(0, numCards).map((_, index) => (
@@ -467,6 +619,32 @@ const StepTwo = ({
                   {!cards[index].bodyText && <span className={styles.incompleteIndicator}>!</span>}
                 </Button>
               ))}
+              
+              {/* <div className={styles.cardNavButtons}>
+                <Button
+                  variant="outline"
+                  color="content"
+                  size="small"
+                  iconLeft={<FiChevronLeft size={16} />}
+                  onClick={() => setActiveCard(prev => Math.max(0, prev - 1))}
+                  disabled={activeCard === 0}
+                  className={styles.navButton}
+                >
+                  Anterior
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  color="content"
+                  size="small"
+                  iconRight={<FiChevronRight size={16} />}
+                  onClick={() => setActiveCard(prev => Math.min(numCards - 1, prev + 1))}
+                  disabled={activeCard === numCards - 1}
+                  className={styles.navButton}
+                >
+                  Próximo
+                </Button>
+              </div> */}
             </div>
 
             <div className={styles.activeCardEditor}>
@@ -484,6 +662,7 @@ const StepTwo = ({
                     validationMessages[`card-${activeCard}-buttons`]
                   }
                   focusedInput={focusedInput}
+                  setFocusedInput={setFocusedInput}
                 />
               )}
             </div>
@@ -529,12 +708,12 @@ const StepTwo = ({
 
           {/* Mostrar informação de último salvamento */}
           {lastSavedTime && !savedBeforeUpload && (
-            <div className={styles.lastSavedInfo}>
+            <div className={steps.lastSavedInfo}>
               <FiInfo size={14} />
               <span>
                 Último salvamento: {new Date(lastSavedTime).toLocaleString()}
                 {unsavedChanges && (
-                  <span className={styles.unsavedIndicator}> (Alterações não salvas)</span>
+                  <span className={steps.unsavedIndicator}> (Alterações não salvas)</span>
                 )}
               </span>
             </div>
@@ -542,9 +721,14 @@ const StepTwo = ({
         </div>
 
         {showPreview && (
-          <div className={styles.previewContainer}>
+          <div 
+            className={`${styles.previewContainer} ${previewExpanded ? styles.expanded : ''}`}
+            ref={previewRef}
+          >
             <div className={styles.previewWrapper}>
-              <h3 className={styles.previewTitle}>Pré-visualização do Carrossel</h3>
+              <div className={styles.previewHeader}>
+                <h3 className={styles.previewTitle}>Pré-visualização do Carrossel</h3>
+              </div>
               <p className={styles.previewSubtitle}>
                 Visualização ao vivo de como seu carrossel aparecerá no WhatsApp
               </p>
@@ -555,6 +739,19 @@ const StepTwo = ({
                   focusedInput={focusedInput}
                 />
               </div>
+              
+              {/* Botões de refresh para a visualização */}
+              {/* <div className={styles.previewActions}>
+                <Button
+                  variant="outline"
+                  color="content"
+                  size="small"
+                  iconLeft={<FiRefreshCw size={16} />}
+                  onClick={() => setFocusedInput({ cardIndex: null, buttonIndex: null })}
+                >
+                  Atualizar visualização
+                </Button>
+              </div> */}
             </div>
           </div>
         )}
@@ -564,4 +761,3 @@ const StepTwo = ({
 };
 
 export default StepTwo;
-

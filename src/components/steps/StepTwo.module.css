@@ -66,15 +66,6 @@
   border: 1px solid var(--color-border-2);
 }
 
-.sectionTitle {
-  font-size: var(--fs-p1);
-  font-weight: var(--fw-bold);
-  color: var(--blip-blue-brand);
-  margin-bottom: var(--spacing-5);
-  padding-bottom: var(--spacing-3);
-  border-bottom: 1px solid var(--color-border-2);
-}
-
 /* Form Elements */
 .formGroup {
   margin-bottom: var(--spacing-5);
@@ -158,28 +149,6 @@
   border-radius: 3px;
 }
 
-/* Card Content Editor */
-.cardContentEditor {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-5);
-}
-
-.cardTextEditor {
-  background-color: var(--color-surface-1);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-4);
-  border: 1px solid var(--color-border-2);
-}
-
-.cardTextLabel {
-  display: block;
-  font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
-  margin-bottom: var(--spacing-3);
-  color: var(--color-content-default);
-}
-
 /* Preview Container */
 .previewContainer {
   flex: 0 0 30%;
@@ -204,7 +173,8 @@
   font-weight: var(--fw-bold);
   padding: var(--spacing-4);
   text-align: center;
-  background-color: var(--blip-blue-brand);
+  
+  background-color: var(--color-surface-primary);
   color: var(--color-bright);
   margin: 0;
 }
@@ -224,7 +194,7 @@
   display: flex;
   justify-content: center;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: none;
 }
 
 /* WhatsApp requirements notice */
