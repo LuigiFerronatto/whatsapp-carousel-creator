@@ -1,358 +1,174 @@
-
 // services/api/apiService.js
-import { validateFileUrls } from '../validation/validationService';
+import { uploadFiles } from './apiUploadFiles';
+import { createTemplate } from './apiCreateTemplate';
+import { sendTemplateMessage } from './apiSendTemplate';
+import TemplateCreationValidation from '../validation/validationCreateTemplate';
 
-/**
- * Configuração da base URL da API
- */
-const API_BASE_URL = 'https://msging.net';
+// Configuração da base URL da API (mantida por compatibilidade)
+export const API_BASE_URL = 'https://msging.net';
 
-/**
- * Cabeçalhos básicos para requisições à API
- * @param {string} authKey - Chave de autorização
- * @returns {Object} Cabeçalhos HTTP
- */
-const getHeaders = (authKey) => ({
+// Função auxiliar de cabeçalhos (mantida por compatibilidade)
+export const getHeaders = (authKey) => ({
   'Content-Type': 'application/json',
   'Authorization': authKey
 });
 
-/**
- * Realiza upload dos arquivos para a API
- * @param {Array} cards - Lista de cards com URLs de arquivos
- * @param {string} authKey - Chave de autorização
- * @returns {Promise<Array>} Resultado do upload com fileHandles
- */
-export const uploadFiles = async (cards, authKey) => {
-  // Validar URLs antes de começar
-  validateFileUrls(cards);
-  
-  const results = [];
+// Função para lidar com erros de forma padronizada
+const handleApiError = (error, alert) => {
+  // Se for um erro de criação de template com código específico
+  if (TemplateCreationValidation.isFileHandleExpiredError(error)) {
+    alert.error('Os arquivos do template expiraram. Faça o upload novamente.', {
+      position: 'top-center',
+      autoCloseTime: 7000
+    });
+  } else if (TemplateCreationValidation.isTemplateAlreadyExistsError(error)) {
+    alert.error('Já existe um template com este nome em português. Escolha outro nome.', {
+      position: 'top-center',
+      autoCloseTime: 7000
+    });
+  } else {
+    // Erro genérico
+    alert.error(error.message || 'Erro desconhecido ao processar sua solicitação', {
+      position: 'top-center',
+      autoCloseTime: 7000
+    });
+  }
+};
 
-  // Processar uploads sequencialmente para evitar sobrecarga
-  for (let i = 0; i < cards.length; i++) {
-    const card = cards[i];
+// Wrapper para createTemplate com tratamento de erros
+export const createTemplateWithErrorHandling = async (
+  templateName, 
+  language, 
+  bodyText, 
+  cards, 
+  authKey,
+  alert
+) => {
+  try {
+    const result = await createTemplate(
+      templateName, 
+      language, 
+      bodyText, 
+      cards, 
+      authKey
+    );
     
-    // Gerar ID único para a requisição
-    const requestId = `template_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    // Mostrar alerta de sucesso
+    alert.success('Template criado com sucesso!', {
+      position: 'top-right',
+      autoCloseTime: 3000
+    });
+
+    return result;
+  } catch (error) {
+    // Tratar o erro com alertas específicos
+    handleApiError(error, alert);
     
-    // Preparar o corpo da requisição
-    const uploadRequestBody = {
-      id: requestId,
-      method: "set",
-      to: "postmaster@wa.gw.msging.net",
-      type: "application/vnd.lime.media-link+json",
-      uri: "/message-templates-attachment",
-      resource: {
-        uri: card.fileUrl
-      }
-    };
+    // Relançar o erro para ser tratado pelo chamador se necessário
+    throw error;
+  }
+};
+
+// Wrapper para uploadFiles com tratamento de erros
+export const uploadFilesWithErrorHandling = async (
+  cards, 
+  authKey,
+  alert
+) => {
+  try {
+    const results = await uploadFiles(cards, authKey);
     
-    try {
-      console.log(`Iniciando upload do arquivo ${i + 1}:`, card.fileUrl);
-      
-      const response = await fetch(`${API_BASE_URL}/commands`, {
-        method: 'POST',
-        headers: getHeaders(authKey),
-        body: JSON.stringify(uploadRequestBody)
-      });
-      
-      if (!response.ok) {
-        console.error(`Erro na resposta HTTP para card ${i+1}: ${response.status} ${response.statusText}`);
-        throw new Error(`Falha na requisição: ${response.status} ${response.statusText}`);
-      }
-      
-      const responseData = await response.json();
-      console.log(`Resposta do upload do arquivo ${i + 1}:`, responseData);
-      
-      if (responseData.status !== 'success') {
-        console.error(`Falha ao fazer upload do arquivo ${i + 1}: ${responseData.reason || 'Erro desconhecido'}`);
+    // Verificar se algum upload falhou
+    const failedUploads = results.filter(result => result.status === 'failure');
+    
+    if (failedUploads.length > 0) {
+      // Tratar uploads que falharam
+      failedUploads.forEach(failedUpload => {
+        const { error } = failedUpload;
         
-      throw new Error(responseData.reason || 'Falha no upload do arquivo');
-
-      }
-      
-      // Extrair o fileHandle da resposta
-      const fileHandle = responseData.resource?.fileHandle;
-      
-      if (!fileHandle) {
-        console.error(`Não foi possível obter o fileHandle para o card ${i + 1}`);
-        throw new Error(`Não foi possível obter o fileHandle para o card ${i + 1}`);
-      }
-      
-      // Armazenar o resultado
-      results.push({
-        fileHandle: fileHandle,
-        status: 'success'
-      });
-      
-      console.log(`Upload do arquivo ${i + 1} concluído com sucesso. Handle: ${fileHandle}`);
-    } catch (error) {
-      console.error(`Erro no upload do card ${i+1}:`, error);
-      throw error;
-    }
-  }
-
-  return results;
-};
-
-/**
- * Cria o template na API
- * @param {string} templateName - Nome do template
- * @param {string} language - Código de idioma
- * @param {string} bodyText - Texto do corpo da mensagem
- * @param {Array} cards - Lista de cards do carrossel
- * @param {string} authKey - Chave de autorização
- * @returns {Promise<Object>} JSONs do template criado
- */
-export const createTemplate = async (templateName, language, bodyText, cards, authKey) => {
-  // Geração de ID único para o template
-  const templateId = `template_${templateName.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}`;
-  
-  // Criação do JSON do template
-  const templateJson = {
-    id: templateId,
-    method: "set",
-    type: "application/json",
-    to: "postmaster@wa.gw.msging.net",
-    uri: "/message-templates",
-    resource: {
-      name: templateName,
-      language: language,
-      category: "MARKETING",
-      components: [
-        { type: "BODY", text: bodyText },
-        {
-          type: "CAROUSEL",
-          cards: cards.map((card) => ({
-            components: [
-              {
-                type: "HEADER",
-                format: card.fileType.toUpperCase(),
-                example: {
-                  header_handle: [card.fileHandle]
-                }
-              },
-              {
-                type: "BODY",
-                text: card.bodyText
-              },
-              {
-                type: "BUTTONS",
-                buttons: card.buttons.map(button => {
-                  if (button.type === 'URL') {
-                    return {
-                      type: button.type,
-                      text: button.text,
-                      url: button.url
-                    };
-                  } else if (button.type === 'PHONE_NUMBER') {
-                    return {
-                      type: button.type,
-                      text: button.text,
-                      phone_number: button.phoneNumber
-                    };
-                  } else {
-                    return {
-                      type: button.type,
-                      text: button.text
-                    };
-                  }
-                })
-              }
-            ]
-          }))
+        if (error.isExpiredHandle) {
+          alert.error(`Handle expirado para o card ${error.cardIndex + 1}: ${error.message}`, {
+            position: 'top-center'
+          });
+        } else {
+          alert.error(`Falha no upload do card ${error.cardIndex + 1}: ${error.message}`, {
+            position: 'top-center'
+          });
         }
-      ]
-    }
-  };
-  
-    try {
-      const response = await fetch(`${API_BASE_URL}/commands`, {
-        method: 'POST',
-        headers: getHeaders(authKey),
-        body: JSON.stringify(templateJson)
       });
       
-      if (!response.ok) {
-        throw new Error(`Erro na resposta HTTP: ${response.status} ${response.statusText}`);
-      }
-      
-      const responseData = await response.json();
-      
-      if (responseData.status !== 'success') {
-        throw new Error(`Falha ao criar o template: ${responseData.reason || 'Erro desconhecido'}`);
-      }
-      
-      // Adicionar o ID recebido ao JSON
-      if (responseData.resource && responseData.resource.id) {
-        templateJson.resource.id = responseData.resource.id;
-      }
-    } catch (error) {
-      console.error('Erro ao criar template na API:', error);
+      // Lançar erro para ser tratado pelo chamador
+      throw new Error('Falha em um ou mais uploads');
+    }
+
+    // Alertar sucesso se todos os uploads funcionarem
+    const successMessage = results.length > 1 
+      ? `${results.length} arquivos enviados com sucesso` 
+      : 'Arquivo enviado com sucesso';
+    
+    alert.success(successMessage, {
+      position: 'top-right',
+      autoCloseTime: 3000
+    });
+
+    return results;
+  } catch (error) {
+    // Se já for um erro de alerta, não precisa tratar novamente
+    if (error.message === 'Falha em um ou mais uploads') {
       throw error;
     }
 
-  
-  // Gerar JSON para envio do template
-  const sendTemplateJson = {
-    id: `send_${templateName.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}`,
-    to: "numero@wa.gw.msging.net", 
-    type: "application/json",
-    content: {
-      type: "template",
-      template: {
-        name: templateName,
-        language: {
-          code: language,
-          policy: "deterministic"
-        },
-        components: [
-          {
-            type: "CAROUSEL",
-            cards: cards.map((card, index) => ({
-              card_index: index,
-              components: [
-                {
-                  type: "HEADER",
-                  parameters: [
-                    {
-                      type: card.fileType.toUpperCase(),
-                      [card.fileType.toLowerCase()]: {
-                        link: card.fileUrl
-                      }
-                    }
-                  ]
-                },
-                ...card.buttons.map((button, btnIndex) => {
-                  if (button.type === 'URL') {
-                    return {
-                      type: "BUTTON",
-                      sub_type: button.type,
-                      index: btnIndex
-                    };
-                  } else if (button.type === 'QUICK_REPLY') {
-                    return {
-                      type: "BUTTON",
-                      sub_type: button.type,
-                      index: btnIndex,
-                      parameters: [
-                        {
-                          type: "PAYLOAD",
-                          payload: button.payload || button.text
-                        }
-                      ]
-                    };
-                  } else {
-                    return {
-                      type: "BUTTON",
-                      sub_type: button.type,
-                      index: btnIndex
-                    };
-                  }
-                })
-              ]
-            }))
-          }
-        ]
-      }
-    }
-  };
+    // Tratar qualquer outro erro inesperado
+    alert.error(error.message || 'Erro desconhecido durante o upload', {
+      position: 'top-center',
+      autoCloseTime: 7000
+    });
 
-  // Gerar JSON para uso no Builder da Blip como conteúdo dinâmico
-const builderTemplateJson = {
-  type: "template",
-  template: {
-    name: templateName,
-    language: {
-      code: language,
-      policy: "deterministic"
-    },
-    components: [
-      {
-        type: "CAROUSEL",
-        cards: cards.map((card, index) => ({
-          card_index: index,
-          components: [
-            {
-              type: "HEADER",
-              parameters: [
-                {
-                  type: card.fileType.toUpperCase(),
-                  [card.fileType.toLowerCase()]: {
-                    link: card.fileUrl
-                  }
-                }
-              ]
-            },
-            ...card.buttons.map((button, btnIndex) => {
-              if (button.type === 'URL') {
-                return {
-                  type: "BUTTON",
-                  sub_type: button.type,
-                  index: btnIndex
-                };
-              } else if (button.type === 'QUICK_REPLY') {
-                return {
-                  type: "BUTTON",
-                  sub_type: button.type,
-                  index: btnIndex,
-                  parameters: [
-                    {
-                      type: "PAYLOAD",
-                      payload: button.payload || button.text
-                    }
-                  ]
-                };
-              } else {
-                return {
-                  type: "BUTTON",
-                  sub_type: button.type,
-                  index: btnIndex
-                };
-              }
-            })
-          ]
-        }))
-      }
-    ]
+    throw error;
   }
 };
 
-  return { templateJson, sendTemplateJson, builderTemplateJson };
+// Wrapper para sendTemplateMessage com tratamento de erros
+export const sendTemplateMessageWithErrorHandling = async (
+  phoneNumber, 
+  sendTemplate, 
+  authKey,
+  alert
+) => {
+  try {
+    const result = await sendTemplateMessage(phoneNumber, sendTemplate, authKey);
+    
+    alert.success(`Template enviado com sucesso para ${phoneNumber}!`, {
+      position: 'top-right',
+      autoCloseTime: 3000
+    });
+
+    return result;
+  } catch (error) {
+    alert.error(`Erro ao enviar template: ${error.message}`, {
+      position: 'top-center',
+      autoCloseTime: 7000
+    });
+
+    throw error;
+  }
 };
 
-/**
- * Envia o template para um número de telefone
- * @param {string} phoneNumber - Número de telefone formatado
- * @param {Object} sendTemplate - JSON de envio do template
- * @param {string} authKey - Chave de autorização
- * @returns {Promise<Object>} Resultado do envio
- */
-export const sendTemplateMessage = async (phoneNumber, sendTemplate, authKey) => {
-  // Preparar o JSON de envio
-  const sendJson = {
-    ...sendTemplate,
-    to: `${phoneNumber}@wa.gw.msging.net`
-  };
-  
-  // Em ambiente de produção, envia para a API
-  // Em ambiente de desenvolvimento, simula sucesso
-    try {
-      const response = await fetch(`${API_BASE_URL}/messages`, {
-        method: 'POST',
-        headers: getHeaders(authKey),
-        body: JSON.stringify(sendJson)
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erro ao enviar template: ${errorText}`);
-      }
-      
-      return { success: true, message: `Template enviado com sucesso para ${phoneNumber}` };
-    } catch (error) {
-      console.error('Erro ao enviar template:', error);
-      throw error;
-    }
+// Exportar todas as funções
+export {
+  uploadFiles,
+  createTemplate,
+  sendTemplateMessage
+};
+
+// Exportação padrão para manter a compatibilidade com importações existentes
+export default {
+  API_BASE_URL,
+  getHeaders,
+  uploadFiles,
+  createTemplate,
+  sendTemplateMessage,
+  createTemplateWithErrorHandling,
+  uploadFilesWithErrorHandling,
+  sendTemplateMessageWithErrorHandling
 };

@@ -827,6 +827,32 @@ export const useWhatsAppTemplate = () => {
    * Esta função preserva os fileHandles existentes e só faz upload de novos arquivos
    */
   const handleUploadFiles = useCallback(async () => {
+    const uploadResults = await uploadFiles(cards, authKey);
+  
+    // Verificar se algum upload falhou
+    const failedUploads = uploadResults.filter(result => result.status === 'failure');
+    
+    if (failedUploads.length > 0) {
+      // Tratar uploads que falharam
+      failedUploads.forEach(failedUpload => {
+        const { error } = failedUpload;
+        
+        if (error.isExpiredHandle) {
+          // Caso específico de handle expirado
+          alert.error(`Handle expirado para o card ${error.cardIndex + 1}: ${error.message}`, {
+            position: 'top-center'
+          });
+        } else {
+          // Erro genérico de upload
+          alert.error(`Falha no upload do card ${error.cardIndex + 1}: ${error.message}`, {
+            position: 'top-center'
+          });
+        }
+      });
+      
+      // Não prosseguir se houver falhas
+      return;
+    }
     // Validar antes de prosseguir
     if (!validateStepOne(true)) {
       setError('Por favor, corrija os erros antes de continuar.');
@@ -1106,16 +1132,7 @@ export const useWhatsAppTemplate = () => {
         sendTemplate: sendTemplateJson,
         builderTemplate: builderTemplateJson
       });
-      
-      // Mostrar alerta de sucesso
-      setTimeout(() => {
-        if (alert && typeof alert.success === 'function') {
-          alert.success('Template criado com sucesso!', {
-            position: 'top-right'
-          });
-        }
-      }, 0);
-      
+
       // Salvar o estado atual
       saveCurrentState();
       

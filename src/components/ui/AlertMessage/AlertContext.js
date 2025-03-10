@@ -107,7 +107,7 @@ export const AlertProvider = ({ children }) => {
     }
     
     // Get alert content
-    const content = typeof args[0] === 'string' ? args[0] : 'Alert message';
+    const content = typeof args[0] === 'string' ? args[0] : 'Teste';
     const config = args[1] || {};
     
     // Throttle alerts - prevent too many in quick succession

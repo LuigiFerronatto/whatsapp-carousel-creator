@@ -241,22 +241,19 @@ const StepTwo = ({
         if (typeof saveCurrentState === 'function') {
           saveCurrentState();
         }
-
+      
         // Tenta criar o template
         await handleCreateTemplate();
-
-        // Em caso de sucesso, mostra alerta
-        alert.success("Template criado com sucesso!", {
-          position: 'top-right'
-        });
+      
+        // REMOVER o alerta de sucesso daqui
+        // Agora o alerta virá do apiService
       } catch (err) {
         // Capturar e mostrar erros como alertas
         alert.error(`Erro ao criar template: ${err.message || 'Falha desconhecida'}`, {
           position: 'top-center',
           autoCloseTime: 7000
         });
-      }
-    }
+      }}
   }, [
     isTemplateNameValid,
     isBodyTextValid,
@@ -392,8 +389,22 @@ const StepTwo = ({
         <p className={steps.stepDescription}>
           Configure os detalhes do seu template, adicione os textos iniciais dos cartões, adicione formatação para os textos e veja o preview logo ao lado!
         </p>
+        
+        {/* Barra de progresso da etapa */}
+        <div className={steps.stepProgressContainer}>
+          <div className={steps.stepProgressBar}>
+            <div 
+              className={steps.stepProgressFill} 
+              style={{width: `${completionPercentage}%`}}
+            ></div>
+          </div>
+          <span className={steps.stepProgressText}>
+            {completionPercentage === 100 ? 'Pronto para continuar!' : `${completionPercentage}% completo`}
+          </span>
+        </div>
+      </div>
 
-        <div className={styles.viewControls}>
+      <div className={styles.viewControls}>
           <Button
             className={styles.viewToggle}
             onClick={() => setShowPreview(!showPreview)}
@@ -419,21 +430,6 @@ const StepTwo = ({
           </Button>
         </div>
         
-        {/* Barra de progresso da etapa */}
-        <div className={steps.stepProgressContainer}>
-          <div className={steps.stepProgressBar}>
-            <div 
-              className={steps.stepProgressFill} 
-              style={{width: `${completionPercentage}%`}}
-            ></div>
-          </div>
-          <span className={steps.stepProgressText}>
-            {completionPercentage === 100 ? 'Pronto para continuar!' : `${completionPercentage}% completo`}
-          </span>
-        </div>
-      </div>
-
-
       <div className={`${styles.contentWrapper} ${previewExpanded ? styles.previewExpanded : ''}`}>
         <div 
           className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}
