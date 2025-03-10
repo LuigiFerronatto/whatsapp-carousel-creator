@@ -1,6 +1,6 @@
 // hooks/useAlertSafe.js
 import { useContext, useRef, useState, useEffect } from 'react';
-import AlertContext from '../components/ui/AlertMessage/AlertContext';
+import { AlertContext } from '../components/ui/AlertMessage/AlertContext';
 
 // Globally shared alert management
 const globalAlertCache = {
@@ -126,8 +126,8 @@ export const useAlertSafe = () => {
     
     // Method to remove alert
     remove: (id) => {
-      if (context?.remove) {
-        context.remove(id);
+      if (context?.removeAlert) {
+        context.removeAlert(id);
       }
     },
     

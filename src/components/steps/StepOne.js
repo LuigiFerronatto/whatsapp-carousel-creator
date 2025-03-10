@@ -1,7 +1,7 @@
-// components/steps/StepOne.js
+// components/steps/StepOne.js - Versão melhorada
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CardUploadInput from '../editors/CardUploadInput';
-import { useAlert } from '../ui/AlertMessage/AlertContext'; // Adicionar esta importação
+import { useAlert } from '../ui/AlertMessage/AlertContext'; 
 import Button from '../ui/Button/Button';
 import { 
   FiUpload, 
@@ -20,6 +20,7 @@ import Input from '../ui/Input/Input';
 /**
  * StepOne - Initial step for file configuration
  * Enhanced with better UI/UX based on the design system
+ * Fixed issues with saveDraftManually and step validation
  * 
  * @param {Object} props Component properties
  * @returns {JSX.Element} StepOne component
@@ -32,13 +33,15 @@ const StepOne = ({
   updateCard, 
   handleAddCard, 
   handleRemoveCard, 
-  handleUploadFiles: uploadFiles, 
+  handleUploadFiles,
   loading, 
   error, 
   success, 
   uploadResults,
   isStepValid,
-  saveDraftManually
+  saveCurrentState, // Aqui está a mudança: usar saveCurrentState em vez de saveDraftManually
+  unsavedChanges,
+  lastSavedTime
 }) => {
   // Local state
   const [savedBeforeUpload, setSavedBeforeUpload] = useState(false);
@@ -47,7 +50,7 @@ const StepOne = ({
   });
   const [showTips, setShowTips] = useState(true);
   
-  // Inicializar sistema de alertas
+  // Initialize alert system
   const alert = useAlert();
   
   // Refs
@@ -79,21 +82,39 @@ const StepOne = ({
     uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
   
-  // Save draft before upload - Com alerta adicionado
+  // Save draft before upload - FIXED: use saveCurrentState instead of saveDraftManually
   const handleSaveBeforeUpload = useCallback(() => {
-    saveDraftManually();
-    setSavedBeforeUpload(true);
-    
-    // Adicionar alerta de sucesso
-    alert.success("Rascunho salvo com sucesso!", {
-      position: 'bottom-right',
-      autoCloseTime: 3000
-    });
-    
-    setTimeout(() => {
-      setSavedBeforeUpload(false);
-    }, 3000);
-  }, [saveDraftManually, alert]);
+    // Verifica se a função saveCurrentState existe
+    if (typeof saveCurrentState === 'function') {
+      const success = saveCurrentState();
+      
+      if (success) {
+        setSavedBeforeUpload(true);
+        
+        // Adicionar alerta de sucesso
+        alert.success("Rascunho salvo com sucesso!", {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+        
+        setTimeout(() => {
+          setSavedBeforeUpload(false);
+        }, 3000);
+      } else {
+        // Mostrar erro se o salvamento falhou
+        alert.error("Não foi possível salvar o rascunho. Verifique o armazenamento local.", {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
+      }
+    } else {
+      // Mostrar erro se a função não estiver disponível
+      console.error("Função saveCurrentState não está disponível");
+      alert.error("Não foi possível salvar o rascunho. Tente novamente mais tarde.", {
+        position: 'top-center'
+      });
+    }
+  }, [saveCurrentState, alert]);
   
   // Check if all cards have valid URLs
   const allCardsHaveUrls = useCallback(() => {
@@ -101,8 +122,9 @@ const StepOne = ({
   }, [cards, numCards]);
 
   // Wrapper para verificar e mostrar alertas antes do upload
-  const handleUploadFiles = useCallback(async () => {
+  const wrappedHandleUploadFiles = useCallback(async () => {
     try {
+      // Verificar se temos a chave de autenticação
       if (!authKey) {
         alert.error("Chave de autorização (Router Key) é obrigatória para continuar", {
           position: 'top-center'
@@ -110,6 +132,7 @@ const StepOne = ({
         return;
       }
       
+      // Verificar se todos os cards têm URLs
       if (!allCardsHaveUrls()) {
         alert.warning("Adicione URLs para todos os cards antes de continuar", {
           position: 'top-center'
@@ -117,8 +140,13 @@ const StepOne = ({
         return;
       }
       
+      // Salvar rascunho antes de upload
+      if (typeof saveCurrentState === 'function') {
+        saveCurrentState();
+      }
+      
       // Chamar a função original de upload
-      await uploadFiles();
+      await handleUploadFiles();
       
       // Mostrar alerta de sucesso se não ocorreu erro
       alert.success("Upload de arquivos concluído com sucesso!", {
@@ -131,7 +159,7 @@ const StepOne = ({
         autoCloseTime: 7000
       });
     }
-  }, [authKey, allCardsHaveUrls, uploadFiles, alert]);
+  }, [authKey, allCardsHaveUrls, handleUploadFiles, alert, saveCurrentState]);
 
   // Mostrar alertas para erros e sucessos existentes
   useEffect(() => {
@@ -144,6 +172,44 @@ const StepOne = ({
     }
   }, [error, success, alert]);
 
+  // Verifica quantos cards já possuem fileHandles
+  const cardsWithFileHandles = cards.slice(0, numCards).filter(card => 
+    card.fileUrl && card.fileHandle && card.fileHandle !== ''
+  ).length;
+
+  // Função para limpar todos os fileHandles
+  const handleClearAllFileHandles = useCallback(() => {
+    if (window.confirm('Tem certeza que deseja limpar todos os fileHandles? Isso forçará um novo upload para todos os cards.')) {
+      // Atualizar cada card para remover fileHandle
+      for (let i = 0; i < numCards; i++) {
+        updateCard(i, 'fileHandle', '');
+      }
+      
+      // Mostrar alerta de limpeza
+      alert.info('Todos os fileHandles foram limpos. Você precisará fazer upload novamente.', {
+        position: 'top-center',
+        autoCloseTime: 3000
+      });
+    }
+  }, [cards, numCards, updateCard, alert]);
+
+  // Verifica se o passo é válido
+  const checkStepValidity = useCallback(() => {
+    // Se a função isStepValid não estiver disponível, fazer validação local
+    if (typeof isStepValid !== 'function') {
+      // Verificar se temos a chave de autenticação
+      if (!authKey) {
+        return false;
+      }
+      
+      // Verificar se todos os cards têm URLs
+      return allCardsHaveUrls();
+    }
+    
+    // Se a função isStepValid estiver disponível, usar ela
+    return isStepValid(1);
+  }, [isStepValid, authKey, allCardsHaveUrls]);
+
   return (
     <div className={steps.container}>
       {/* Introduction section */}
@@ -155,15 +221,15 @@ const StepOne = ({
         </p>
       </div>
 
-          <div className={steps.containerCard}>
-            <div className={styles.authHeader}>
+      <div className={steps.containerCard}>
+        <div className={styles.authHeader}>
           <div className={styles.authIconContainer}>
             <FiKey size={24} />
           </div>
           <h3>Autenticação</h3>
-            </div>
-            
-            <Input 
+        </div>
+        
+        <Input 
           id="authKey"
           name="authKey"
           label="Chave de Autorização (Router Key)"
@@ -175,10 +241,10 @@ const StepOne = ({
           hintVariant="simple"
           hintIsCompact={true}
           required
-          error="A chave de autorização é obrigatória. Você pode encontrá-la no seu roteador conectado ao Canal WhatsApp, no portal Blip."
-            />
+          error=""
+        />
 
-            <div className={styles.authOptions}>
+        <div className={styles.authOptions}>
           <label className={styles.rememberKeyLabel}>
             <input 
               type="checkbox" 
@@ -188,14 +254,32 @@ const StepOne = ({
             />
             Lembrar minha chave
           </label>
-            </div>
-          </div>
+        </div>
+      </div>
 
-        
-        {/* Card controls section */}
+      {/* Card controls section */}
       <div className={styles.cardsControlSection}>
         <div className={styles.controlHeader}>
           <h3>Configuração dos Cards</h3>
+          {cardsWithFileHandles > 0 && (
+            <div className={styles.fileHandleInfo}>
+              <FiInfo size={16} />
+              <span>
+                {cardsWithFileHandles === numCards 
+                  ? `Todos os ${numCards} cards já possuem fileHandles salvos.` 
+                  : `${cardsWithFileHandles} de ${numCards} cards possuem fileHandles salvos.`
+                }
+              </span>
+              <Button 
+                variant="text"
+                color="danger"
+                size="small"
+                onClick={handleClearAllFileHandles}
+              >
+                Limpar todos
+              </Button>
+            </div>
+          )}
           <div className={styles.cardCounter}>
             <span className={styles.cardCountLabel}>Número de cards:</span>
             <div className={styles.buttonGroup}>
@@ -296,14 +380,26 @@ const StepOne = ({
             color="primary"
             size="large"
             loading={loading}
-            disabled={!isStepValid(1) || loading}
+            disabled={!checkStepValidity() || loading}
             iconLeft={loading ? null : <FiUpload size={18} />}
-            onClick={handleUploadFiles}
+            onClick={wrappedHandleUploadFiles}
           >
             {loading ? 'Processando uploads...' : 'Enviar Arquivos & Continuar'}
           </Button>
         </div>
         
+        {/* Mostrar informação de último salvamento */}
+        {lastSavedTime && !savedBeforeUpload && (
+          <div className={styles.lastSavedInfo}>
+            <FiInfo size={14} />
+            <span>
+              Último salvamento: {new Date(lastSavedTime).toLocaleString()}
+              {unsavedChanges && (
+                <span className={styles.unsavedIndicator}> (Alterações não salvas)</span>
+              )}
+            </span>
+          </div>
+        )}
       </div>
       
       {/* Upload summary */}
@@ -313,9 +409,15 @@ const StepOne = ({
           <ul className={styles.summaryList}>
             {uploadResults.map((result, idx) => (
               <li key={idx} className={styles.summaryItem}>
-                Card {idx + 1}: 
-                <span className={result.status === 'success' ? styles.successStatus : styles.simulatedStatus}>
-                  {result.status === 'success' ? ' Upload bem-sucedido' : ' Simulado para teste'}
+                Card {result.cardIndex !== undefined ? result.cardIndex + 1 : idx + 1}: 
+                <span className={
+                  result.status === 'success' ? styles.successStatus : 
+                  result.status === 'cached' ? styles.cachedStatus : 
+                  styles.simulatedStatus
+                }>
+                  {result.status === 'success' ? ' Upload bem-sucedido' : 
+                  result.status === 'cached' ? ' Carregado do cache' : 
+                  ' Simulado para teste'}
                 </span>
               </li>
             ))}

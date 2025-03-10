@@ -30,6 +30,8 @@ export const useWhatsAppTemplate = () => {
   const [bodyText, setBodyText] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   
+  const [hasInteracted, setHasInteracted] = useState(false);
+
   // Card states
   const [numCards, setNumCards] = useState(2);
   const [cards, setCards] = useState([
@@ -75,56 +77,79 @@ export const useWhatsAppTemplate = () => {
     return false;
   }, [templateName, language, bodyText, cards, authKey]);
 
-  // Load draft on initial render
+  // Load draft on initial render - FIXED to avoid state updates during render
   useEffect(() => {
     // Prevent multiple draft loads
     if (draftLoadedRef.current) return;
+    draftLoadedRef.current = true; // Mark as attempted to prevent multiple loads
 
     const loadDraftSafely = () => {
       try {
         const savedDraft = loadDraft();
         
         if (savedDraft) {
-          // Mark as loaded to prevent multiple attempts
-          draftLoadedRef.current = true;
-
-          // Safely restore draft state with functional updates
-          const updateOperations = [
-            savedDraft.templateName && setTemplateName(savedDraft.templateName),
-            savedDraft.language && setLanguage(savedDraft.language),
-            savedDraft.bodyText && setBodyText(savedDraft.bodyText),
-            savedDraft.authKey && setAuthKey(savedDraft.authKey)
-          ];
-
-          // Handle cards with safety
+          // Use a single setState call to update all values at once
+          const updatedState = {};
+          
+          if (savedDraft.templateName) updatedState.templateName = savedDraft.templateName;
+          if (savedDraft.language) updatedState.language = savedDraft.language;
+          if (savedDraft.bodyText) updatedState.bodyText = savedDraft.bodyText;
+          if (savedDraft.authKey) updatedState.authKey = savedDraft.authKey;
+          
+          // Handle cards safely
           if (savedDraft.cards && savedDraft.cards.length >= 2) {
-            setCards(savedDraft.cards);
-            setNumCards(savedDraft.cards.length);
+            updatedState.cards = savedDraft.cards;
+            updatedState.numCards = savedDraft.cards.length;
           }
-
+          
           // Set last saved time if available
-          savedDraft.lastSavedTime && 
-            setLastSavedTime(new Date(savedDraft.lastSavedTime));
-
-          // Show draft loaded alert with delay
-          setTimeout(() => {
-            alert.info('Rascunho anterior carregado com sucesso!', {
-              position: 'top-right',
-              autoCloseTime: 3000
-            });
-          }, 1000);
+          if (savedDraft.lastSavedTime) {
+            updatedState.lastSavedTime = new Date(savedDraft.lastSavedTime);
+          }
+          
+          // Apply all state updates at once
+          if (Object.keys(updatedState).length > 0) {
+            // Set template name
+            if (updatedState.templateName) setTemplateName(updatedState.templateName);
+            // Set language
+            if (updatedState.language) setLanguage(updatedState.language);
+            // Set body text
+            if (updatedState.bodyText) setBodyText(updatedState.bodyText);
+            // Set auth key
+            if (updatedState.authKey) setAuthKey(updatedState.authKey);
+            // Set cards
+            if (updatedState.cards) {
+              setCards(updatedState.cards);
+              setNumCards(updatedState.numCards);
+            }
+            // Set last saved time
+            if (updatedState.lastSavedTime) {
+              setLastSavedTime(updatedState.lastSavedTime);
+            }
+            
+            // Show draft loaded alert with delay (moved outside render cycle)
+            setTimeout(() => {
+              if (alert && typeof alert.info === 'function') {
+                alert.info('Rascunho anterior carregado com sucesso!', {
+                  position: 'top-right',
+                  autoCloseTime: 3000
+                });
+              }
+            }, 1000);
+          }
         }
       } catch (error) {
         console.error('Erro ao carregar rascunho:', error);
       }
     };
 
-    loadDraftSafely();
+    // Use setTimeout to ensure this runs after initial render is complete
+    setTimeout(loadDraftSafely, 0);
   }, []); // Empty dependency array to run only once
-
+  
   // Autosave effect
   useEffect(() => {
-    // Ignore changes during initial load
+    // Skip initial effect run to avoid marking changes during load
     if (!draftLoadedRef.current) return;
     
     // Mark unsaved changes
@@ -149,47 +174,56 @@ export const useWhatsAppTemplate = () => {
     };
   }, [templateName, language, bodyText, cards, authKey, unsavedChanges, saveCurrentState]);
   
-  // Funções de validação para cada etapa com alertas para erros
-  const validateStepOne = useCallback(() => {
+  // Validation functions with safe alert handling - FIXED to avoid calling alert during render
+  const validateStepOne = useCallback((triggerAlerts = false) => {
     const errors = {};
-    const errorMessages = []; // Use array for error messages
-    
-    // Validate authorization key
+    const errorMessages = [];
+  
+    // Validar a chave de autorização
     if (!authKey) {
       errors.authKey = 'A chave de autorização (Router Key) é obrigatória';
       errorMessages.push('Chave de autorização (Router Key) é obrigatória');
     }
-    
-    // Validate file URLs for each card
+  
+    // Validar URLs dos arquivos para cada card
     cards.slice(0, numCards).forEach((card, index) => {
       if (!card.fileUrl) {
         errors[`card_${index}_fileUrl`] = `URL do arquivo não informada para o card ${index + 1}`;
         errorMessages.push(`Card ${index + 1}: URL do arquivo não informada`);
       }
     });
-    
-    // Update validation errors
+  
+    // Atualizar erros de validação no estado
     setValidationErrors(errors);
-    
-    // Show error alert if there are messages
-    if (errorMessages.length > 0) {
-      // Use setTimeout to prevent potential render loops
+  
+    // Disparar alertas apenas se `triggerAlerts` for verdadeiro
+    if (triggerAlerts && errorMessages.length > 0) {
+      showValidationErrors(errorMessages);
+    }
+  
+    return errorMessages.length === 0;
+  }, [authKey, cards, numCards, showValidationErrors]);
+  
+  // Show validation errors - separate function to call alerts outside of render
+  const showValidationErrors = useCallback((errorMessages) => {
+    if (!errorMessages || errorMessages.length === 0) return;
+  
+    // Use o `useAlertSafe` para evitar alertas duplicados ou muito frequentes
+    if (alert && typeof alert.error === 'function') {
       setTimeout(() => {
         alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
           position: 'top-center',
           autoCloseTime: 7000
         });
       }, 0);
-      
-      return errorMessages; // Return error messages array
     }
-    
-    return []; // Return empty array if no errors
-  }, [authKey, cards, numCards, alert]);
+  }, [alert]);
+
+
   
   const validateStepTwo = useCallback(() => {
     const errors = {};
-    const errorMessages = []; // Use array for error messages
+    const errorMessages = [];
     
     // Validate template name
     if (!templateName) {
@@ -250,23 +284,13 @@ export const useWhatsAppTemplate = () => {
     // Update validation errors
     setValidationErrors(errors);
     
-    // Show error alert if there are messages
-    if (errorMessages.length > 0) {
-      alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
-        position: 'top-center',
-        autoCloseTime: 7000
-      });
-      
-      return errorMessages; // Return error messages array
-    }
-    
-    return []; // Return empty array if no errors
-  }, [templateName, bodyText, cards, numCards, alert]);
-
+    // Return errors without directly calling alert
+    return errorMessages.length > 0 ? errorMessages : [];
+  }, [templateName, bodyText, cards, numCards]);
   
   const validateStepThree = useCallback(() => {
     const errors = {};
-    const errorMessages = []; // Use array for error messages
+    const errorMessages = [];
     
     // Validate phone number
     if (!phoneNumber) {
@@ -284,36 +308,37 @@ export const useWhatsAppTemplate = () => {
     // Update validation errors
     setValidationErrors(errors);
     
-    // Show error alert if there are messages
-    if (errorMessages.length > 0) {
-      alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
-        position: 'top-center',
-        autoCloseTime: 7000
-      });
-      
-      return errorMessages; // Return error messages array
-    }
-    
-    return []; // Return empty array if no errors
-  }, [phoneNumber, alert]);
+    // Return errors without directly calling alert
+    return errorMessages.length > 0 ? errorMessages : [];
+  }, [phoneNumber]);
   
-  // Update the isStepValid callback to handle the new validation logic
-  const isStepValid = useCallback((currentStep) => {
+  // Update isStepValid to return errors but not directly show alerts
+  const isStepValid = useCallback((currentStep, triggerAlerts = false) => {
+    let errors = [];
+    
     switch(currentStep) {
       case 1:
-        return validateStepOne();
+        return validateStepOne(triggerAlerts);
       case 2:
-        return validateStepTwo();
+        errors = validateStepTwo();
+        break;
       case 3:
-        return validateStepThree();
+        errors = validateStepThree();
+        break;
       default:
-        return [];
+        errors = [];
     }
-  }, [validateStepOne, validateStepTwo, validateStepThree]);
+    
+    // Mostrar alertas apenas se solicitado
+    if (triggerAlerts && errors.length > 0) {
+      showValidationErrors(errors);
+    }
+    
+    return errors.length === 0;
+  }, [validateStepOne, validateStepTwo, validateStepThree, showValidationErrors]);
   
   /**
    * Verifica a consistência dos botões entre todos os cards
-   * @returns {Object} Informações sobre a consistência dos botões
    */
   const checkButtonConsistency = useCallback(() => {
     const activeCards = cards.slice(0, numCards);
@@ -400,7 +425,6 @@ export const useWhatsAppTemplate = () => {
 
   /**
    * Padroniza os botões em todos os cards para garantir consistência
-   * @returns {Array} Array de cards com botões padronizados
    */
   const standardizeButtons = useCallback(() => {
     const activeCards = cards.slice(0, numCards);
@@ -467,22 +491,24 @@ export const useWhatsAppTemplate = () => {
     const standardizedCards = standardizeButtons();
     setCards(standardizedCards);
     
-    // Exibir mensagem de sucesso e alerta
+    // Exibir mensagem de sucesso
     setSuccess('Botões padronizados com sucesso em todos os cards!');
     
-    // Mostrar alerta de sucesso
-    alert.success('Botões padronizados com sucesso em todos os cards!', {
-      position: 'top-right',
-      autoCloseTime: 3000
-    });
+    // Mostrar alerta de sucesso - FIXED to run outside of render
+    if (alert && typeof alert.success === 'function') {
+      setTimeout(() => {
+        alert.success('Botões padronizados com sucesso em todos os cards!', {
+          position: 'top-right',
+          autoCloseTime: 3000
+        });
+      }, 0);
+    }
     
     setTimeout(() => setSuccess(''), 3000);
   }, [standardizeButtons, alert]);
 
   /**
    * Sincroniza um tipo de botão em todos os cards
-   * @param {number} buttonIndex Índice do botão a ser sincronizado
-   * @param {string} newType Novo tipo de botão
    */
   const syncButtonType = useCallback((buttonIndex, newType) => {
     // Atualizar o tipo do botão em todos os cards ativos
@@ -517,17 +543,19 @@ export const useWhatsAppTemplate = () => {
       return newCards;
     });
     
-    // Informar sobre a sincronização
-    alert.info(`Tipo de botão "${newType}" sincronizado em todos os cards`, {
-      position: 'bottom-right',
-      autoCloseTime: 3000
-    });
+    // Informar sobre a sincronização - FIXED with setTimeout
+    if (alert && typeof alert.info === 'function') {
+      setTimeout(() => {
+        alert.info(`Tipo de botão "${newType}" sincronizado em todos os cards`, {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+      }, 0);
+    }
   }, [numCards, alert]);
 
   /**
    * Sincroniza a adição de botões em todos os cards
-   * @param {number} cardIndex Índice do card onde o botão foi adicionado
-   * @param {Object} buttonType Tipo do novo botão
    */
   const syncAddButton = useCallback((cardIndex, buttonType = 'QUICK_REPLY') => {
     setCards(prev => {
@@ -552,16 +580,19 @@ export const useWhatsAppTemplate = () => {
       return newCards;
     });
     
-    // Informar sobre a adição de botões
-    alert.info(`Botão do tipo "${buttonType}" adicionado a todos os cards`, {
-      position: 'bottom-right',
-      autoCloseTime: 3000
-    });
+    // Informar sobre a adição de botões - FIXED with setTimeout
+    if (alert && typeof alert.info === 'function') {
+      setTimeout(() => {
+        alert.info(`Botão do tipo "${buttonType}" adicionado a todos os cards`, {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+      }, 0);
+    }
   }, [numCards, alert]);
 
   /**
    * Sincroniza a remoção de botões em todos os cards
-   * @param {number} buttonIndex Índice do botão a ser removido
    */
   const syncRemoveButton = useCallback((buttonIndex) => {
     setCards(prev => {
@@ -576,11 +607,15 @@ export const useWhatsAppTemplate = () => {
       return newCards;
     });
     
-    // Informar sobre a remoção de botões
-    alert.warning(`Botão removido de todos os cards`, {
-      position: 'bottom-right',
-      autoCloseTime: 3000
-    });
+    // Informar sobre a remoção de botões - FIXED with setTimeout
+    if (alert && typeof alert.warning === 'function') {
+      setTimeout(() => {
+        alert.warning(`Botão removido de todos os cards`, {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+      }, 0);
+    }
   }, [numCards, alert]);
   
   /**
@@ -591,16 +626,24 @@ export const useWhatsAppTemplate = () => {
       setNumCards(prev => prev + 1);
       setCards(prev => [...prev, createEmptyCard()]);
       
-      // Alerta ao adicionar card
-      alert.info(`Card ${numCards + 1} adicionado ao carrossel`, {
-        position: 'bottom-right',
-        autoCloseTime: 2000
-      });
+      // Alerta ao adicionar card - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info(`Card ${numCards + 1} adicionado ao carrossel`, {
+            position: 'bottom-right',
+            autoCloseTime: 2000
+          });
+        }, 0);
+      }
     } else {
-      // Alerta quando atingir o limite de cards
-      alert.warning('Limite máximo de 10 cards atingido', {
-        position: 'top-center'
-      });
+      // Alerta quando atingir o limite de cards - FIXED with setTimeout
+      if (alert && typeof alert.warning === 'function') {
+        setTimeout(() => {
+          alert.warning('Limite máximo de 10 cards atingido', {
+            position: 'top-center'
+          });
+        }, 0);
+      }
     }
   }, [numCards, alert]);
   
@@ -612,24 +655,29 @@ export const useWhatsAppTemplate = () => {
       setNumCards(prev => prev - 1);
       setCards(prev => prev.slice(0, prev.length - 1));
       
-      // Alerta ao remover card
-      alert.info(`Card ${numCards} removido do carrossel`, {
-        position: 'bottom-right',
-        autoCloseTime: 2000
-      });
+      // Alerta ao remover card - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info(`Card ${numCards} removido do carrossel`, {
+            position: 'bottom-right',
+            autoCloseTime: 2000
+          });
+        }, 0);
+      }
     } else {
-      // Alerta quando tentar remover além do mínimo
-      alert.warning('Um carrossel precisa ter no mínimo 2 cards', {
-        position: 'top-center'
-      });
+      // Alerta quando tentar remover além do mínimo - FIXED with setTimeout
+      if (alert && typeof alert.warning === 'function') {
+        setTimeout(() => {
+          alert.warning('Um carrossel precisa ter no mínimo 2 cards', {
+            position: 'top-center'
+          });
+        }, 0);
+      }
     }
   }, [numCards, alert]);
   
   /**
    * Atualiza um campo específico de um card
-   * @param {number} index - Índice do card a ser atualizado
-   * @param {string} field - Nome do campo a ser atualizado
-   * @param {any} value - Novo valor do campo
    */
   const updateCard = useCallback((index, field, value) => {
     setCards(prev => {
@@ -650,10 +698,6 @@ export const useWhatsAppTemplate = () => {
   
   /**
    * Atualiza um campo específico de um botão em um card
-   * @param {number} cardIndex - Índice do card
-   * @param {number} buttonIndex - Índice do botão
-   * @param {string} field - Nome do campo a ser atualizado
-   * @param {any} value - Novo valor do campo
    */
   const updateButtonField = useCallback((cardIndex, buttonIndex, field, value) => {
     setCards(prev => {
@@ -681,16 +725,19 @@ export const useWhatsAppTemplate = () => {
   
   /**
    * Adiciona um novo botão a um card
-   * @param {number} cardIndex - Índice do card
    */
   const addButton = useCallback((cardIndex) => {
     // Verificar se já possui o máximo de botões
     const card = cards[cardIndex];
     if (card.buttons.length >= 2) {
-      // Alerta sobre o limite de botões
-      alert.warning('Cada card pode ter no máximo 2 botões', {
-        position: 'top-center'
-      });
+      // Alerta sobre o limite de botões - FIXED with setTimeout
+      if (alert && typeof alert.warning === 'function') {
+        setTimeout(() => {
+          alert.warning('Cada card pode ter no máximo 2 botões', {
+            position: 'top-center'
+          });
+        }, 0);
+      }
       return;
     }
     
@@ -714,18 +761,20 @@ export const useWhatsAppTemplate = () => {
     if (numCards > 1) {
       syncAddButton(cardIndex, defaultButtonType);
     } else {
-      // Alerta sobre adição de botão apenas para o card atual
-      alert.info(`Botão adicionado ao Card ${cardIndex + 1}`, {
-        position: 'bottom-right',
-        autoCloseTime: 2000
-      });
+      // Alerta sobre adição de botão apenas para o card atual - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info(`Botão adicionado ao Card ${cardIndex + 1}`, {
+            position: 'bottom-right',
+            autoCloseTime: 2000
+          });
+        }, 0);
+      }
     }
   }, [cards, numCards, syncAddButton, alert]);
   
   /**
    * Remove um botão de um card
-   * @param {number} cardIndex - Índice do card
-   * @param {number} buttonIndex - Índice do botão a ser removido
    */
   const removeButton = useCallback((cardIndex, buttonIndex) => {
     setCards(prev => {
@@ -739,73 +788,147 @@ export const useWhatsAppTemplate = () => {
     if (numCards > 1) {
       syncRemoveButton(buttonIndex);
     } else {
-      // Alerta sobre remoção de botão apenas para o card atual
-      alert.info(`Botão removido do Card ${cardIndex + 1}`, {
-        position: 'bottom-right',
-        autoCloseTime: 2000
-      });
+      // Alerta sobre remoção de botão apenas para o card atual - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info(`Botão removido do Card ${cardIndex + 1}`, {
+            position: 'bottom-right',
+            autoCloseTime: 2000
+          });
+        }, 0);
+      }
     }
   }, [numCards, syncRemoveButton, alert]);
   
-  /**
-   * Faz o upload dos arquivos dos cards para a API
-   */
-  const handleUploadFiles = useCallback(async () => {
-    // Validar antes de prosseguir
-    if (!validateStepOne()) {
-      setError('Por favor, corrija os erros antes de continuar.');
-      return;
+/**
+ * Faz o upload dos arquivos dos cards para a API, pulando aqueles que já têm fileHandle
+ */
+const handleUploadFiles = useCallback(async () => {
+  // Validar antes de prosseguir
+  if (!validateStepOne(true)) {
+    setError('Por favor, corrija os erros antes de continuar.');
+    return;
+  }
+
+  const errors = validateStepOne();
+  if (errors.length > 0) {
+    setError('Por favor, corrija os erros antes de continuar.');
+    showValidationErrors(errors);
+    return;
+  }
+  
+  setLoading(true);
+  setError('');
+  setSuccess('');
+
+  try {
+    // Mostrar alerta de início do processo
+    if (alert && typeof alert.info === 'function') {
+      setTimeout(() => {
+        alert.info('Iniciando processo de upload...', {
+          position: 'top-right',
+          autoCloseTime: 3000
+        });
+      }, 0);
     }
     
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      // Mostrar alerta de início do processo
-      alert.info('Iniciando processo de upload...', {
-        position: 'top-right',
-        autoCloseTime: 3000
+    setSuccess('Iniciando processo de upload...');
+    
+    // Filtrar apenas cards que precisam de upload (sem fileHandle)
+    const cardsToUpload = cards.slice(0, numCards).filter(card => 
+      card.fileUrl && (!card.fileHandle || card.fileHandle === '')
+    );
+    
+    // Cards que já têm fileHandle (podem pular o upload)
+    const cardsWithHandles = cards.slice(0, numCards).filter(card => 
+      card.fileUrl && card.fileHandle && card.fileHandle !== ''
+    );
+    
+    // Resultados finais combinados
+    let finalResults = [];
+    
+    // Adicionar resultados dos cards que já têm fileHandle
+    cardsWithHandles.forEach(card => {
+      finalResults.push({
+        fileHandle: card.fileHandle,
+        status: 'cached', // Status especial para indicar que foi carregado do cache
+        cardIndex: cards.indexOf(card)
       });
+    });
+    
+    // Se houver cards para upload, fazer o upload
+    if (cardsToUpload.length > 0) {
+      // Fazer upload dos arquivos que precisam
+      const newResults = await uploadFiles(cardsToUpload, authKey);
       
-      setSuccess('Iniciando processo de upload...');
-      
-      // Fazer upload dos arquivos
-      const results = await uploadFiles(cards.slice(0, numCards), authKey);
-      
-      // Atualizar os cards com os handles recebidos
-      results.forEach((result, index) => {
-        updateCard(index, 'fileHandle', result.fileHandle);
-      });
-      
-      setUploadResults(results);
-      setSuccess(`Todos os ${numCards} arquivos foram processados com sucesso!`);
-      
-      // Mostrar alerta de sucesso
-      alert.success(`Todos os ${numCards} arquivos foram processados com sucesso!`, {
-        position: 'top-right'
-      });
-      
-      // Salvar o estado atual
-      saveCurrentState();
-      
-      // Avançar para a próxima etapa
-      setStep(2);
-    } catch (err) {
-      const errorMessage = handleApiError(err);
-      setError(errorMessage);
-      
-      // Mostrar alerta de erro
-      alert.error(`Erro durante o processo de upload: ${errorMessage}`, {
-        position: 'top-center',
-        autoCloseTime: 7000
-      });
-      
-      console.error('Erro durante o processo de upload:', err);
-    } finally {
-      setLoading(false);
+      // Mapear resultados aos índices originais dos cards
+      for (let i = 0; i < newResults.length; i++) {
+        const result = newResults[i];
+        const originalCard = cardsToUpload[i];
+        const originalIndex = cards.indexOf(originalCard);
+        
+        // Adicionar o índice original ao resultado
+        result.cardIndex = originalIndex;
+        
+        // Atualizar o card com o fileHandle recebido
+        updateCard(originalIndex, 'fileHandle', result.fileHandle);
+        
+        // Adicionar ao array de resultados finais
+        finalResults.push(result);
+      }
     }
-  }, [authKey, cards, numCards, updateCard, validateStepOne, saveCurrentState, alert]);
+    
+    // Ordenar resultados pelo índice original
+    finalResults.sort((a, b) => a.cardIndex - b.cardIndex);
+    
+    // Definir os resultados de upload
+    setUploadResults(finalResults);
+    
+    // Mensagem de sucesso baseada em quantos arquivos foram processados
+    const skippedCount = cardsWithHandles.length;
+    let successMessage = '';
+    
+    if (skippedCount > 0) {
+      successMessage = `${cardsToUpload.length} arquivo(s) enviado(s) e ${skippedCount} carregado(s) do cache!`;
+    } else {
+      successMessage = `Todos os ${numCards} arquivos foram processados com sucesso!`;
+    }
+    
+    setSuccess(successMessage);
+    
+    // Mostrar alerta de sucesso
+    if (alert && typeof alert.success === 'function') {
+      setTimeout(() => {
+        alert.success(successMessage, {
+          position: 'top-right'
+        });
+      }, 0);
+    }
+    
+    // Salvar o estado atual com fileHandles preservados
+    saveCurrentState();
+    
+    // Avançar para a próxima etapa
+    setStep(2);
+  } catch (err) {
+    const errorMessage = handleApiError(err);
+    setError(errorMessage);
+    
+    // Mostrar alerta de erro
+    if (alert && typeof alert.error === 'function') {
+      setTimeout(() => {
+        alert.error(`Erro durante o processo de upload: ${errorMessage}`, {
+          position: 'top-center',
+          autoCloseTime: 7000
+        });
+      }, 0);
+    }
+    
+    console.error('Erro durante o processo de upload:', err);
+  } finally {
+    setLoading(false);
+  }
+}, [authKey, cards, numCards, updateCard, validateStepOne, saveCurrentState, alert, showValidationErrors, uploadFiles]);
   
   /**
    * Cria o template baseado nas informações fornecidas
@@ -813,8 +936,10 @@ export const useWhatsAppTemplate = () => {
    */
   const handleCreateTemplate = useCallback(async () => {
     // Validar antes de prosseguir
-    if (!validateStepTwo()) {
+    const errors = validateStepTwo();
+    if (errors.length > 0) {
       setError('Por favor, corrija os erros antes de continuar.');
+      showValidationErrors(errors);
       return;
     }
     
@@ -823,11 +948,15 @@ export const useWhatsAppTemplate = () => {
     
     // Se não for consistente, padronizar os botões antes de prosseguir
     if (!consistency.isConsistent) {
-      // Mostrar alerta sobre a padronização necessária
-      alert.warning('Inconsistência detectada nos botões. O WhatsApp exige que todos os cards tenham o mesmo número e tipos de botões. Será realizada uma padronização automática.', {
-        position: 'top-center',
-        autoCloseTime: 5000
-      });
+      // Mostrar alerta sobre a padronização necessária - FIXED with setTimeout
+      if (alert && typeof alert.warning === 'function') {
+        setTimeout(() => {
+          alert.warning('Inconsistência detectada nos botões. O WhatsApp exige que todos os cards tenham o mesmo número e tipos de botões. Será realizada uma padronização automática.', {
+            position: 'top-center',
+            autoCloseTime: 5000
+          });
+        }, 0);
+      }
       
       // Padronizar botões
       const standardizedCards = standardizeButtons();
@@ -849,11 +978,15 @@ export const useWhatsAppTemplate = () => {
         // Informar ao usuário que precisa preencher os campos
         setError('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.');
         
-        // Mostrar alerta sobre campos obrigatórios vazios
-        alert.warning('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.', {
-          position: 'top-center',
-          autoCloseTime: 7000
-        });
+        // Mostrar alerta sobre campos obrigatórios vazios - FIXED with setTimeout
+        if (alert && typeof alert.warning === 'function') {
+          setTimeout(() => {
+            alert.warning('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.', {
+              position: 'top-center',
+              autoCloseTime: 7000
+            });
+          }, 0);
+        }
         
         return;
       }
@@ -864,11 +997,15 @@ export const useWhatsAppTemplate = () => {
       // Informar ao usuário sobre a padronização
       setSuccess('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.');
       
-      // Mostrar alerta sobre a padronização automática
-      alert.success('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.', {
-        position: 'top-right',
-        autoCloseTime: 3000
-      });
+      // Mostrar alerta sobre a padronização automática - FIXED with setTimeout
+      if (alert && typeof alert.success === 'function') {
+        setTimeout(() => {
+          alert.success('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.', {
+            position: 'top-right',
+            autoCloseTime: 3000
+          });
+        }, 0);
+      }
       
       // Pequena pausa para o usuário ver a mensagem
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -887,11 +1024,15 @@ export const useWhatsAppTemplate = () => {
       
       setSuccess('Validações concluídas. Criando template...');
       
-      // Mostrar alerta de criação
-      alert.info('Validações concluídas. Criando template...', {
-        position: 'top-right',
-        autoCloseTime: 3000
-      });
+      // Mostrar alerta de criação - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info('Validações concluídas. Criando template...', {
+            position: 'top-right',
+            autoCloseTime: 3000
+          });
+        }, 0);
+      }
       
       // Criar template na API
       const { templateJson, sendTemplateJson, builderTemplateJson } = await createTemplate(
@@ -911,10 +1052,14 @@ export const useWhatsAppTemplate = () => {
 
       setSuccess('Template criado com sucesso!');
       
-      // Mostrar alerta de sucesso
-      alert.success('Template criado com sucesso!', {
-        position: 'top-right'
-      });
+      // Mostrar alerta de sucesso - FIXED with setTimeout
+      if (alert && typeof alert.success === 'function') {
+        setTimeout(() => {
+          alert.success('Template criado com sucesso!', {
+            position: 'top-right'
+          });
+        }, 0);
+      }
       
       // Salvar o estado atual
       saveCurrentState();
@@ -925,17 +1070,21 @@ export const useWhatsAppTemplate = () => {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
       
-      // Mostrar alerta de erro
-      alert.error(`Erro ao criar template: ${errorMessage}`, {
-        position: 'top-center',
-        autoCloseTime: 7000
-      });
+      // Mostrar alerta de erro - FIXED with setTimeout
+      if (alert && typeof alert.error === 'function') {
+        setTimeout(() => {
+          alert.error(`Erro ao criar template: ${errorMessage}`, {
+            position: 'top-center',
+            autoCloseTime: 7000
+          });
+        }, 0);
+      }
       
       console.error('Erro ao criar template:', err);
     } finally {
       setLoading(false);
     }
-  }, [templateName, language, bodyText, authKey, cards, numCards, validateStepTwo, saveCurrentState, checkButtonConsistency, standardizeButtons, alert]);
+  }, [templateName, language, bodyText, authKey, cards, numCards, validateStepTwo, saveCurrentState, checkButtonConsistency, standardizeButtons, alert, showValidationErrors]);
   
   /**
    * Envia o template para um número de telefone
@@ -946,10 +1095,14 @@ export const useWhatsAppTemplate = () => {
       const errorMsg = 'Número de telefone é obrigatório para enviar o template';
       setError(errorMsg);
       
-      // Mostrar alerta de erro
-      alert.error(errorMsg, {
-        position: 'top-center'
-      });
+      // Mostrar alerta de erro - FIXED with setTimeout
+      if (alert && typeof alert.error === 'function') {
+        setTimeout(() => {
+          alert.error(errorMsg, {
+            position: 'top-center'
+          });
+        }, 0);
+      }
       
       return;
     }
@@ -959,11 +1112,15 @@ export const useWhatsAppTemplate = () => {
     setSuccess('');
 
     try {
-      // Mostrar alerta de envio
-      alert.info(`Enviando template para ${phoneNumberToSend}...`, {
-        position: 'top-right',
-        autoCloseTime: 3000
-      });
+      // Mostrar alerta de envio - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info(`Enviando template para ${phoneNumberToSend}...`, {
+            position: 'top-right',
+            autoCloseTime: 3000
+          });
+        }, 0);
+      }
       
       const formattedPhone = validatePhoneNumber(phoneNumberToSend);
       
@@ -978,21 +1135,29 @@ export const useWhatsAppTemplate = () => {
       const successMsg = `Template enviado com sucesso para ${phoneNumberToSend}!`;
       setSuccess(successMsg);
       
-      // Mostrar alerta de sucesso
-      alert.success(successMsg, {
-        position: 'top-right'
-      });
+      // Mostrar alerta de sucesso - FIXED with setTimeout
+      if (alert && typeof alert.success === 'function') {
+        setTimeout(() => {
+          alert.success(successMsg, {
+            position: 'top-right'
+          });
+        }, 0);
+      }
       
       return true;
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
       
-      // Mostrar alerta de erro
-      alert.error(`Erro no envio: ${errorMessage}`, {
-        position: 'top-center',
-        autoCloseTime: 7000
-      });
+      // Mostrar alerta de erro - FIXED with setTimeout
+      if (alert && typeof alert.error === 'function') {
+        setTimeout(() => {
+          alert.error(`Erro no envio: ${errorMessage}`, {
+            position: 'top-center',
+            autoCloseTime: 7000
+          });
+        }, 0);
+      }
       
       console.error("Erro no envio:", err);
       throw err;
@@ -1003,7 +1168,6 @@ export const useWhatsAppTemplate = () => {
   
   /**
    * Copia o JSON do template para a área de transferência
-   * @param {string} jsonType - Tipo de JSON a ser copiado ('createTemplate' ou 'sendTemplate')
    */
   const copyToClipboard = useCallback((jsonType) => {
     try {
@@ -1011,10 +1175,14 @@ export const useWhatsAppTemplate = () => {
         const errorMsg = 'Não foi possível copiar. JSON não disponível.';
         setError(errorMsg);
         
-        // Mostrar alerta de erro
-        alert.error(errorMsg, {
-          position: 'top-center'
-        });
+        // Mostrar alerta de erro - FIXED with setTimeout
+        if (alert && typeof alert.error === 'function') {
+          setTimeout(() => {
+            alert.error(errorMsg, {
+              position: 'top-center'
+            });
+          }, 0);
+        }
         
         return;
       }
@@ -1024,11 +1192,15 @@ export const useWhatsAppTemplate = () => {
           const successMsg = `JSON para ${jsonType === 'createTemplate' ? 'criação do template' : jsonType === 'sendTemplate' ? 'envio do template' : 'integração com Builder'} copiado!`;
           setSuccess(successMsg);
           
-          // Mostrar alerta de sucesso
-          alert.success(successMsg, {
-            position: 'bottom-right',
-            autoCloseTime: 3000
-          });
+          // Mostrar alerta de sucesso - FIXED with setTimeout
+          if (alert && typeof alert.success === 'function') {
+            setTimeout(() => {
+              alert.success(successMsg, {
+                position: 'bottom-right',
+                autoCloseTime: 3000
+              });
+            }, 0);
+          }
           
           // Limpar a mensagem de sucesso após 3 segundos
           setTimeout(() => {
@@ -1039,19 +1211,27 @@ export const useWhatsAppTemplate = () => {
           const errorMsg = `Erro ao copiar: ${err.message}`;
           setError(errorMsg);
           
-          // Mostrar alerta de erro
-          alert.error(errorMsg, {
-            position: 'top-center'
-          });
+          // Mostrar alerta de erro - FIXED with setTimeout
+          if (alert && typeof alert.error === 'function') {
+            setTimeout(() => {
+              alert.error(errorMsg, {
+                position: 'top-center'
+              });
+            }, 0);
+          }
         });
     } catch (err) {
       const errorMsg = `Erro ao copiar: ${err.message}`;
       setError(errorMsg);
       
-      // Mostrar alerta de erro
-      alert.error(errorMsg, {
-        position: 'top-center'
-      });
+      // Mostrar alerta de erro - FIXED with setTimeout
+      if (alert && typeof alert.error === 'function') {
+        setTimeout(() => {
+          alert.error(errorMsg, {
+            position: 'top-center'
+          });
+        }, 0);
+      }
     }
   }, [finalJson, alert]);
   
@@ -1077,11 +1257,15 @@ export const useWhatsAppTemplate = () => {
       setLastSavedTime(null);
       setUnsavedChanges(false);
       
-      // Mostrar alerta de reset
-      alert.info('Template resetado. Você pode começar um novo template agora.', {
-        position: 'top-right',
-        autoCloseTime: 3000
-      });
+      // Mostrar alerta de reset - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info('Template resetado. Você pode começar um novo template agora.', {
+            position: 'top-right',
+            autoCloseTime: 3000
+          });
+        }, 0);
+      }
     }
   }, [alert]);
 
@@ -1094,11 +1278,15 @@ export const useWhatsAppTemplate = () => {
       setError('');
       setSuccess('');
       
-      // Mostrar alerta de navegação
-      alert.info(`Retornando para o passo ${step - 1}`, {
-        position: 'bottom-right',
-        autoCloseTime: 2000
-      });
+      // Mostrar alerta de navegação - FIXED with setTimeout
+      if (alert && typeof alert.info === 'function') {
+        setTimeout(() => {
+          alert.info(`Retornando para o passo ${step - 1}`, {
+            position: 'bottom-right',
+            autoCloseTime: 2000
+          });
+        }, 0);
+      }
     }
   }, [step, alert]);
 
@@ -1112,6 +1300,8 @@ export const useWhatsAppTemplate = () => {
 
   // Atualizar os campos de texto com limpeza de validação
   const handleInputChange = useCallback((field, value) => {
+    setHasInteracted(true);
+
     switch (field) {
       case 'templateName':
         setTemplateName(value);
@@ -1184,6 +1374,9 @@ export const useWhatsAppTemplate = () => {
     applyButtonStandardization,
     syncButtonType,
     syncAddButton,
-    syncRemoveButton
+    syncRemoveButton,
+
+    hasInteracted,
+    setHasInteracted
   };
 };

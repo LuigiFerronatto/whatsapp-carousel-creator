@@ -926,3 +926,26 @@ span .blockquote {
 .disabled ~ .dots .activeDot {
   opacity: 0.8;
 }
+
+/* CarouselPreview.module.css */
+.cardHighlighted {
+  box-shadow: 0 0 0 2px var(--blip-action);
+  animation: highlightPulse 2s infinite;
+}
+
+.buttonHighlighted {
+  box-shadow: 0 0 0 2px var(--blip-action);
+  animation: highlightPulse 2s infinite;
+}
+
+@keyframes highlightPulse {
+  0% {
+    box-shadow: 0 0 0 2px var(--blip-action);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--blip-action-light);
+  }
+  100% {
+    box-shadow: 0 0 0 2px var(--blip-action);
+  }
+}

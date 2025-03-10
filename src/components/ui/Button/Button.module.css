@@ -17,7 +17,7 @@
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Focus State */

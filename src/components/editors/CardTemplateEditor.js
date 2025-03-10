@@ -26,7 +26,9 @@ const CardTemplateEditor = ({
   updateCard,
   showHints = true,
   validationMessage,
-  numCards = 2
+  numCards = 2,
+  setFocusedInput,
+  focusedInput
 }) => {
   // Inicializar sistema de alertas
   const alert = useAlert();
@@ -295,19 +297,21 @@ const CardTemplateEditor = ({
                 ${changedFields.includes('buttons') ? styles.changedField : ''}
               `}
             >
-              <ButtonEditor 
-                key={buttonIndex}
-                index={index}
-                buttonIndex={buttonIndex}
-                button={button}
-                updateButtonField={updateButtonField}
-                removeButton={() => removeButton(buttonIndex)}
-                totalButtons={card.buttons.length}
-                showHints={showHints}
-                cards={cards}
-                numCards={numCards}
-                syncButtonTypes={syncButtonTypes}
-              />
+
+<ButtonEditor
+  key={buttonIndex}
+  index={index}
+  buttonIndex={buttonIndex}
+  button={button}
+  updateButtonField={updateButtonField}
+  removeButton={() => removeButton(buttonIndex)}
+  totalButtons={card.buttons.length}
+  showHints={showHints}
+  cards={cards}
+  numCards={numCards}
+  syncButtonTypes={syncButtonTypes}
+  setFocusedInput={setFocusedInput}
+/>
             </div>
           ))}
         </div>

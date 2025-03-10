@@ -4,6 +4,7 @@ import { FiLink, FiPhone, FiMessageSquare, FiInfo, FiAlertCircle, FiCheckCircle,
 import styles from './ButtonEditor.module.css';
 import Input from '../ui/Input/Input';
 import Button from '../ui/Button/Button';
+import PropTypes from 'prop-types'
 
 /**
  * ButtonEditor - Componente aprimorado para editar botões de templates do WhatsApp
@@ -34,7 +35,8 @@ const ButtonEditor = ({
   validationMessage,
   cards,
   numCards,
-  syncButtonTypes
+  syncButtonTypes,
+  setFocusedInput
 }) => {
   // Estado para interações de UI
   const [urlTested, setUrlTested] = useState(false);
@@ -50,7 +52,13 @@ const ButtonEditor = ({
     setIsTypeLocked(shouldLock);
   }, [numCards, index]);
   
+  const handleFocus = () => {
+    setFocusedInput?.({ cardIndex: index, buttonIndex: buttonIndex });
+  };
 
+  const handleBlur = () => {
+    setFocusedInput?.({ cardIndex: null, buttonIndex: null });
+  };
   
   // Verificação de URL válida com protocolo adequado
   const isValidUrl = (url) => {
@@ -210,6 +218,8 @@ const ButtonEditor = ({
         textFormattingDarkMode={false} // Opcional: tema claro
         showCharCounter
         hintIsCompact={true}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
       
       {button.type === 'URL' && (
@@ -225,6 +235,8 @@ const ButtonEditor = ({
           error={button.url && !isValidUrl(button.url) ? "URL inválida. Certifique-se de incluir 'https://' ou 'http://'" : ""}
           variant="url"
           validateOnChange
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           rightElement={button.url && (
             <Button 
               type="button"
@@ -278,6 +290,8 @@ const ButtonEditor = ({
             onChange={(e) => updateButtonField(buttonIndex, 'payload', e.target.value)}
             placeholder="Deixe vazio para usar o texto do botão como payload"
             hintIsCompact={true}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
           />
         </div>
       )}
@@ -299,6 +313,8 @@ const ButtonEditor = ({
     required
     variant="phoneNumber"
     validateOnChange
+    onFocus={handleFocus}
+    onBlur={handleBlur}
     rightElement={button.phoneNumber && (
       <Button
         type="button"
@@ -354,6 +370,23 @@ const ButtonEditor = ({
       )}
     </div>
   );
+};
+
+
+
+ButtonEditor.propTypes = {
+  index: PropTypes.number.isRequired,
+  buttonIndex: PropTypes.number.isRequired,
+  button: PropTypes.object.isRequired,
+  updateButtonField: PropTypes.func.isRequired,
+  removeButton: PropTypes.func.isRequired,
+  totalButtons: PropTypes.number.isRequired,
+  showHints: PropTypes.bool,
+  validationMessage: PropTypes.string,
+  cards: PropTypes.array.isRequired,
+  numCards: PropTypes.number.isRequired,
+  syncButtonTypes: PropTypes.func.isRequired,
+  setFocusedInput: PropTypes.func.isRequired
 };
 
 export default ButtonEditor;

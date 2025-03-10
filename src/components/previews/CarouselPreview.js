@@ -118,7 +118,8 @@ const CarouselPreview = forwardRef(({
   cards = [],
   bodyText = 'Exemplo de Body Text',
   contactName = 'Blip CDA',
-  disableInteraction = false
+  disableInteraction = false,
+  focusedInput
 }, ref) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const cardsWrapperRef = useRef(null);
@@ -132,6 +133,13 @@ const CarouselPreview = forwardRef(({
   const dragStartTimeRef = useRef(0);
   const lastTouchEnd = useRef(0);
   const mediaLoadedRef = useRef({});
+
+  useEffect(() => {
+    if (focusedInput && focusedInput.cardIndex !== null) {
+      setCurrentCardIndex(focusedInput.cardIndex);
+      updateTranslatePosition(focusedInput.cardIndex);
+    }
+  }, [focusedInput]);
 
   // Expõe métodos para controle externo via ref
   useImperativeHandle(ref, () => ({
@@ -546,6 +554,8 @@ const CarouselPreview = forwardRef(({
                   <div 
                     key={index} 
                     className={`${styles.card} ${
+                      focusedInput && index === focusedInput.cardIndex ? styles.cardHighlighted : ''
+                    } ${
                       index === currentCardIndex 
                         ? styles.activeCard 
                         : styles.inactiveCard

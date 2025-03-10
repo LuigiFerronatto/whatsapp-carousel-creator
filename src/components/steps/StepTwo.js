@@ -1,25 +1,33 @@
-// components/steps/StepTwo.js
+// components/steps/StepTwo.js - Versão melhorada
 import React, { useState, useEffect, useCallback } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
-import { useAlert } from '../ui/AlertMessage/AlertContext'; // Adicionar esta importação
+import { useAlert } from '../ui/AlertMessage/AlertContext';
 import Input from '../ui/Input/Input';
 import Hints, { HintsGroup } from '../ui/Hints/Hints';
 import Button from '../ui/Button/Button';
-import { 
-  FiSave, 
-  FiCheck, 
-  FiChevronRight, 
-  FiChevronLeft, 
-  FiEye, 
-  FiEyeOff, 
+import {
+  FiSave,
+  FiCheck,
+  FiChevronRight,
+  FiChevronLeft,
+  FiEye,
+  FiEyeOff,
   FiInfo,
-  FiCheckCircle
+  FiCheckCircle,
+  FiAlertTriangle
 } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
 import progressbar from '../ui/ProgressBar/ProgressBar.module.css';
 
+/**
+ * StepTwo - Componente melhorado para a segunda etapa de configuração do template
+ * Corrigido para utilizar saveCurrentState em vez de saveDraftManually
+ * 
+ * @param {Object} props Propriedades do componente
+ * @returns {JSX.Element} Componente StepTwo
+ */
 const StepTwo = ({
   templateName,
   setTemplateName,
@@ -35,17 +43,33 @@ const StepTwo = ({
   error,
   loading,
   isStepValid,
-  saveDraftManually
+  saveCurrentState, // Substituído de saveDraftManually para saveCurrentState
+  unsavedChanges,
+  lastSavedTime,
+  checkButtonConsistency, // Adicionada verificação de consistência
+  applyButtonStandardization // Adicionada padronização de botões
 }) => {
   // Inicializar sistema de alertas
   const alert = useAlert();
-  
+
+  // Estado local
   const [showHints, setShowHints] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
   const [validationMessages, setValidationMessages] = useState({});
   const [activeCard, setActiveCard] = useState(0);
   const [savedBeforeUpload, setSavedBeforeUpload] = useState(false);
+  const [buttonConsistencyStatus, setButtonConsistencyStatus] = useState({ isConsistent: true, message: "" });
+  const [focusedInput, setFocusedInput] = useState({ cardIndex: null, buttonIndex: null });
 
+  // Verificar consistência de botões quando os cards ou numCards mudarem
+  useEffect(() => {
+    if (typeof checkButtonConsistency === 'function' && numCards > 1) {
+      const consistency = checkButtonConsistency();
+      setButtonConsistencyStatus(consistency);
+    }
+  }, [checkButtonConsistency, cards, numCards]);
+
+  // Limpar validações quando inputs mudam
   useEffect(() => {
     if (templateName) {
       setValidationMessages(prev => {
@@ -67,17 +91,19 @@ const StepTwo = ({
   // Mostrar erros recebidos como propriedades como alertas
   useEffect(() => {
     if (error) {
-      alert.error(error, { 
+      alert.error(error, {
         position: 'top-center',
-        autoCloseTime: 7000 
+        autoCloseTime: 7000
       });
     }
   }, [error, alert]);
 
-  const isTemplateNameValid = templateName.length >= 3;
-  const isBodyTextValid = bodyText.length > 0;
+  // Status de validação
+  const isTemplateNameValid = templateName && templateName.length >= 3;
+  const isBodyTextValid = bodyText && bodyText.length > 0;
 
-  const validateCards = () => {
+  // Validação completa de cards e botões
+  const validateCards = useCallback(() => {
     const messages = {};
     let allValid = true;
     let validationErrors = [];
@@ -110,7 +136,7 @@ const StepTwo = ({
     });
 
     setValidationMessages(messages);
-    
+
     // Se tivermos erros, mostramos um alerta com as informações
     if (!allValid && validationErrors.length > 0) {
       alert.error(`Problemas de validação encontrados:\n${validationErrors.join('\n')}`, {
@@ -118,11 +144,12 @@ const StepTwo = ({
         autoCloseTime: 7000
       });
     }
-    
-    return allValid;
-  };
 
-  const handleContinue = async () => {
+    return allValid;
+  }, [cards, numCards, alert]);
+
+  // Melhorado o handler para continuar, inclui validação e padronização
+  const handleContinue = useCallback(async () => {
     // Validar nome do template
     if (!isTemplateNameValid) {
       alert.warning("O nome do template deve ter pelo menos 3 caracteres", {
@@ -130,7 +157,7 @@ const StepTwo = ({
       });
       return;
     }
-    
+
     // Validar texto de introdução
     if (!isBodyTextValid) {
       alert.warning("A mensagem de introdução é obrigatória", {
@@ -138,13 +165,46 @@ const StepTwo = ({
       });
       return;
     }
-    
+
+    // Verificar consistência de botões se houver mais de um card
+    if (numCards > 1 && typeof checkButtonConsistency === 'function') {
+      const consistency = checkButtonConsistency();
+
+      if (!consistency.isConsistent) {
+        // Mostrar alerta sobre a inconsistência
+        const shouldStandardize = window.confirm(
+          "Os cards possuem configurações diferentes de botões, o que não é permitido pelo WhatsApp.\n\n" +
+          "Deseja padronizar os botões automaticamente baseado no primeiro card?\n\n" +
+          "Clique em OK para padronizar ou Cancelar para revisar manualmente."
+        );
+
+        if (shouldStandardize) {
+          // Padronizar botões e continuar
+          if (typeof applyButtonStandardization === 'function') {
+            applyButtonStandardization();
+
+            // Pequena pausa para processar as mudanças
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        } else {
+          // Usuário escolheu revisar manualmente
+          return;
+        }
+      }
+    }
+
     // Validar os cards
     if (validateCards()) {
       try {
+        // Salvar antes de criar o template
+        if (typeof saveCurrentState === 'function') {
+          saveCurrentState();
+        }
+
         // Tenta criar o template
         await handleCreateTemplate();
-        // Em caso de sucesso, mostra alerta (mesmo que a função já troque de tela)
+
+        // Em caso de sucesso, mostra alerta
         alert.success("Template criado com sucesso!", {
           position: 'top-right'
         });
@@ -156,25 +216,70 @@ const StepTwo = ({
         });
       }
     }
-  };
+  }, [
+    isTemplateNameValid,
+    isBodyTextValid,
+    validateCards,
+    handleCreateTemplate,
+    alert,
+    saveCurrentState,
+    numCards,
+    checkButtonConsistency,
+    applyButtonStandardization
+  ]);
 
+  // Salvar rascunho
   const handleSaveBeforeUpload = useCallback(() => {
-    saveDraftManually();
-    setSavedBeforeUpload(true);
-    
-    // Adicionar alerta de sucesso
-    alert.success("Rascunho salvo com sucesso!", {
-      position: 'bottom-right',
-      autoCloseTime: 3000
-    });
-    
-    setTimeout(() => {
-      setSavedBeforeUpload(false);
-    }, 5000);
-  }, [saveDraftManually, alert]);
+    // Verificar se a função saveCurrentState existe
+    if (typeof saveCurrentState === 'function') {
+      const success = saveCurrentState();
 
-  const isAllValid = isTemplateNameValid && isBodyTextValid && Object.keys(validationMessages).length === 0;
+      if (success) {
+        setSavedBeforeUpload(true);
 
+        // Adicionar alerta de sucesso
+        alert.success("Rascunho salvo com sucesso!", {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+
+        setTimeout(() => {
+          setSavedBeforeUpload(false);
+        }, 5000);
+      } else {
+        // Mostrar erro se o salvamento falhou
+        alert.error("Não foi possível salvar o rascunho. Verifique o armazenamento local.", {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
+      }
+    } else {
+      // Mostrar erro se a função não estiver disponível
+      console.error("Função saveCurrentState não está disponível");
+      alert.error("Não foi possível salvar o rascunho. Tente novamente mais tarde.", {
+        position: 'top-center'
+      });
+    }
+  }, [saveCurrentState, alert]);
+
+  // Verifica se o passo está completo
+  const checkStepValidity = useCallback(() => {
+    // Se a função isStepValid não estiver disponível, fazer validação local
+    if (typeof isStepValid !== 'function') {
+      // Verificar nome do template e texto
+      if (!isTemplateNameValid || !isBodyTextValid) {
+        return false;
+      }
+
+      // Verificar cards
+      return validateCards();
+    }
+
+    // Se a função isStepValid estiver disponível, usar ela
+    return isStepValid(2);
+  }, [isStepValid, isTemplateNameValid, isBodyTextValid, validateCards]);
+
+  // Calcula o percentual de conclusão baseado no progresso
   const completionPercentage = [
     isTemplateNameValid,
     isBodyTextValid,
@@ -182,6 +287,7 @@ const StepTwo = ({
     cards.slice(0, numCards).every(card => card.buttons.every(button => button.text)),
   ].filter(Boolean).length * 25;
 
+  // Opções de idioma para o dropdown
   const languageOptions = [
     { code: "pt_BR", name: "Português (Brasil)" },
     { code: "en_US", name: "English (United States)" },
@@ -231,7 +337,7 @@ const StepTwo = ({
       </div>
 
       <div className={styles.contentWrapper}>
-        <div className={`${styles.formContainer}${showPreview ? styles.withPreview : ''}`}>
+        <div className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}>
           <div className={steps.containerCard}>
             <h3>Informações Básicas do Template</h3>
 
@@ -262,7 +368,7 @@ const StepTwo = ({
               required
               minLength={3}
               maxLength={64}
-              error={!isTemplateNameValid && templateName ? "O nome do template deve ter pelo menos 3 caracteres." : ""}
+              error={validationMessages.templateName || (templateName && !isTemplateNameValid ? "O nome do template deve ter pelo menos 3 caracteres." : "")}
               hintMessage={showHints ? "Escolha um nome descritivo, sem espaços." : ""}
               hintVariant="info"
               hintList={["Use _ para separar palavras", "Exemplo: 'promo_verao' ou 'lancamento_produto'"]}
@@ -306,6 +412,7 @@ const StepTwo = ({
               maxLength={1024}
               rows={3}
               required
+              error={validationMessages.bodyText || (bodyText === "" ? "A mensagem de introdução é obrigatória." : "")}
               hintMessage={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
               textFormatting
               hintVariant="simple"
@@ -316,6 +423,32 @@ const StepTwo = ({
               hintIsCompact={true}
             />
           </div>
+
+          {/* Alerta de inconsistência de botões */}
+          {numCards > 1 && !buttonConsistencyStatus.isConsistent && (
+            <div className={styles.buttonInconsistencyWarning}>
+              <FiAlertTriangle size={20} />
+              <div>
+                <h4>Atenção! Inconsistência de botões detectada</h4>
+                <p>{buttonConsistencyStatus.message}</p>
+                {typeof applyButtonStandardization === 'function' && (
+                  <Button
+                    variant="outline"
+                    color="warning"
+                    size="small"
+                    onClick={() => {
+                      applyButtonStandardization();
+                      alert.success("Botões padronizados com sucesso!", {
+                        position: 'bottom-right'
+                      });
+                    }}
+                  >
+                    Padronizar botões automaticamente
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className={steps.containerCard}>
             <h3>Conteúdo dos Cards</h3>
@@ -350,50 +483,62 @@ const StepTwo = ({
                     validationMessages[`card-${activeCard}`] ||
                     validationMessages[`card-${activeCard}-buttons`]
                   }
+                  focusedInput={focusedInput}
                 />
               )}
             </div>
           </div>
 
           <div className={steps.actionSection}>
-
             <Button
               onClick={() => setStep(1)}
               variant="outline"
               color="content"
               iconLeft={<FiChevronLeft />}
-              size='large'
+              size="large"
               fullWidth
-              
             >
               Voltar
             </Button>
 
-            <Button 
-            variant="outline"
-            color="primary"
-            size="large"
-            onClick={handleSaveBeforeUpload}
-            iconLeft={savedBeforeUpload ? <FiCheckCircle size={18} /> : <FiSave size={18} />}
-            fullWidth
-          >
-            {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
-          </Button>
+            <Button
+              variant="outline"
+              color="primary"
+              size="large"
+              onClick={handleSaveBeforeUpload}
+              iconLeft={savedBeforeUpload ? <FiCheckCircle size={18} /> : <FiSave size={18} />}
+              fullWidth
+            >
+              {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
+            </Button>
 
             <Button
               className={styles.nextButton}
               onClick={handleContinue}
-              disabled={loading}
+              disabled={loading || !checkStepValidity()}
               variant="solid"
               color="primary"
               loading={loading}
-              iconRight={!loading ? <FiChevronRight/> : null}
-              size='large'
+              iconRight={!loading ? <FiChevronRight /> : null}
+              size="large"
               fullWidth
             >
               {loading ? 'Processando...' : 'Criar Template'}
             </Button>
           </div>
+
+          {/* Mostrar informação de último salvamento */}
+          {lastSavedTime && !savedBeforeUpload && (
+            <div className={styles.lastSavedInfo}>
+              <FiInfo size={14} />
+              <span>
+                Último salvamento: {new Date(lastSavedTime).toLocaleString()}
+                {unsavedChanges && (
+                  <span className={styles.unsavedIndicator}> (Alterações não salvas)</span>
+                )}
+              </span>
+            </div>
+          )}
         </div>
 
         {showPreview && (
@@ -407,6 +552,7 @@ const StepTwo = ({
                 <CarouselPreview
                   cards={cards.slice(0, numCards)}
                   bodyText={bodyText}
+                  focusedInput={focusedInput}
                 />
               </div>
             </div>
@@ -418,3 +564,4 @@ const StepTwo = ({
 };
 
 export default StepTwo;
+
