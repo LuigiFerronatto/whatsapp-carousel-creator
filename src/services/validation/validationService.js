@@ -172,3 +172,16 @@ export const validateFileUrls = (cards) => {
     }
   });
 };
+
+export const ValidationService = {
+  validateUrl: (url) => {
+    // Lógica de validação de URL
+  },
+  validatePhone: (phone) => {
+    // Lógica de validação de telefone
+  },
+  validateTemplate: (template) => {
+    // Lógica de validação de template
+  }
+};
+

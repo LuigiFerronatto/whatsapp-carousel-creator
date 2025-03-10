@@ -527,7 +527,7 @@ class DownloadPreviewService {
       // Limpar sistema de arquivos antes de começar
       await this.cleanupFileSystem();
 
-      onStatusUpdate?.({ status: 'processing', message: 'Processando frames...' });
+      onStatusUpdate?.({ status: 'processing', message: 'Preparando o download...' });
       console.log(`Iniciando processamento de ${frames.length} frames`);
 
       // Criar diretório temporário
@@ -646,7 +646,7 @@ class DownloadPreviewService {
       for (let i = 0; i < selectedIndices.length; i++) {
         onStatusUpdate?.({ 
           status: 'processing', 
-          message: `Processando frame ${i + 1}/${selectedIndices.length}...`,
+          message: `Processando vídeo...`,
           progress: Math.round((i / selectedIndices.length) * 100)
         });
   
@@ -710,7 +710,7 @@ class DownloadPreviewService {
       // Limpar sistema de arquivos antes de começar
       await this.cleanupFileSystem();
 
-      onStatusUpdate?.({ status: 'processing', message: 'Processando frames para GIF...' });
+      onStatusUpdate?.({ status: 'processing', message: 'Processando GIF...' });
 
       // Criar diretório para frames
       try {
@@ -815,7 +815,7 @@ class DownloadPreviewService {
       for (let i = 0; i < selectedIndices.length; i++) {
         onStatusUpdate?.({ 
           status: 'processing', 
-          message: `Processando frame ${i + 1}/${selectedIndices.length}...`,
+          message: `Capturando GIF...`,
           progress: Math.round((i / selectedIndices.length) * 100)
         });
   

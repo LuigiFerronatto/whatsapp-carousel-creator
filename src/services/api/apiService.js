@@ -59,20 +59,7 @@ export const uploadFiles = async (cards, authKey) => {
       
       if (!response.ok) {
         console.error(`Erro na resposta HTTP para card ${i+1}: ${response.status} ${response.statusText}`);
-        
-        // Em ambiente de produção, seria melhor lançar um erro
-        // Em ambiente de desenvolvimento, podemos simular um sucesso para testes
-        if (process.env.NODE_ENV === 'production') {
-          throw new Error(`Falha na requisição: ${response.status} ${response.statusText}`);
-        } else {
-          console.warn('Ambiente de desenvolvimento: Usando fileHandle simulado');
-          const simulatedHandle = `file-handle-${i + 1}-${Date.now()}`;
-          results.push({
-            fileHandle: simulatedHandle,
-            status: 'simulated'
-          });
-          continue;
-        }
+        throw new Error(`Falha na requisição: ${response.status} ${response.statusText}`);
       }
       
       const responseData = await response.json();
@@ -81,24 +68,15 @@ export const uploadFiles = async (cards, authKey) => {
       if (responseData.status !== 'success') {
         console.error(`Falha ao fazer upload do arquivo ${i + 1}: ${responseData.reason || 'Erro desconhecido'}`);
         
-        // Similar ao anterior, em produção seria melhor lançar um erro
-        if (process.env.NODE_ENV === 'production') {
-          throw new Error(responseData.reason || 'Falha no upload do arquivo');
-        } else {
-          console.warn('Ambiente de desenvolvimento: Usando fileHandle simulado');
-          const simulatedHandle = `file-handle-${i + 1}-${Date.now()}`;
-          results.push({
-            fileHandle: simulatedHandle,
-            status: 'simulated'
-          });
-          continue;
-        }
+      throw new Error(responseData.reason || 'Falha no upload do arquivo');
+
       }
       
       // Extrair o fileHandle da resposta
       const fileHandle = responseData.resource?.fileHandle;
       
       if (!fileHandle) {
+        console.error(`Não foi possível obter o fileHandle para o card ${i + 1}`);
         throw new Error(`Não foi possível obter o fileHandle para o card ${i + 1}`);
       }
       
@@ -111,19 +89,7 @@ export const uploadFiles = async (cards, authKey) => {
       console.log(`Upload do arquivo ${i + 1} concluído com sucesso. Handle: ${fileHandle}`);
     } catch (error) {
       console.error(`Erro no upload do card ${i+1}:`, error);
-      
-      // Em ambiente de produção, propagamos o erro
-      // Em ambiente de desenvolvimento, podemos simular um sucesso para testes
-      if (process.env.NODE_ENV === 'production') {
-        throw error;
-      } else {
-        console.warn('Ambiente de desenvolvimento: Usando fileHandle simulado após erro');
-        const simulatedHandle = `file-handle-${i + 1}-${Date.now()}`;
-        results.push({
-          fileHandle: simulatedHandle,
-          status: 'simulated'
-        });
-      }
+      throw error;
     }
   }
 
@@ -201,9 +167,6 @@ export const createTemplate = async (templateName, language, bodyText, cards, au
     }
   };
   
-  // Em ambiente de produção, envia para a API
-  // Em ambiente de desenvolvimento, simula sucesso
-  if (process.env.NODE_ENV === 'production') {
     try {
       const response = await fetch(`${API_BASE_URL}/commands`, {
         method: 'POST',
@@ -229,9 +192,7 @@ export const createTemplate = async (templateName, language, bodyText, cards, au
       console.error('Erro ao criar template na API:', error);
       throw error;
     }
-  } else {
-    console.warn('Ambiente de desenvolvimento: Simulando criação de template');
-  }
+
   
   // Gerar JSON para envio do template
   const sendTemplateJson = {
@@ -377,7 +338,6 @@ export const sendTemplateMessage = async (phoneNumber, sendTemplate, authKey) =>
   
   // Em ambiente de produção, envia para a API
   // Em ambiente de desenvolvimento, simula sucesso
-  if (process.env.NODE_ENV === 'production') {
     try {
       const response = await fetch(`${API_BASE_URL}/messages`, {
         method: 'POST',
@@ -395,8 +355,4 @@ export const sendTemplateMessage = async (phoneNumber, sendTemplate, authKey) =>
       console.error('Erro ao enviar template:', error);
       throw error;
     }
-  } else {
-    console.warn(`Ambiente de desenvolvimento: Simulando envio de template para ${phoneNumber}`);
-    return { success: true, message: `[SIMULADO] Template enviado com sucesso para ${phoneNumber}` };
-  }
 };

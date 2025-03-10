@@ -81,7 +81,7 @@ const introducao = {
   
   // ============== MENSAGENS DE STATUS DO PROCESSAMENTO DE FRAMES ==============
   const statusProcessamentoFrames = {
-    processingFrame: (atual, total) => `Processando frame ${atual}/${total}...`
+    processingFrame: (atual, total) => `Preparando Download...`
   };
   
   // Podemos exportar todos esses objetos para uso no componente

@@ -102,7 +102,7 @@ const StepOne = ({
         }, 3000);
       } else {
         // Mostrar erro se o salvamento falhou
-        alert.error("Não foi possível salvar o rascunho. Verifique o armazenamento local.", {
+        alert.error("Não foi possível salvar o rascunho.", {
           position: 'top-center',
           autoCloseTime: 5000
         });
@@ -134,7 +134,7 @@ const StepOne = ({
       
       // Verificar se todos os cards têm URLs
       if (!allCardsHaveUrls()) {
-        alert.warning("Adicione URLs para todos os cards antes de continuar", {
+        alert.warning("Adicione arquivos para todos os cards antes de continuar", {
           position: 'top-center'
         });
         return;
@@ -179,14 +179,14 @@ const StepOne = ({
 
   // Função para limpar todos os fileHandles
   const handleClearAllFileHandles = useCallback(() => {
-    if (window.confirm('Tem certeza que deseja limpar todos os fileHandles? Isso forçará um novo upload para todos os cards.')) {
+    if (window.confirm('Tem certeza que deseja limpar tudo? Isso forçará um novo upload para todos os cards.')) {
       // Atualizar cada card para remover fileHandle
       for (let i = 0; i < numCards; i++) {
         updateCard(i, 'fileHandle', '');
       }
       
       // Mostrar alerta de limpeza
-      alert.info('Todos os fileHandles foram limpos. Você precisará fazer upload novamente.', {
+      alert.info('Todos os arquivos foram limpos. Você precisará fazer upload novamente.', {
         position: 'top-center',
         autoCloseTime: 3000
       });

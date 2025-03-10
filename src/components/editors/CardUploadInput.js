@@ -1,29 +1,28 @@
-// components/editors/CardUploadInput.js - Versão corrigida
+// React e Hooks
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+
+// Hooks personalizados
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { useAlert } from '../ui/AlertMessage/AlertContext';
+
+// Componentes
 import Button from '../ui/Button/Button';
-import { 
-  FiImage, 
-  FiVideo, 
-  FiUploadCloud, 
-  FiLink, 
-  FiCheck, 
-  FiAlertCircle, 
-  FiX,
-  FiExternalLink,
-  FiTrendingUp,
-  FiCopy,
-  FiLock,
-  FiUnlock
-} from 'react-icons/fi';
-import styles from './CardUploadInput.module.css';
 import Input from '../ui/Input/Input';
+
+// Ícones
+import { 
+  FiImage, FiVideo, FiUploadCloud, FiLink, 
+  FiCheck, FiAlertCircle, FiX, FiExternalLink,
+  FiTrendingUp, FiCopy, FiInfo, FiEye, 
+  FiRefreshCw, FiTrash2, FiEdit3 
+} from 'react-icons/fi';
+
+// Estilos
+import styles from './CardUploadInput.module.css';
 
 /**
  * Componente aprimorado para upload ou seleção de URL para cada cartão do carrossel
- * Corrigido para exibir corretamente os fileHandles e garantir funcionalidade de upload
- * Adicionado sistema de bloqueio para proteger arquivos já enviados
+ * Design refinado e UX simplificada com foco na experiência do usuário
  * 
  * @param {Object} props Propriedades do componente
  * @param {number} props.index Índice do cartão
@@ -41,12 +40,15 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(card.fileUrl || '');
   const [urlValidationError, setUrlValidationError] = useState('');
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [isLocked, setIsLocked] = useState(!!card.fileHandle);
-  
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [forceRender, setForceRender] = useState(0);
+
   // Refs
   const fileInputRef = useRef(null);
   const dropAreaRef = useRef(null);
+  const previewImgRef = useRef(null);
   
   // Hook customizado para upload de arquivos
   const { 
@@ -60,101 +62,128 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
   // Atualiza preview quando a URL do cartão muda
   useEffect(() => {
     if (card.fileUrl) {
-      setPreviewUrl(card.fileUrl);
       setUrlValidationError('');
+      setPreviewError(false);
+      setLoadingPreview(true);
+      setPreviewUrl(card.fileUrl);
     } else {
       setPreviewUrl('');
     }
-  }, [card.fileUrl]);
+  }, [card.fileUrl, forceRender]);
 
-  // Atualiza status de bloqueio quando fileHandle muda
+  // Monitora drag & drop para melhorar UX
   useEffect(() => {
-    setIsLocked(!!card.fileHandle);
-  }, [card.fileHandle]);
-
-  // Alterna o estado de bloqueio do card
-  const toggleLock = useCallback(() => {
-    if (!card.fileHandle) {
-      // Não pode bloquear um card sem fileHandle
-      alert.warning(`O Card ${index + 1} precisa ter um arquivo válido para ser bloqueado`, {
-        position: 'bottom-right',
-        autoCloseTime: 3000
-      });
-      return;
-    }
-    
-    setIsLocked(prev => !prev);
-    
-    // Mostrar alerta apropriado
-    setTimeout(() => {
-      if (isLocked) {
-        alert.info(`Card ${index + 1} desbloqueado. Agora você pode modificar o arquivo.`, {
+    const handleGlobalDragEnter = (e) => {
+      // Se o usuário está arrastando arquivos e o método atual não é 'file'
+      if (e.dataTransfer.types.includes('Files') && uploadMethod !== 'file') {
+        // Mude automaticamente para o método de arquivo
+        setUploadMethod('file');
+        // Mostre um toast informativo
+        alert.info(`Modo de upload de arquivo ativado para o Card ${index + 1}`, {
           position: 'bottom-right',
-          autoCloseTime: 3000
-        });
-      } else {
-        alert.success(`Card ${index + 1} bloqueado. O arquivo está protegido contra alterações.`, {
-          position: 'bottom-right',
-          autoCloseTime: 3000
+          autoCloseTime: 2000
         });
       }
-    }, 0);
-  }, [card.fileHandle, isLocked, index, alert]);
-
-  // Manipuladores de arrastar e soltar
-  const handleDragEnter = useCallback((e) => {
-    if (isLocked) return;
+    };
     
+    document.addEventListener('dragenter', handleGlobalDragEnter);
+    
+    return () => {
+      document.removeEventListener('dragenter', handleGlobalDragEnter);
+    };
+  }, [uploadMethod, index, alert]);
+
+  // Manipuladores de arrastar e soltar aprimorados
+  const handleDragEnter = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
-  }, [isLocked]);
+    
+    // Feedback visual na área de drop
+    if (dropAreaRef.current) {
+      dropAreaRef.current.classList.add(styles.activeDrop);
+    }
+  }, []);
 
   const handleDragLeave = useCallback((e) => {
-    if (isLocked) return;
-    
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-  }, [isLocked]);
+    
+    // Remover feedback visual
+    if (dropAreaRef.current) {
+      dropAreaRef.current.classList.remove(styles.activeDrop);
+    }
+  }, []);
 
   const handleDragOver = useCallback((e) => {
-    if (isLocked) return;
-    
     e.preventDefault();
     e.stopPropagation();
     if (!isDragging) {
       setIsDragging(true);
     }
-  }, [isDragging, isLocked]);
+  }, [isDragging]);
 
   const handleDrop = useCallback((e) => {
-    if (isLocked) return;
-    
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
     
+    // Remover feedback visual
+    if (dropAreaRef.current) {
+      dropAreaRef.current.classList.remove(styles.activeDrop);
+    }
+    
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFileUpload({ target: { files: e.dataTransfer.files } });
     }
-  }, [isLocked]);
+  }, []);
 
-  // Manipulador de upload de arquivo - Corrigido
-  const handleFileUpload = useCallback(async (event) => {
-    // Se o card estiver bloqueado, impedir upload
-    if (isLocked) {
-      setTimeout(() => {
-        alert.warning(`Card ${index + 1} está bloqueado. Desbloqueie para alterar o arquivo.`, {
-          position: 'top-center',
-          autoCloseTime: 3000
-        });
-      }, 0);
-      return;
+  // Validação de tipo de arquivo
+  const validateFileType = useCallback((file) => {
+    const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const acceptedVideoTypes = ['video/mp4', 'video/webm'];
+    
+    const isAcceptedType = [...acceptedImageTypes, ...acceptedVideoTypes].includes(file.type);
+    
+    if (!isAcceptedType) {
+      alert.error(`Tipo de arquivo não suportado: ${file.type}. Use JPEG, PNG, GIF, WebP, MP4 ou WebM.`, {
+        position: 'top-center',
+        autoCloseTime: 5000
+      });
+      return false;
     }
     
+    // Verificar tamanho (limite de 10MB para imagens, 30MB para vídeos)
+    const isImage = acceptedImageTypes.includes(file.type);
+    const maxSize = isImage ? 10 * 1024 * 1024 : 30 * 1024 * 1024;
+    
+    if (file.size > maxSize) {
+      const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+      const limit = isImage ? '10MB' : '30MB';
+      alert.error(`Arquivo muito grande: ${sizeInMB}MB. O limite para ${isImage ? 'imagens' : 'vídeos'} é ${limit}.`, {
+        position: 'top-center',
+        autoCloseTime: 5000
+      });
+      return false;
+    }
+    
+    return true;
+  }, [alert]);
+
+  // Manipulador de upload de arquivo com feedback visual e controle de progresso
+  const handleFileUpload = useCallback(async (event) => {
     const file = event.target.files[0];
     if (!file) return;
+    
+    // Validar o tipo de arquivo antes de iniciar upload
+    if (!validateFileType(file)) {
+      // Limpar input de arquivo
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
 
     try {
       // Determina o tipo de arquivo (imagem ou vídeo)
@@ -164,53 +193,70 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       // Cria preview local temporário
       const tempUrl = URL.createObjectURL(file);
       setPreviewUrl(tempUrl);
+      setLoadingPreview(true);
+      setPreviewError(false);
       
-      // Usar try/catch para lidar com falhas de upload graciosamente
-      let uploadResult;
-      try {
-        // Mostrar alerta de progresso
-        setTimeout(() => {
-          alert.info(`Enviando ${fileType === 'image' ? 'imagem' : 'vídeo'} para o Card ${index + 1}...`, {
-            position: 'bottom-right',
-            autoCloseTime: 3000
-          });
-        }, 0);
-        
-        // Tentar upload
-        uploadResult = await uploadToAzure(file);
-      } catch (uploadError) {
-        console.error('Upload falhou, usando fallback:', uploadError);
-        
-        // Criar resultado de fallback usando URL temporária
-        uploadResult = {
-          url: tempUrl,
-          type: fileType,
-          name: `fallback-${Date.now()}`
-        };
-        
-        setTimeout(() => {
-          alert.warning(`Usando preview local para o Card ${index + 1} devido a problemas de upload`, {
-            position: 'bottom-right',
-            autoCloseTime: 4000
-          });
-        }, 0);
-      }
+      // Função para atualizar o progresso
+      const updateProgress = (progress) => {
+        setUploadProgress(progress);
+      };
       
-      // Atualizar card com URL e fileHandle
-      updateCard(index, 'fileUrl', uploadResult.url || tempUrl);
-      updateCard(index, 'fileType', uploadResult.type || fileType);
-      updateCard(index, 'fileHandle', uploadResult.name || `file-${Date.now()}`);
+      // Mostrar feedback visual de carregamento
+      dropAreaRef.current?.classList.add(styles.uploading);
       
-      // Auto-bloquear o card após upload bem-sucedido
-      setIsLocked(true);
-      
-      // Alerta de sucesso
+      // Mostrar alerta de progresso
+      const progressToastId = `upload-progress-${index}-${Date.now()}`;
       setTimeout(() => {
-        alert.success(`Arquivo configurado para o Card ${index + 1}!`, {
+        alert.info(`Enviando ${fileType === 'image' ? 'imagem' : 'vídeo'} para o Card ${index + 1}...`, {
+          id: progressToastId,
           position: 'bottom-right',
-          autoCloseTime: 3000
+          autoCloseTime: false,
+          progress: 0
         });
       }, 0);
+      
+      // Upload do arquivo
+      const uploadResult = await uploadToAzure(file, updateProgress);
+    
+      if (!uploadResult || !uploadResult.url) {
+        throw new Error("Upload falhou: nenhuma URL retornada.");
+      }
+    
+      console.log("Upload concluído!", uploadResult);
+    
+      // Formatar filename mais amigável para exibição
+      const displayName = file.name.length > 20 
+        ? file.name.substring(0, 18) + '...' + file.name.slice(-8)
+        : file.name;
+      
+      // Atualiza o card com URL e metadados
+      updateCard(index, 'fileUrl', uploadResult.url);
+      updateCard(index, 'fileType', fileType);
+      updateCard(index, 'fileName', displayName);
+      updateCard(index, 'fileSize', file.size);
+      updateCard(index, 'uploadDate', new Date().toISOString());
+      updateCard(index, 'hasFile', true);
+      
+      // Atualiza preview local
+      setPreviewUrl(uploadResult.url);
+      
+      // Forçar re-renderização para garantir que a imagem seja atualizada
+      setTimeout(() => {
+        setPreviewUrl(uploadResult.url + '?t=' + Date.now());
+        setForceRender(prev => prev + 1);
+      }, 100);
+      
+      // Alerta de sucesso com animação
+      alert.success(`Arquivo "${displayName}" configurado para o Card ${index + 1}!`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      
+      // Adicionar classe para animação de sucesso
+      dropAreaRef.current?.classList.add(styles.uploadSuccess);
+      setTimeout(() => {
+        dropAreaRef.current?.classList.remove(styles.uploadSuccess);
+      }, 1000);
       
       // Salvar o rascunho após o upload
       if (typeof window.saveCurrentDraft === 'function') {
@@ -219,37 +265,37 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     } catch (error) {
       console.error('Erro no processamento do arquivo:', error);
       
+      // Adicionar classe para animação de erro
+      dropAreaRef.current?.classList.add(styles.uploadError);
       setTimeout(() => {
-        alert.error(`Erro no upload: ${error.message || 'Erro desconhecido'}`, {
-          position: 'top-center',
-          autoCloseTime: 5000
-        });
-      }, 0);
+        dropAreaRef.current?.classList.remove(styles.uploadError);
+      }, 1000);
+      
+      alert.error(`Erro no upload: ${error.message || 'Erro desconhecido'}`, {
+        position: 'top-center',
+        autoCloseTime: 5000
+      });
+      
+      setPreviewError(true);
     } finally {
       // Limpa input de arquivo
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      setLoadingPreview(false);
+      // Remover classe de upload
+      dropAreaRef.current?.classList.remove(styles.uploading);
+      setUploadProgress(0);
     }
-  }, [index, updateCard, uploadToAzure, alert, isLocked]);
+  }, [index, updateCard, uploadToAzure, alert, validateFileType]);
 
   // Abre seletor de arquivos
   const handleFileInputClick = useCallback(() => {
-    if (isLocked) {
-      setTimeout(() => {
-        alert.warning(`Card ${index + 1} está bloqueado. Desbloqueie para alterar o arquivo.`, {
-          position: 'top-center',
-          autoCloseTime: 3000
-        });
-      }, 0);
-      return;
-    }
-    
     resetUpload();
     fileInputRef.current?.click();
-  }, [resetUpload, isLocked, index, alert]);
+  }, [resetUpload]);
 
-  // Validação de URL
+  // Validação de URL aprimorada com detecção de tipo
   const validateUrl = useCallback((url) => {
     if (!url) {
       setUrlValidationError('URL é obrigatória');
@@ -258,161 +304,238 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     
     try {
       new URL(url);
+      
+      // Validar se a URL termina com uma extensão de imagem/vídeo conhecida
+      const fileExtension = url.split('.').pop().toLowerCase();
+      const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+      const videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
+      
+      const isImage = imageExtensions.includes(fileExtension);
+      const isVideo = videoExtensions.includes(fileExtension);
+      
+      // Se conseguirmos detectar o tipo, atualizar automaticamente
+      if (isImage) {
+        updateCard(index, 'fileType', 'image');
+      } else if (isVideo) {
+        updateCard(index, 'fileType', 'video');
+      }
+      
       setUrlValidationError('');
       return true;
     } catch (e) {
       setUrlValidationError('URL inválida. Inclua "https://" ou "http://"');
       return false;
     }
-  }, []);
+  }, [index, updateCard]);
 
-  // Manipulador de mudança de URL - Corrigido
+  // Manipulador de mudança de URL
   const handleUrlChange = useCallback((e) => {
-    if (isLocked) {
-      setTimeout(() => {
-        alert.warning(`Card ${index + 1} está bloqueado. Desbloqueie para alterar a URL.`, {
-          position: 'top-center',
-          autoCloseTime: 3000
-        });
-      }, 0);
-      return;
-    }
-    
     const url = e.target.value;
     updateCard(index, 'fileUrl', url);
     validateUrl(url);
     setUploadMethod('url');
-  }, [index, updateCard, validateUrl, isLocked, alert]);
-  
-  // Copiar fileHandle para a área de transferência
-  const copyFileHandle = useCallback(() => {
-    if (card.fileHandle) {
-      navigator.clipboard.writeText(card.fileHandle)
-        .then(() => {
-          setCopySuccess(true);
-          
-          // Mostrar alerta de sucesso
-          setTimeout(() => {
-            alert.success(`FileHandle do Card ${index + 1} copiado!`, {
-              position: 'bottom-right',
-              autoCloseTime: 2000
-            });
-          }, 0);
-          
-          setTimeout(() => setCopySuccess(false), 2000);
-        })
-        .catch(err => {
-          console.error('Erro ao copiar:', err);
-          
-          // Mostrar alerta de erro
-          setTimeout(() => {
-            alert.error('Falha ao copiar o FileHandle', {
-              position: 'bottom-right',
-              autoCloseTime: 3000
-            });
-          }, 0);
-        });
+    
+    // Reset o preview error quando a URL mudar
+    setPreviewError(false);
+    
+    // Se a URL estiver vazia, limpar outros campos relacionados
+    if (!url) {
+      updateCard(index, 'hasFile', false);
     }
-  }, [card.fileHandle, index, alert]);
+  }, [index, updateCard, validateUrl]);
 
   // Usa URL de teste
   const handleTestUrlClick = useCallback(() => {
-    if (isLocked) {
-      setTimeout(() => {
-        alert.warning(`Card ${index + 1} está bloqueado. Desbloqueie para usar URL de teste.`, {
-          position: 'top-center',
-          autoCloseTime: 3000
-        });
-      }, 0);
-      return;
-    }
+    // Mostra alerta de carregamento
+    const loadingToastId = `loading-test-url-${index}`;
+    alert.info(`Carregando URL de teste para o Card ${index + 1}...`, {
+      id: loadingToastId,
+      position: 'bottom-right',
+      autoCloseTime: false,
+    });
     
+    // Array com URLs de teste
     const testUrls = [
       "https://images.sympla.com.br/64999ce2a7792.png"
     ];
-        
+    
+    // Seleciona uma URL baseada no índice do card (para consistência)
     const newUrl = testUrls[index % testUrls.length];
-    updateCard(index, 'fileUrl', newUrl);
-    updateCard(index, 'fileType', 'image');
     
-    // Gerar um fileHandle único baseado na URL
-    const fileHandle = `4::aW1hZ2UvcG5n:ARZVIx22CJrySgCV1z6a-rpH59lh48wBU0WF9nb69JFl--hu-GopMfp3KCBj6pSk-pMHDY_HYymIt5H7_YE1LfP4cJkgno53JFuUMZj5FePxcQ:e:${Date.now()}:${Math.floor(Math.random() * 999999999)}:${Math.floor(Math.random() * 999999999)}:ARblBi-NqQpu5YdU080`;
-    updateCard(index, 'fileHandle', fileHandle);
-    
-    setUploadMethod('url');
-    validateUrl(newUrl);
-    
-    // Auto-bloquear o card após aplicar URL de teste
-    setIsLocked(true);
-    
-    // Mostrar alerta de sucesso
+    // Simular um pequeno atraso para uma experiência mais realista
     setTimeout(() => {
-      alert.success(`URL de teste aplicada ao Card ${index + 1}`, {
-        position: 'bottom-right',
-        autoCloseTime: 3000
-      });
-    }, 0);
-    
-    // Salvar o rascunho após a alteração
-    if (typeof window.saveCurrentDraft === 'function') {
-      window.saveCurrentDraft();
-    }
-  }, [index, updateCard, validateUrl, alert, isLocked]);
-
-  // Limpa URL - Corrigido
-  const handleClearUrl = useCallback(() => {
-    if (isLocked) {
-      const willUnlock = window.confirm(`O Card ${index + 1} está bloqueado. Deseja desbloqueá-lo e limpar?`);
-      if (!willUnlock) return;
-      setIsLocked(false);
-    } else if (card.fileUrl && !window.confirm(`Tem certeza que deseja limpar a URL e o fileHandle do Card ${index + 1}?`)) {
-      return;
-    }
-    
-    // Limpar a URL e fileHandle
-    updateCard(index, 'fileUrl', '');
-    updateCard(index, 'fileHandle', '');
-    
-    // Limpar o preview
-    setPreviewUrl('');
-    
-    // Resetar o input de arquivo
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    
-    // Resetar quaisquer erros
-    setUrlValidationError('');
-    resetUpload && resetUpload();
-    
-    // Mostrar alerta de informação
-    setTimeout(() => {
-      alert.info(`Card ${index + 1} foi limpo`, {
-        position: 'bottom-right',
-        autoCloseTime: 3000
-      });
-    }, 0);
-    
-    // Salvar o rascunho após a alteração
-    if (typeof window.saveCurrentDraft === 'function') {
-      window.saveCurrentDraft();
-    }
-  }, [index, updateCard, resetUpload, card.fileUrl, alert, isLocked]);
-
-  // Muda tipo de arquivo
-  const handleFileTypeChange = useCallback((e) => {
-    if (isLocked) {
+      updateCard(index, 'fileUrl', newUrl);
+      updateCard(index, 'fileType', 'image');
+      updateCard(index, 'fileName', `imagem-teste-${index + 1}.png`);
+      updateCard(index, 'fileSize', 124500);
+      updateCard(index, 'uploadDate', new Date().toISOString());
+      updateCard(index, 'hasFile', true);
+      
+      setUploadMethod('url');
+      validateUrl(newUrl);
+      
+      // Mostrar alerta de sucesso
       setTimeout(() => {
-        alert.warning(`Card ${index + 1} está bloqueado. Desbloqueie para alterar o tipo de arquivo.`, {
-          position: 'top-center',
+        alert.success(`URL de teste aplicada ao Card ${index + 1}`, {
+          position: 'bottom-right',
           autoCloseTime: 3000
         });
       }, 0);
+      
+      // Salvar o rascunho após a alteração
+      if (typeof window.saveCurrentDraft === 'function') {
+        window.saveCurrentDraft();
+      }
+    }, 800); // Pequeno atraso para feedback visual
+  }, [index, updateCard, validateUrl, alert]);
+
+  // Limpa arquivo/URL com confirmação simplificada
+  const handleClearFile = useCallback(() => {
+    // Sem verificação de bloqueio, conforme solicitado
+    if (card.fileUrl && !window.confirm(`Tem certeza que deseja remover o arquivo do Card ${index + 1}?`)) {
       return;
     }
     
-    updateCard(index, 'fileType', e.target.value);
-  }, [index, updateCard, isLocked, alert]);
+    // Animação de limpeza
+    const previewSection = document.querySelector(`#preview-section-${index}`);
+    if (previewSection) {
+      previewSection.classList.add(styles.clearingAnimation);
+    }
+    
+    // Pequeno atraso para a animação ser visível
+    setTimeout(() => {
+      // Limpar a URL e arquivo
+      updateCard(index, 'fileUrl', '');
+      updateCard(index, 'fileName', '');
+      updateCard(index, 'fileSize', null);
+      updateCard(index, 'hasFile', false);
+      
+      // Limpar o preview
+      setPreviewUrl('');
+      
+      // Resetar o input de arquivo
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
+      // Resetar quaisquer erros
+      setUrlValidationError('');
+      setPreviewError(false);
+      resetUpload && resetUpload();
+      
+      // Mostrar alerta de informação
+      setTimeout(() => {
+        alert.info(`Card ${index + 1} foi limpo`, {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+      }, 0);
+      
+      // Salvar o rascunho após a alteração
+      if (typeof window.saveCurrentDraft === 'function') {
+        window.saveCurrentDraft();
+      }
+      
+      // Remover classe de animação
+      if (previewSection) {
+        previewSection.classList.remove(styles.clearingAnimation);
+      }
+    }, 300);
+  }, [index, updateCard, resetUpload, card.fileUrl, alert]);
+
+  // Muda tipo de arquivo com feedback visual
+  const handleFileTypeChange = useCallback((e) => {
+    const newType = e.target.value;
+    
+    // Verificar se o tipo é compatível com a extensão do arquivo se tivermos fileName
+    if (card.fileName) {
+      const extension = card.fileName.split('.').pop().toLowerCase();
+      const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+      const videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
+      
+      if (newType === 'image' && videoExtensions.includes(extension)) {
+        alert.warning(`A extensão .${extension} geralmente é um formato de vídeo.`, {
+          position: 'bottom-right',
+          autoCloseTime: 4000
+        });
+      } else if (newType === 'video' && imageExtensions.includes(extension)) {
+        alert.warning(`A extensão .${extension} geralmente é um formato de imagem.`, {
+          position: 'bottom-right',
+          autoCloseTime: 4000
+        });
+      }
+    }
+    
+    updateCard(index, 'fileType', newType);
+    
+    // Feedback visual sobre a alteração
+    setTimeout(() => {
+      alert.info(`Tipo de arquivo alterado para ${newType === 'image' ? 'imagem' : 'vídeo'} no Card ${index + 1}`, {
+        position: 'bottom-right',
+        autoCloseTime: 2000
+      });
+    }, 0);
+  }, [index, updateCard, alert, card.fileName]);
+
+  // Verificar URL para melhorar feedback ao usuário
+  const checkUrl = useCallback(() => {
+    if (!card.fileUrl) return;
+    
+    // Mostrar alerta de verificação
+    const checkingToastId = `checking-url-${index}`;
+    alert.info(`Verificando URL para o Card ${index + 1}...`, {
+      id: checkingToastId,
+      position: 'bottom-right',
+      autoCloseTime: false
+    });
+    
+    // Criar um objeto Image para verificar se a URL carrega
+    const img = new Image();
+    img.onload = () => {
+      // URL funciona para imagem
+      alert.success(`URL verificada com sucesso para o Card ${index + 1}!`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      setPreviewError(false);
+    };
+    
+    img.onerror = () => {
+      // Falha ao carregar imagem, verificar se é vídeo
+      const video = document.createElement('video');
+      
+      video.onloadeddata = () => {
+        // URL funciona para vídeo
+        alert.success(`URL de vídeo verificada com sucesso para o Card ${index + 1}!`, {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+        setPreviewError(false);
+        
+        // Atualizar o tipo para vídeo se o usuário tinha selecionado imagem
+        if (card.fileType !== 'video') {
+          updateCard(index, 'fileType', 'video');
+          alert.info(`Tipo de arquivo atualizado para vídeo no Card ${index + 1}`, {
+            position: 'bottom-right',
+            autoCloseTime: 3000
+          });
+        }
+      };
+      
+      video.onerror = () => {
+        // URL não funciona para imagem nem vídeo
+        alert.error(`A URL fornecida no Card ${index + 1} não parece ser válida. Verifique se o endereço está correto.`, {
+          position: 'bottom-right',
+          autoCloseTime: 5000
+        });
+        setPreviewError(true);
+      };
+      
+      video.src = card.fileUrl;
+    };
+    
+    img.src = card.fileUrl;
+  }, [card.fileUrl, card.fileType, index, alert, updateCard]);
 
   // Obtém ícone do tipo de arquivo
   const getFileTypeIcon = useCallback(() => {
@@ -421,65 +544,66 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       <FiVideo size={20} className={styles.typeIcon} />;
   }, [card.fileType]);
 
-  // Classe CSS do cartão baseada no índice
-  const cardClass = `${styles.cardContainer} ${index % 2 === 0 ? styles.evenCard : styles.oddCard} ${isLocked ? styles.lockedCard : ''}`;
+  // Atualização do status da imagem de preview
+  const handlePreviewLoad = useCallback(() => {
+    setLoadingPreview(false);
+    setPreviewError(false);
+  }, []);
+
+  const handlePreviewError = useCallback(() => {
+    setLoadingPreview(false);
+    setPreviewError(true);
+    
+    // Mostrar alerta sobre erro de carregamento
+    alert.warning(`Não foi possível carregar a prévia para o Card ${index + 1}. Verifique se a URL é válida.`, {
+      position: 'bottom-right',
+      autoCloseTime: 4000
+    });
+  }, [index, alert]);
+
+  // Classe CSS do cartão baseada no índice e status
+  const cardClass = `${styles.cardContainer} ${index % 2 === 0 ? styles.evenCard : styles.oddCard} ${card.fileUrl ? styles.hasContent : ''}`;
 
   return (
     <div className={cardClass}>
-      <div className={styles.cardHeader}>
-        <div className={styles.cardNumber}>
-          Cartão {index + 1}
-          {isLocked && <FiLock size={14} className={styles.cardLockIcon} />}
+      {/* Progresso de upload animado */}
+      {uploadProgress > 0 && (
+        <div className={`${styles.progressIndicator} ${styles.active}`}>
+          <div 
+            className={styles.progressBar} 
+            style={{ width: `${uploadProgress}%` }}
+          ></div>
         </div>
-        
-        {card.fileHandle && (
-          <div className={styles.fileHandleIndicator}>
-            <FiCheck size={14} className={styles.fileHandleIcon} />
-            <span>
-              FileHandle: {card.fileHandle.length > 15 
-                ? card.fileHandle.substring(0, 15) + '...' 
-                : card.fileHandle
-              }
-            </span>
-            <Button
-              variant="icon"
-              size="small"
-              color="primary"
-              onClick={copyFileHandle}
-              title="Copiar FileHandle"
-              iconLeft={<FiCopy size={14} />}
-            />
-            
-            {/* Botão de alternar bloqueio */}
-            <Button
-              variant="icon"
-              size="small"
-              color={isLocked ? "warning" : "secondary"}
-              onClick={toggleLock}
-              title={isLocked ? "Desbloquear card" : "Bloquear card"}
-              iconLeft={isLocked ? <FiLock size={14} /> : <FiUnlock size={14} />}
-            />
+      )}
+      
+      <div className={styles.cardHeader}>
+        <div className={styles.cardNumberWrapper}>
+          <div className={styles.cardNumber}>
+            Cartão {index + 1}
           </div>
-        )}
-        
+          
+          {card.fileName && (
+            <div className={styles.fileNameDisplay} title={card.fileName}>
+              {card.fileName}
+            </div>
+          )}
+        </div>
+
         <div className={styles.fileTypeSelect}>
           <select 
             className={styles.select}
             value={card.fileType || 'image'}
             onChange={handleFileTypeChange}
             aria-label="Tipo de mídia"
-            disabled={isLocked}
           >
             <option value="image">Imagem</option>
             <option value="video">Vídeo</option>
           </select>
           <div className={styles.fileTypeIconWrapper}>
             {getFileTypeIcon()}
-            {isLocked && (
-              <div className={styles.lockIndicator}>
-                <FiLock size={12} />
-              </div>
-            )}
+          </div>
+          <div className={styles.fileTypeInfo} title="Compatibilidade de arquivos">
+            <FiInfo size={14} />
           </div>
         </div>
       </div>
@@ -488,153 +612,215 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
         <div className={styles.uploadMethods}>
           <button 
             className={`${styles.methodButton} ${uploadMethod === 'url' ? styles.activeMethod : ''}`}
-            onClick={() => !isLocked && setUploadMethod('url')}
-            disabled={isLocked}
+            onClick={() => setUploadMethod('url')}
+            aria-label="Mudar para método URL"
           >
             <FiLink size={16} />
             <span>URL</span>
           </button>
           <button 
             className={`${styles.methodButton} ${uploadMethod === 'file' ? styles.activeMethod : ''}`}
-            onClick={() => !isLocked && setUploadMethod('file')}
-            disabled={isLocked}
+            onClick={() => setUploadMethod('file')}
+            aria-label="Mudar para método Upload"
           >
             <FiUploadCloud size={16} />
             <span>Upload</span>
           </button>
         </div>
-        
-        {uploadMethod === 'url' ? (
-          <div className={styles.formGroup}>
-            <Input
-              label="URL do Arquivo"
-              type="url"
-              clearable
-              value={card.fileUrl || ''}
-              onChange={handleUrlChange}
-              onClear={handleClearUrl}
-              placeholder="https://exemplo.com/imagem.jpg"
-              rightElement={
-                <div className={styles.urlActions}>
-                  <Button
-                    variant="text"
-                    size="small"
-                    color="primary"
-                    onClick={handleTestUrlClick}
-                    iconLeft={<FiTrendingUp size={14} />}
-                    disabled={isLocked}
-                  >
-                    Testar URL
-                  </Button>
-                </div>
-              }
-              error={urlValidationError}
-              hintMessage="URL pública da imagem ou vídeo para exibir no carrossel"
-              disabled={isLocked}
-            />
-          </div>
+
+        {!previewUrl ? (
+          uploadMethod === 'url' ? (
+            <div className={styles.formGroup}>
+              <div className={styles.uploadHeader}>
+                <label className={styles.label}>URL do Arquivo</label>
+              </div>
+              
+              <Input
+                type="url"
+                clearable
+                value={card.fileUrl || ''}
+                onChange={handleUrlChange}
+                onClear={handleClearFile}
+                placeholder="https://exemplo.com/imagem.jpg"
+                error={urlValidationError}
+                aria-label="URL do arquivo de mídia"
+              />
+              
+              <div className={styles.urlActions}>
+                <Button
+                  variant="text"
+                  size="small"
+                  color="primary"
+                  onClick={handleTestUrlClick}
+                  iconLeft={<FiTrendingUp size={14} />}
+                  className={styles.testUrlButton}
+                >
+                  Usar URL de teste
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.formGroup}>
+              <div className={styles.uploadHeader}>
+                <label className={styles.label}>{previewUrl ? 'Visualização do Arquivo' : 'Upload de Arquivo'}</label>
+              </div>
+              
+              <div 
+                className={`${styles.dropArea} ${isDragging ? styles.dragging : ''}`}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                ref={dropAreaRef}
+                onClick={handleFileInputClick}
+                role="button"
+                tabIndex={0}
+                aria-label="Área de arrastar e soltar"
+              >
+                {isUploading ? (
+                  <>
+                    <div className={styles.uploadingSpinner}></div>
+                    <p className={styles.dropText}>Enviando arquivo...</p>
+                    <p className={styles.dropHint}>
+                      {uploadProgress > 0 ? `${Math.round(uploadProgress)}% concluído` : 'Preparando upload...'}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <FiUploadCloud size={32} className={styles.uploadIcon} />
+                    <p className={styles.dropText}>
+                      Arraste um arquivo ou clique para escolher
+                    </p>
+                    <div className={styles.dropHintEnhanced}>
+                      <div className={styles.formatBadges}>
+                        <span className={styles.formatBadge}>JPEG</span>
+                        <span className={styles.formatBadge}>PNG</span>
+                        <span className={styles.formatBadge}>MP4</span>
+                      </div>
+                      <span className={styles.sizeLimit}>
+                        Limite: {card.fileType === 'image' ? '10MB' : '30MB'}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+                disabled={isUploading}
+                aria-hidden="true"
+              />
+            </div>
+          )
         ) : (
           <div className={styles.formGroup}>
-            <label className={styles.label}>Upload de Arquivo</label>
+            <div className={styles.uploadHeader}>
+              <label className={styles.label}>Visualização do Arquivo</label>
+            </div>
             <div 
-              className={`${styles.dropArea} ${isDragging ? styles.dragging : ''} ${isLocked ? styles.lockedDropArea : ''}`}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              ref={dropAreaRef}
-              onClick={handleFileInputClick}
-              role="button"
-              tabIndex={isLocked ? -1 : 0}
-              aria-label={isLocked ? "Área de upload bloqueada" : "Área de arrastar e soltar"}
-            >
-              {isLocked ? (
-                <>
-                  <FiLock size={32} className={styles.lockIcon} />
-                  <p className={styles.dropText}>Card bloqueado</p>
-                  <p className={styles.dropHint}>
-                    Desbloqueie para modificar o arquivo
-                  </p>
-                </>
+              className={`${styles.dropArea} ${styles.previewContent} ${loadingPreview ? styles.loading : ''} ${previewError ? styles.error : ''}`}
+              id={`preview-section-${index}`}>
+              {loadingPreview && (
+                <div className={styles.previewLoader}>
+                  <div className={styles.spinner}></div>
+                  <p>Carregando...</p>
+                </div>
+              )}
+              
+              {previewError && (
+                <div className={styles.previewErrorMessage}>
+                  <FiAlertCircle size={32} />
+                  <p>Não foi possível carregar a mídia</p>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    color="secondary"
+                    onClick={() => {
+                      setPreviewError(false);
+                      setLoadingPreview(true);
+                      const imgEl = previewImgRef.current;
+                      if (imgEl) {
+                        imgEl.src = card.fileUrl + '?t=' + Date.now();
+                      }
+                    }}
+                    iconLeft={<FiRefreshCw size={14} />}
+                  >
+                    Tentar novamente
+                  </Button>
+                </div>
+              )}
+              
+              {/* Botão de remover estilizado no canto superior direito */}
+              <button
+                className={styles.removeMediaButton}
+                onClick={handleClearFile}
+                aria-label="Remover mídia"
+                title="Remover mídia"
+              >
+                <FiX size={18} />
+              </button>
+              
+              {card.fileType === 'image' ? (
+                <img 
+                  ref={previewImgRef}
+                  src={previewUrl} 
+                  alt={`Pré-visualização do Cartão ${index + 1}`} 
+                  className={`${styles.previewImage} ${loadingPreview ? styles.hidden : ''} ${previewError ? styles.hidden : ''}`}
+                  loading="lazy"
+                  onLoad={handlePreviewLoad}
+                  onError={handlePreviewError}
+                />
               ) : (
-                <>
-                  <FiUploadCloud size={32} className={styles.uploadIcon} />
-                  <p className={styles.dropText}>
-                    {isUploading ? 'Enviando...' : 'Arraste um arquivo ou clique para escolher'}
-                  </p>
-                  <p className={styles.dropHint}>
-                    Formatos: JPEG, PNG, GIF, WebP, MP4, WebM
-                  </p>
-                </>
+                <div className={styles.videoWrapper}>
+                  <video 
+                    src={previewUrl} 
+                    className={`${styles.previewVideo} ${loadingPreview ? styles.hidden : ''} ${previewError ? styles.hidden : ''}`}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    onLoadedData={handlePreviewLoad}
+                    onError={handlePreviewError}
+                    poster="/static/video-poster.jpg"
+                  />
+                  {card.fileType === 'video' && !previewError && !loadingPreview && (
+                    <div className={styles.videoOverlay}>
+                      <div className={styles.videoFormatInfo}>
+                        <span>MP4, WebM</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
-              onChange={handleFileUpload}
-              style={{ display: 'none' }}
-              disabled={isUploading || isLocked}
-            />
           </div>
         )}
-        
+
         {uploadError && (
-          <div className={styles.errorMessage}>
-            <FiAlertCircle size={16} />
-            <span>{uploadError}</span>
+          <div className={styles.errorMessageContainer}>
+            <div className={styles.errorMessage}>
+              <FiAlertCircle size={16} />
+              <span>{uploadError}</span>
+            </div>
+            <Button
+              variant="text"
+              size="small"
+              color="negative"
+              onClick={resetUpload}
+              iconLeft={<FiRefreshCw size={14} />}
+            >
+              Tentar novamente
+            </Button>
           </div>
         )}
       </div>
       
       {previewUrl && (
-        <div className={styles.previewSection}>
-          <div className={styles.previewHeader}>
-            <span className={styles.previewTitle}>Pré-visualização</span>
-            {card.fileUrl && <FiCheck size={16} className={styles.checkIcon} />}
-            {isLocked && <FiLock size={16} className={styles.lockIcon} />}
-          </div>
-          <div className={styles.previewContent}>
-            {card.fileType === 'image' ? (
-              <img 
-                src={previewUrl} 
-                alt={`Pré-visualização do Cartão ${index + 1}`} 
-                className={styles.previewImage}
-                loading="lazy"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzk5OSI+SW1hZ2VtIG7Do28gZGlzcG9uw612ZWw8L3RleHQ+PC9zdmc+';
-                  alert.warning('Não foi possível carregar a imagem de preview', {
-                    position: 'bottom-right',
-                    autoCloseTime: 3000
-                  });
-                }}
-              />
-            ) : (
-              <video 
-                src={previewUrl} 
-                className={styles.previewVideo} 
-                controls
-                preload="metadata"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  // Mostrar mensagem de erro
-                  e.target.parentNode.innerHTML += `
-                    <div class="${styles.videoError}">
-                      <FiAlertCircle size={24} />
-                      <p>Não foi possível carregar o vídeo</p>
-                    </div>
-                  `;
-                  alert.warning('Não foi possível carregar o vídeo de preview', {
-                    position: 'bottom-right',
-                    autoCloseTime: 3000
-                  });
-                }}
-              />
-            )}
-          </div>
-          {card.fileUrl && (
-            <div className={styles.previewActions}>
+        <div className={styles.formGroup}>
+          <div className={styles.previewActions}>
+            <div className={styles.previewActionGroup}>
               <Button 
                 variant="text"
                 size="small"
@@ -644,6 +830,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
                 target="_blank" 
                 rel="noopener noreferrer"
                 iconLeft={<FiExternalLink size={14} />}
+                title="Abrir a mídia em uma nova aba"
               >
                 Ver original
               </Button>
@@ -652,29 +839,30 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
                 variant="text"
                 size="small"
                 color="negative"
-                onClick={handleClearUrl}
-                iconLeft={<FiX size={14} />}
-                disabled={isLocked}
+                onClick={handleClearFile}
+                iconLeft={<FiTrash2 size={14} />}
+                title="Remover mídia"
               >
                 Remover
               </Button>
-              
-              {/* Botão de alternar bloqueio */}
-              <Button
-                variant="text"
-                size="small"
-                color={isLocked ? "warning" : "secondary"}
-                onClick={toggleLock}
-                iconLeft={isLocked ? <FiUnlock size={14} /> : <FiLock size={14} />}
-              >
-                {isLocked ? "Desbloquear" : "Bloquear"}
-              </Button>
             </div>
-          )}
+            
+            {card.uploadDate && (
+              <div className={styles.mediaDetailsFooter}>
+                <div className={styles.uploadDetails}>
+                  <span className={styles.uploadTimestamp}>
+                    {`${card.fileName || 'Arquivo'} • `}
+                    {`${((card.fileSize || 0) / 1024).toFixed(1)} KB`}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-export default CardUploadInput;
+// Utilizar React.memo para otimizar performance e evitar renderizações desnecessárias
+export default React.memo(CardUploadInput);

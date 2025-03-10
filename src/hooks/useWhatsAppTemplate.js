@@ -10,11 +10,11 @@ export const useWhatsAppTemplate = () => {
   // Alert hook
   const alert = useAlertSafe();
   
-  // Refs to prevent multiple draft loads
+  // Refs para controle
   const draftLoadedRef = useRef(false);
   const autoSaveTimerRef = useRef(null);
   
-  // States 
+  // Estados
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,27 +23,27 @@ export const useWhatsAppTemplate = () => {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState(null);
   
-  // Template states
+  // Estados do template
   const [authKey, setAuthKey] = useState('');
   const [templateName, setTemplateName] = useState('');
   const [language, setLanguage] = useState('pt_BR');
   const [bodyText, setBodyText] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  
+  const [hasTriedToAdvance, setHasTriedToAdvance] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
-  // Card states
+  // Estados dos cards
   const [numCards, setNumCards] = useState(2);
   const [cards, setCards] = useState([
     createEmptyCard(),
     createEmptyCard()
   ]);
   
-  // Result states
+  // Estados de resultados
   const [uploadResults, setUploadResults] = useState([]);
   const [finalJson, setFinalJson] = useState({});
 
-  // Create empty card function
+  // Função para criar um card vazio
   function createEmptyCard() {
     return {
       fileUrl: '',
@@ -54,142 +54,127 @@ export const useWhatsAppTemplate = () => {
     };
   }
 
-  // Save current state to draft
+  // Carregar rascunho apenas uma vez na inicialização
+  useEffect(() => {
+    // Evitar carregamentos múltiplos
+    if (draftLoadedRef.current) return;
+    
+    const loadSavedData = () => {
+      try {
+        const savedDraft = loadDraft();
+        if (!savedDraft) return;
+        
+        // Aplicar dados salvos
+        if (savedDraft.templateName) setTemplateName(savedDraft.templateName);
+        if (savedDraft.language) setLanguage(savedDraft.language);
+        if (savedDraft.bodyText) setBodyText(savedDraft.bodyText);
+        if (savedDraft.authKey) setAuthKey(savedDraft.authKey);
+        
+        // Aplicar cards salvos se existirem e forem válidos
+        if (savedDraft.cards && savedDraft.cards.length >= 2) {
+          // Garantir que os fileHandles estejam preservados
+          const processedCards = savedDraft.cards.map(card => ({
+            ...card,
+            fileHandle: card.fileHandle || '',  // Garantir que fileHandle nunca seja undefined
+            buttons: card.buttons || [{ type: 'QUICK_REPLY', text: '', payload: '' }]
+          }));
+          
+          setCards(processedCards);
+          setNumCards(processedCards.length);
+          
+          console.log('Cards carregados do rascunho:', processedCards.length);
+          console.log('Cards com fileHandles:', processedCards.filter(c => c.fileHandle).length);
+        }
+        
+        // Definir último salvamento
+        if (savedDraft.lastSavedTime) {
+          const savedTime = typeof savedDraft.lastSavedTime === 'string' 
+            ? new Date(savedDraft.lastSavedTime)
+            : new Date(savedDraft.lastSavedTime);
+            
+          setLastSavedTime(savedTime);
+        }
+        
+        // Mostrar confirmação ao usuário
+        setTimeout(() => {
+          if (alert && typeof alert.info === 'function') {
+            alert.info('Rascunho anterior carregado com sucesso!', {
+              position: 'top-right',
+              autoCloseTime: 3000
+            });
+          }
+        }, 1000);
+      } catch (error) {
+        console.error('Erro ao carregar dados salvos:', error);
+      }
+    };
+    
+    // Usar setTimeout para garantir que execute após a renderização inicial
+    setTimeout(loadSavedData, 0);
+    draftLoadedRef.current = true;
+  }, [alert]);
+
+  // Salvar o estado atual no localStorage (apenas quando chamado explicitamente)
   const saveCurrentState = useCallback(() => {
-    const currentTime = new Date();
+    // Criar objeto com estado atual
     const state = {
       templateName,
       language,
       bodyText,
       cards,
       authKey,
-      lastSavedTime: currentTime.toISOString()
+      numCards,
+      step // Salvar o passo atual
     };
     
+    // Chamar saveDraft e obter resultado
     const saveSuccess = saveDraft(state);
     
     if (saveSuccess) {
+      // Atualizar estado de UI
+      const currentTime = new Date();
       setLastSavedTime(currentTime);
       setUnsavedChanges(false);
+      
+      console.log('Rascunho salvo com sucesso em', currentTime.toLocaleString());
       return true;
     }
     
+    console.error('Falha ao salvar rascunho');
     return false;
-  }, [templateName, language, bodyText, cards, authKey]);
+  }, [templateName, language, bodyText, cards, authKey, numCards, step]);
 
-  // Load draft on initial render - FIXED to avoid state updates during render
+  // Monitorar mudança de step para garantir que os fileHandles sejam preservados
   useEffect(() => {
-    // Prevent multiple draft loads
-    if (draftLoadedRef.current) return;
-    draftLoadedRef.current = true; // Mark as attempted to prevent multiple loads
-
-    const loadDraftSafely = () => {
-      try {
-        const savedDraft = loadDraft();
-        
-        if (savedDraft) {
-          // Use a single setState call to update all values at once
-          const updatedState = {};
-          
-          if (savedDraft.templateName) updatedState.templateName = savedDraft.templateName;
-          if (savedDraft.language) updatedState.language = savedDraft.language;
-          if (savedDraft.bodyText) updatedState.bodyText = savedDraft.bodyText;
-          if (savedDraft.authKey) updatedState.authKey = savedDraft.authKey;
-          
-          // Handle cards safely
-          if (savedDraft.cards && savedDraft.cards.length >= 2) {
-            updatedState.cards = savedDraft.cards;
-            updatedState.numCards = savedDraft.cards.length;
-          }
-          
-          // Set last saved time if available
-          if (savedDraft.lastSavedTime) {
-            updatedState.lastSavedTime = new Date(savedDraft.lastSavedTime);
-          }
-          
-          // Apply all state updates at once
-          if (Object.keys(updatedState).length > 0) {
-            // Set template name
-            if (updatedState.templateName) setTemplateName(updatedState.templateName);
-            // Set language
-            if (updatedState.language) setLanguage(updatedState.language);
-            // Set body text
-            if (updatedState.bodyText) setBodyText(updatedState.bodyText);
-            // Set auth key
-            if (updatedState.authKey) setAuthKey(updatedState.authKey);
-            // Set cards
-            if (updatedState.cards) {
-              setCards(updatedState.cards);
-              setNumCards(updatedState.numCards);
-            }
-            // Set last saved time
-            if (updatedState.lastSavedTime) {
-              setLastSavedTime(updatedState.lastSavedTime);
-            }
-            
-            // Show draft loaded alert with delay (moved outside render cycle)
-            setTimeout(() => {
-              if (alert && typeof alert.info === 'function') {
-                alert.info('Rascunho anterior carregado com sucesso!', {
-                  position: 'top-right',
-                  autoCloseTime: 3000
-                });
-              }
-            }, 1000);
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao carregar rascunho:', error);
-      }
-    };
-
-    // Use setTimeout to ensure this runs after initial render is complete
-    setTimeout(loadDraftSafely, 0);
-  }, []); // Empty dependency array to run only once
-  
-  // Autosave effect
-  useEffect(() => {
-    // Skip initial effect run to avoid marking changes during load
-    if (!draftLoadedRef.current) return;
-    
-    // Mark unsaved changes
-    if (!unsavedChanges) {
-      setUnsavedChanges(true);
-    }
-    
-    // Clear previous timer
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-    }
-    
-    // Set new autosave timer
-    autoSaveTimerRef.current = setTimeout(() => {
+    if (step === 2 && cards.some(card => card.fileHandle)) {
+      // Salvar o estado quando avançar para o step 2 para garantir que os fileHandles sejam preservados
       saveCurrentState();
-    }, 30000);
-    
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, [templateName, language, bodyText, cards, authKey, unsavedChanges, saveCurrentState]);
+      console.log('Estado salvo ao avançar para step 2, fileHandles preservados');
+    }
+  }, [step, cards, saveCurrentState]);
 
+  // Função para exibir erros de validação
   const showValidationErrors = useCallback((errorMessages) => {
     if (!errorMessages || errorMessages.length === 0) return;
-  
-    // Use o `useAlertSafe` para evitar alertas duplicados ou muito frequentes
-    if (alert && typeof alert.error === 'function') {
-      setTimeout(() => {
+    
+    // Usar setTimeout para evitar alertas durante a renderização
+    setTimeout(() => {
+      if (alert && typeof alert.error === 'function') {
         alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
           position: 'top-center',
           autoCloseTime: 7000
         });
-      }, 0);
-    }
+      }
+    }, 0);
   }, [alert]);
   
-  // Validation functions with safe alert handling - FIXED to avoid calling alert during render
+  // Validação do primeiro passo
   const validateStepOne = useCallback((triggerAlerts = false) => {
+    // Não validar automaticamente se o usuário ainda não tentou avançar
+    if (!hasTriedToAdvance && !triggerAlerts) {
+      return true;
+    }
+  
     const errors = {};
     const errorMessages = [];
   
@@ -210,23 +195,20 @@ export const useWhatsAppTemplate = () => {
     // Atualizar erros de validação no estado
     setValidationErrors(errors);
   
-    // Disparar alertas apenas se `triggerAlerts` for verdadeiro
+    // Disparar alertas apenas se solicitado
     if (triggerAlerts && errorMessages.length > 0) {
       showValidationErrors(errorMessages);
     }
   
     return errorMessages.length === 0;
-  }, [authKey, cards, numCards, showValidationErrors]);
+  }, [authKey, cards, numCards, hasTriedToAdvance, showValidationErrors]);
   
-
-
-
-  
+  // Validação do segundo passo
   const validateStepTwo = useCallback(() => {
     const errors = {};
     const errorMessages = [];
     
-    // Validate template name
+    // Validar nome do template
     if (!templateName) {
       errors.templateName = 'Nome do template é obrigatório';
       errorMessages.push('Nome do template é obrigatório');
@@ -235,7 +217,7 @@ export const useWhatsAppTemplate = () => {
       errorMessages.push('Nome do template deve ter pelo menos 3 caracteres');
     }
     
-    // Validate body text
+    // Validar texto do corpo
     if (!bodyText) {
       errors.bodyText = 'Texto do corpo da mensagem é obrigatório';
       errorMessages.push('Texto do corpo da mensagem é obrigatório');
@@ -244,9 +226,9 @@ export const useWhatsAppTemplate = () => {
       errorMessages.push(`Texto do corpo excede o limite de 1024 caracteres (${bodyText.length})`);
     }
     
-    // Validate cards
+    // Validar cards
     cards.slice(0, numCards).forEach((card, index) => {
-      // Validate card body text
+      // Validar texto do card
       if (!card.bodyText) {
         errors[`card_${index}_bodyText`] = `Texto do card ${index + 1} é obrigatório`;
         errorMessages.push(`Card ${index + 1}: texto é obrigatório`);
@@ -255,25 +237,25 @@ export const useWhatsAppTemplate = () => {
         errorMessages.push(`Card ${index + 1}: texto excede limite de 160 caracteres`);
       }
       
-      // Validate buttons
+      // Validar botões
       if (!card.buttons || card.buttons.length === 0) {
         errors[`card_${index}_buttons`] = `Adicione pelo menos um botão para o card ${index + 1}`;
         errorMessages.push(`Card ${index + 1}: adicione pelo menos um botão`);
       } else {
         card.buttons.forEach((button, btnIndex) => {
-          // Validate button text
+          // Validar texto do botão
           if (!button.text) {
             errors[`card_${index}_button_${btnIndex}_text`] = `Texto do botão ${btnIndex + 1} no card ${index + 1} é obrigatório`;
             errorMessages.push(`Card ${index + 1}, Botão ${btnIndex + 1}: texto é obrigatório`);
           }
           
-          // Validate URL button
+          // Validar URL do botão
           if (button.type === 'URL' && !button.url) {
             errors[`card_${index}_button_${btnIndex}_url`] = `URL do botão ${btnIndex + 1} no card ${index + 1} é obrigatória`;
             errorMessages.push(`Card ${index + 1}, Botão ${btnIndex + 1}: URL é obrigatória`);
           }
           
-          // Validate phone number button
+          // Validar número de telefone do botão
           if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) {
             errors[`card_${index}_button_${btnIndex}_phoneNumber`] = `Número de telefone do botão ${btnIndex + 1} no card ${index + 1} é obrigatório`;
             errorMessages.push(`Card ${index + 1}, Botão ${btnIndex + 1}: número de telefone é obrigatório`);
@@ -282,18 +264,18 @@ export const useWhatsAppTemplate = () => {
       }
     });
     
-    // Update validation errors
+    // Atualizar erros de validação
     setValidationErrors(errors);
     
-    // Return errors without directly calling alert
     return errorMessages.length > 0 ? errorMessages : [];
   }, [templateName, bodyText, cards, numCards]);
   
+  // Validação do terceiro passo
   const validateStepThree = useCallback(() => {
     const errors = {};
     const errorMessages = [];
     
-    // Validate phone number
+    // Validar número de telefone
     if (!phoneNumber) {
       errors.phoneNumber = 'Número de telefone é obrigatório para enviar o template';
       errorMessages.push('Número de telefone é obrigatório');
@@ -306,14 +288,13 @@ export const useWhatsAppTemplate = () => {
       }
     }
     
-    // Update validation errors
+    // Atualizar erros de validação
     setValidationErrors(errors);
     
-    // Return errors without directly calling alert
     return errorMessages.length > 0 ? errorMessages : [];
   }, [phoneNumber]);
   
-  // Update isStepValid to return errors but not directly show alerts
+  // Verificar se o passo atual é válido
   const isStepValid = useCallback((currentStep, triggerAlerts = false) => {
     let errors = [];
     
@@ -338,13 +319,11 @@ export const useWhatsAppTemplate = () => {
     return errors.length === 0;
   }, [validateStepOne, validateStepTwo, validateStepThree, showValidationErrors]);
   
-  /**
-   * Verifica a consistência dos botões entre todos os cards
-   */
+  // Verificar a consistência dos botões entre todos os cards
   const checkButtonConsistency = useCallback(() => {
     const activeCards = cards.slice(0, numCards);
     
-    // Retorna consistente se houver apenas um card
+    // Consistente se houver apenas um card
     if (activeCards.length <= 1) {
       return { 
         isConsistent: true,
@@ -352,7 +331,7 @@ export const useWhatsAppTemplate = () => {
       };
     }
     
-    // Coletar informações de botões do primeiro card para referência
+    // Coletar informações do primeiro card como referência
     const referenceButtons = activeCards[0].buttons;
     const referenceCount = referenceButtons.length;
     const referenceTypes = referenceButtons.map(button => button.type);
@@ -405,7 +384,7 @@ export const useWhatsAppTemplate = () => {
       message += "Alguns cards têm tipos diferentes de botões. ";
     }
     
-    // Incluir informações sobre o que será padronizado
+    // Incluir informações sobre padronização
     if (!isConsistent) {
       // Encontrar o card com mais botões
       const maxButtonCount = Math.max(...activeCards.map(card => card.buttons.length));
@@ -424,9 +403,7 @@ export const useWhatsAppTemplate = () => {
     };
   }, [cards, numCards]);
 
-  /**
-   * Padroniza os botões em todos os cards para garantir consistência
-   */
+  // Padronizar botões entre todos os cards
   const standardizeButtons = useCallback(() => {
     const activeCards = cards.slice(0, numCards);
     
@@ -485,32 +462,30 @@ export const useWhatsAppTemplate = () => {
     return standardizedCards;
   }, [cards, numCards]);
 
-  /**
-   * Aplica a padronização dos botões diretamente nos cards
-   */
+  // Aplicar padronização de botões
   const applyButtonStandardization = useCallback(() => {
     const standardizedCards = standardizeButtons();
     setCards(standardizedCards);
     
-    // Exibir mensagem de sucesso
-    setSuccess('Botões padronizados com sucesso em todos os cards!');
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
     
-    // Mostrar alerta de sucesso - FIXED to run outside of render
-    if (alert && typeof alert.success === 'function') {
-      setTimeout(() => {
+    // Exibir mensagem de sucesso
+    setTimeout(() => {
+      if (alert && typeof alert.success === 'function') {
         alert.success('Botões padronizados com sucesso em todos os cards!', {
           position: 'top-right',
           autoCloseTime: 3000
         });
-      }, 0);
-    }
+      }
+    }, 0);
     
+    // Registrar alteração como não salva
+    setSuccess('Botões padronizados com sucesso em todos os cards!');
     setTimeout(() => setSuccess(''), 3000);
   }, [standardizeButtons, alert]);
 
-  /**
-   * Sincroniza um tipo de botão em todos os cards
-   */
+  // Sincronizar tipo de botão em todos os cards
   const syncButtonType = useCallback((buttonIndex, newType) => {
     // Atualizar o tipo do botão em todos os cards ativos
     setCards(prev => {
@@ -544,20 +519,21 @@ export const useWhatsAppTemplate = () => {
       return newCards;
     });
     
-    // Informar sobre a sincronização - FIXED with setTimeout
-    if (alert && typeof alert.info === 'function') {
-      setTimeout(() => {
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
+    
+    // Informar sobre a sincronização
+    setTimeout(() => {
+      if (alert && typeof alert.info === 'function') {
         alert.info(`Tipo de botão "${newType}" sincronizado em todos os cards`, {
           position: 'bottom-right',
           autoCloseTime: 3000
         });
-      }, 0);
-    }
+      }
+    }, 0);
   }, [numCards, alert]);
 
-  /**
-   * Sincroniza a adição de botões em todos os cards
-   */
+  // Sincronizar adição de botão em todos os cards
   const syncAddButton = useCallback((cardIndex, buttonType = 'QUICK_REPLY') => {
     setCards(prev => {
       const newCards = [...prev];
@@ -581,20 +557,21 @@ export const useWhatsAppTemplate = () => {
       return newCards;
     });
     
-    // Informar sobre a adição de botões - FIXED with setTimeout
-    if (alert && typeof alert.info === 'function') {
-      setTimeout(() => {
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
+    
+    // Informar sobre a adição de botões
+    setTimeout(() => {
+      if (alert && typeof alert.info === 'function') {
         alert.info(`Botão do tipo "${buttonType}" adicionado a todos os cards`, {
           position: 'bottom-right',
           autoCloseTime: 3000
         });
-      }, 0);
-    }
+      }
+    }, 0);
   }, [numCards, alert]);
 
-  /**
-   * Sincroniza a remoção de botões em todos os cards
-   */
+  // Sincronizar remoção de botão em todos os cards
   const syncRemoveButton = useCallback((buttonIndex) => {
     setCards(prev => {
       const newCards = [...prev];
@@ -608,84 +585,98 @@ export const useWhatsAppTemplate = () => {
       return newCards;
     });
     
-    // Informar sobre a remoção de botões - FIXED with setTimeout
-    if (alert && typeof alert.warning === 'function') {
-      setTimeout(() => {
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
+    
+    // Informar sobre a remoção de botões
+    setTimeout(() => {
+      if (alert && typeof alert.warning === 'function') {
         alert.warning(`Botão removido de todos os cards`, {
           position: 'bottom-right',
           autoCloseTime: 3000
         });
-      }, 0);
-    }
+      }
+    }, 0);
   }, [numCards, alert]);
   
-  /**
-   * Adiciona um novo card ao template
-   */
+  // Adicionar um novo card
   const handleAddCard = useCallback(() => {
     if (numCards < 10) {
       setNumCards(prev => prev + 1);
       setCards(prev => [...prev, createEmptyCard()]);
       
-      // Alerta ao adicionar card - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
+      // Marcar alterações não salvas
+      setUnsavedChanges(true);
+      
+      // Mostrar alerta
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
           alert.info(`Card ${numCards + 1} adicionado ao carrossel`, {
             position: 'bottom-right',
             autoCloseTime: 2000
           });
-        }, 0);
-      }
+        }
+      }, 0);
     } else {
-      // Alerta quando atingir o limite de cards - FIXED with setTimeout
-      if (alert && typeof alert.warning === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de limite máximo
+      setTimeout(() => {
+        if (alert && typeof alert.warning === 'function') {
           alert.warning('Limite máximo de 10 cards atingido', {
             position: 'top-center'
           });
-        }, 0);
-      }
+        }
+      }, 0);
     }
   }, [numCards, alert]);
   
-  /**
-   * Remove o último card do template
-   */
+  // Remover o último card
   const handleRemoveCard = useCallback(() => {
     if (numCards > 2) {
       setNumCards(prev => prev - 1);
-      setCards(prev => prev.slice(0, prev.length - 1));
       
-      // Alerta ao remover card - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
+      // Não remover o card do array, apenas diminuir o número de cards visíveis
+      // Isso permite recuperar o card se o usuário mudar de ideia
+      
+      // Marcar alterações não salvas
+      setUnsavedChanges(true);
+      
+      // Mostrar alerta
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
           alert.info(`Card ${numCards} removido do carrossel`, {
             position: 'bottom-right',
             autoCloseTime: 2000
           });
-        }, 0);
-      }
+        }
+      }, 0);
     } else {
-      // Alerta quando tentar remover além do mínimo - FIXED with setTimeout
-      if (alert && typeof alert.warning === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de limite mínimo
+      setTimeout(() => {
+        if (alert && typeof alert.warning === 'function') {
           alert.warning('Um carrossel precisa ter no mínimo 2 cards', {
             position: 'top-center'
           });
-        }, 0);
-      }
+        }
+      }, 0);
     }
   }, [numCards, alert]);
   
-  /**
-   * Atualiza um campo específico de um card
-   */
+  // Atualizar um campo específico de um card
   const updateCard = useCallback((index, field, value) => {
     setCards(prev => {
       const newCards = [...prev];
-      newCards[index] = { ...newCards[index], [field]: value };
+      
+      // Se o índice é válido
+      if (index >= 0 && index < newCards.length) {
+        // Cria uma cópia do card para modificação
+        newCards[index] = { ...newCards[index], [field]: value };
+      }
+      
       return newCards;
     });
+    
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
     
     // Limpar erro de validação relacionado a este campo
     if (validationErrors[`card_${index}_${field}`]) {
@@ -697,17 +688,31 @@ export const useWhatsAppTemplate = () => {
     }
   }, [validationErrors]);
   
-  /**
-   * Atualiza um campo específico de um botão em um card
-   */
+  // Atualizar um campo específico de um botão em um card
   const updateButtonField = useCallback((cardIndex, buttonIndex, field, value) => {
     setCards(prev => {
       const newCards = [...prev];
-      const newButtons = [...newCards[cardIndex].buttons];
-      newButtons[buttonIndex] = { ...newButtons[buttonIndex], [field]: value };
-      newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
+      
+      // Verificar se o card existe
+      if (cardIndex >= 0 && cardIndex < newCards.length) {
+        const card = newCards[cardIndex];
+        
+        // Verificar se o botão existe
+        if (buttonIndex >= 0 && buttonIndex < card.buttons.length) {
+          // Criar cópias para preservar imutabilidade
+          const newButtons = [...card.buttons];
+          newButtons[buttonIndex] = { ...newButtons[buttonIndex], [field]: value };
+          
+          // Atualizar o card com os novos botões
+          newCards[cardIndex] = { ...card, buttons: newButtons };
+        }
+      }
+      
       return newCards;
     });
+    
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
     
     // Se estiver alterando o tipo do botão e for o primeiro card, sincronizar com os outros
     if (field === 'type' && cardIndex === 0 && numCards > 1) {
@@ -724,21 +729,19 @@ export const useWhatsAppTemplate = () => {
     }
   }, [validationErrors, numCards, syncButtonType]);
   
-  /**
-   * Adiciona um novo botão a um card
-   */
+  // Adicionar um novo botão a um card
   const addButton = useCallback((cardIndex) => {
     // Verificar se já possui o máximo de botões
     const card = cards[cardIndex];
-    if (card.buttons.length >= 2) {
-      // Alerta sobre o limite de botões - FIXED with setTimeout
-      if (alert && typeof alert.warning === 'function') {
-        setTimeout(() => {
+    if (!card || card.buttons.length >= 2) {
+      // Mostrar alerta sobre o limite de botões
+      setTimeout(() => {
+        if (alert && typeof alert.warning === 'function') {
           alert.warning('Cada card pode ter no máximo 2 botões', {
             position: 'top-center'
           });
-        }, 0);
-      }
+        }
+      }, 0);
       return;
     }
     
@@ -747,194 +750,259 @@ export const useWhatsAppTemplate = () => {
     
     setCards(prev => {
       const newCards = [...prev];
-      const newButtons = [...newCards[cardIndex].buttons, { 
-        type: defaultButtonType, 
-        text: '',
-        ...(defaultButtonType === 'URL' ? { url: '' } : {}),
-        ...(defaultButtonType === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
-        ...(defaultButtonType === 'QUICK_REPLY' ? { payload: '' } : {})
-      }];
-      newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
+      
+      // Se o card existe
+      if (cardIndex >= 0 && cardIndex < newCards.length) {
+        const newButton = { 
+          type: defaultButtonType, 
+          text: '',
+          ...(defaultButtonType === 'URL' ? { url: '' } : {}),
+          ...(defaultButtonType === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
+          ...(defaultButtonType === 'QUICK_REPLY' ? { payload: '' } : {})
+        };
+        
+        // Adicionar novo botão aos botões existentes
+        const newButtons = [...newCards[cardIndex].buttons, newButton];
+        newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
+      }
+      
       return newCards;
     });
+    
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
     
     // Se tiver mais de um card, sincronizar a adição com os outros cards
     if (numCards > 1) {
       syncAddButton(cardIndex, defaultButtonType);
     } else {
-      // Alerta sobre adição de botão apenas para o card atual - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta sobre adição de botão
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
           alert.info(`Botão adicionado ao Card ${cardIndex + 1}`, {
             position: 'bottom-right',
             autoCloseTime: 2000
           });
-        }, 0);
-      }
+        }
+      }, 0);
     }
   }, [cards, numCards, syncAddButton, alert]);
   
-  /**
-   * Remove um botão de um card
-   */
+  // Remover um botão de um card
   const removeButton = useCallback((cardIndex, buttonIndex) => {
     setCards(prev => {
       const newCards = [...prev];
-      const newButtons = newCards[cardIndex].buttons.filter((_, i) => i !== buttonIndex);
-      newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
+      
+      // Se o card existe
+      if (cardIndex >= 0 && cardIndex < newCards.length) {
+        // Remover o botão especificado
+        const newButtons = newCards[cardIndex].buttons.filter((_, i) => i !== buttonIndex);
+        newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
+      }
+      
       return newCards;
     });
+    
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
     
     // Se tiver mais de um card, sincronizar a remoção com os outros cards
     if (numCards > 1) {
       syncRemoveButton(buttonIndex);
     } else {
-      // Alerta sobre remoção de botão apenas para o card atual - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta sobre remoção de botão
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
           alert.info(`Botão removido do Card ${cardIndex + 1}`, {
             position: 'bottom-right',
             autoCloseTime: 2000
           });
-        }, 0);
-      }
+        }
+      }, 0);
     }
   }, [numCards, syncRemoveButton, alert]);
   
-/**
- * Faz o upload dos arquivos dos cards para a API, pulando aqueles que já têm fileHandle
- */
-const handleUploadFiles = useCallback(async () => {
-  // Validar antes de prosseguir
-  if (!validateStepOne(true)) {
-    setError('Por favor, corrija os erros antes de continuar.');
-    return;
-  }
-
-  const errors = validateStepOne();
-  if (errors.length > 0) {
-    setError('Por favor, corrija os erros antes de continuar.');
-    showValidationErrors(errors);
-    return;
-  }
-  
-  setLoading(true);
-  setError('');
-  setSuccess('');
-
-  try {
-    // Mostrar alerta de início do processo
-    if (alert && typeof alert.info === 'function') {
-      setTimeout(() => {
-        alert.info('Iniciando processo de upload...', {
-          position: 'top-right',
-          autoCloseTime: 3000
-        });
-      }, 0);
-    }
-    
-    setSuccess('Iniciando processo de upload...');
-    
-    // Filtrar apenas cards que precisam de upload (sem fileHandle)
-    const cardsToUpload = cards.slice(0, numCards).filter(card => 
-      card.fileUrl && (!card.fileHandle || card.fileHandle === '')
-    );
-    
-    // Cards que já têm fileHandle (podem pular o upload)
-    const cardsWithHandles = cards.slice(0, numCards).filter(card => 
-      card.fileUrl && card.fileHandle && card.fileHandle !== ''
-    );
-    
-    // Resultados finais combinados
-    let finalResults = [];
-    
-    // Adicionar resultados dos cards que já têm fileHandle
-    cardsWithHandles.forEach(card => {
-      finalResults.push({
-        fileHandle: card.fileHandle,
-        status: 'cached', // Status especial para indicar que foi carregado do cache
-        cardIndex: cards.indexOf(card)
-      });
-    });
-    
-    // Se houver cards para upload, fazer o upload
-    if (cardsToUpload.length > 0) {
-      // Fazer upload dos arquivos que precisam
-      const newResults = await uploadFiles(cardsToUpload, authKey);
-      
-      // Mapear resultados aos índices originais dos cards
-      for (let i = 0; i < newResults.length; i++) {
-        const result = newResults[i];
-        const originalCard = cardsToUpload[i];
-        const originalIndex = cards.indexOf(originalCard);
-        
-        // Adicionar o índice original ao resultado
-        result.cardIndex = originalIndex;
-        
-        // Atualizar o card com o fileHandle recebido
-        updateCard(originalIndex, 'fileHandle', result.fileHandle);
-        
-        // Adicionar ao array de resultados finais
-        finalResults.push(result);
-      }
-    }
-    
-    // Ordenar resultados pelo índice original
-    finalResults.sort((a, b) => a.cardIndex - b.cardIndex);
-    
-    // Definir os resultados de upload
-    setUploadResults(finalResults);
-    
-    // Mensagem de sucesso baseada em quantos arquivos foram processados
-    const skippedCount = cardsWithHandles.length;
-    let successMessage = '';
-    
-    if (skippedCount > 0) {
-      successMessage = `${cardsToUpload.length} arquivo(s) enviado(s) e ${skippedCount} carregado(s) do cache!`;
-    } else {
-      successMessage = `Todos os ${numCards} arquivos foram processados com sucesso!`;
-    }
-    
-    setSuccess(successMessage);
-    
-    // Mostrar alerta de sucesso
-    if (alert && typeof alert.success === 'function') {
-      setTimeout(() => {
-        alert.success(successMessage, {
-          position: 'top-right'
-        });
-      }, 0);
-    }
-    
-    // Salvar o estado atual com fileHandles preservados
-    saveCurrentState();
-    
-    // Avançar para a próxima etapa
-    setStep(2);
-  } catch (err) {
-    const errorMessage = handleApiError(err);
-    setError(errorMessage);
-    
-    // Mostrar alerta de erro
-    if (alert && typeof alert.error === 'function') {
-      setTimeout(() => {
-        alert.error(`Erro durante o processo de upload: ${errorMessage}`, {
-          position: 'top-center',
-          autoCloseTime: 7000
-        });
-      }, 0);
-    }
-    
-    console.error('Erro durante o processo de upload:', err);
-  } finally {
-    setLoading(false);
-  }
-}, [authKey, cards, numCards, updateCard, validateStepOne, saveCurrentState, alert, showValidationErrors, uploadFiles]);
-  
   /**
-   * Cria o template baseado nas informações fornecidas
-   * com padronização automática de botões para atender aos requisitos do WhatsApp
+   * Realiza o upload dos arquivos dos cards para a API
+   * Esta função preserva os fileHandles existentes e só faz upload de novos arquivos
    */
+  const handleUploadFiles = useCallback(async () => {
+    // Validar antes de prosseguir
+    if (!validateStepOne(true)) {
+      setError('Por favor, corrija os erros antes de continuar.');
+      return;
+    }
+
+    // Salvar o estado atual antes de fazer uploads
+    // Isso garante que os fileHandles existentes sejam preservados
+    saveCurrentState();
+  
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // Mostrar alerta de início do processo
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
+          alert.info('Iniciando processo de upload...', {
+            position: 'top-right',
+            autoCloseTime: 3000
+          });
+        }
+      }, 0);
+      
+      setSuccess('Iniciando processo de upload...');
+      
+      // Separar cards em dois grupos:
+      // 1. Cards com fileHandles válidos (podem pular upload)
+      // 2. Cards que precisam de upload (sem fileHandle ou com URL alterada)
+      
+      // Carregar o rascunho mais recente para obter os fileHandles mais atualizados
+      const savedDraft = loadDraft();
+      const savedCards = savedDraft?.cards || [];
+      
+      // Mapear cada card atual para verificar se precisa de upload
+      const currentCards = cards.slice(0, numCards);
+      
+      // Cards que já têm fileHandle e URL não mudou (podem pular upload)
+      const cardsWithValidHandles = [];
+      // Cards que precisam de upload
+      const cardsToUpload = [];
+      
+      // Verificar cada card atual
+      currentCards.forEach((card, index) => {
+        // Se não tem URL, pular
+        if (!card.fileUrl) return;
+        
+        // Verificar se existe um card salvo correspondente
+        const savedCard = savedCards[index];
+        
+        // Verificar se o card já tem um fileHandle válido e a URL não mudou
+        if (savedCard && 
+            savedCard.fileHandle && 
+            savedCard.fileUrl === card.fileUrl) {
+          // Atualizar o card atual com o fileHandle salvo
+          const updatedCard = { ...card, fileHandle: savedCard.fileHandle };
+          cardsWithValidHandles.push(updatedCard);
+          
+          // Atualizar o card no estado
+          updateCard(index, 'fileHandle', savedCard.fileHandle);
+        } else if (card.fileUrl) {
+          // Card precisa de upload
+          cardsToUpload.push(card);
+        }
+      });
+      
+      console.log('Cards com fileHandles válidos:', cardsWithValidHandles.length);
+      console.log('Cards que precisam de upload:', cardsToUpload.length);
+      
+      // Resultados finais combinados
+      let finalResults = [];
+      
+      // Adicionar resultados dos cards que já têm fileHandle
+      cardsWithValidHandles.forEach(card => {
+        finalResults.push({
+          fileHandle: card.fileHandle,
+          status: 'cached', // Status especial para indicar que foi carregado do cache
+          cardIndex: cards.indexOf(card)
+        });
+      });
+      
+      // Se houver cards para upload, fazer o upload
+      if (cardsToUpload.length > 0) {
+        // Fazer upload dos arquivos que precisam
+        const newResults = await uploadFiles(cardsToUpload, authKey);
+        
+        // Mapear resultados aos índices originais dos cards
+        for (let i = 0; i < newResults.length; i++) {
+          const result = newResults[i];
+          const originalCard = cardsToUpload[i];
+          const originalIndex = cards.indexOf(originalCard);
+          
+          // Adicionar o índice original ao resultado
+          result.cardIndex = originalIndex;
+          
+          // Atualizar o card com o fileHandle recebido
+          updateCard(originalIndex, 'fileHandle', result.fileHandle);
+          
+          // Adicionar ao array de resultados finais
+          finalResults.push(result);
+        }
+      }
+      
+      // Ordenar resultados pelo índice original
+      finalResults.sort((a, b) => a.cardIndex - b.cardIndex);
+      
+      // Definir os resultados de upload
+      setUploadResults(finalResults);
+      
+      // Salvar novamente o estado para garantir que todos os fileHandles estão preservados
+      saveCurrentState();
+      
+      // Mensagem de sucesso baseada em quantos arquivos foram processados
+      const skippedCount = cardsWithValidHandles.length;
+      let successMessage = '';
+
+      if (cardsToUpload.length > 0 && skippedCount > 0) {
+        successMessage = `${cardsToUpload.length} arquivo(s) enviado(s) e ${skippedCount} carregado(s) do cache`;
+      } else if (cardsToUpload.length > 0) {
+        successMessage = `${cardsToUpload.length} arquivo(s) enviado(s) com sucesso`;
+      } else if (skippedCount > 0) {
+        successMessage = `${skippedCount} arquivo(s) carregado(s) do cache`;
+      } else {
+        successMessage = 'Nenhum arquivo precisava ser processado';
+      }
+      
+      setSuccess(successMessage);
+
+      setTimeout(() => {
+        setSuccess('');
+      }, 5000);
+      
+      // Mostrar alerta de sucesso
+      setTimeout(() => {
+        if (alert && typeof alert.success === 'function') {
+          alert.success(successMessage, {
+            position: 'top-right'
+          });
+        }
+      }, 0);
+      
+      // Avançar para a próxima etapa
+      setStep(2);
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      
+      // Mostrar alerta de erro
+      setTimeout(() => {
+        if (alert && typeof alert.error === 'function') {
+          alert.error(`Erro durante o processo de upload: ${errorMessage}`, {
+            position: 'top-center',
+            autoCloseTime: 7000
+          });
+        }
+      }, 0);
+      
+      console.error('Erro durante o processo de upload:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [authKey, cards, numCards, updateCard, validateStepOne, saveCurrentState, alert]);
+  
+  // Avançar para o próximo passo com validação
+  const handleNextStep = useCallback(() => {
+    setHasTriedToAdvance(true); // Marcar que o usuário tentou avançar
+    const isValid = validateStepOne(true); // Forçar validação com alertas
+    if (isValid) {
+      // Salvar o estado atual antes de avançar
+      saveCurrentState();
+      setStep((prev) => prev + 1); // Avançar para o próximo passo
+    }
+  }, [validateStepOne, saveCurrentState]);
+
+  // Criar o template
   const handleCreateTemplate = useCallback(async () => {
     // Validar antes de prosseguir
     const errors = validateStepTwo();
@@ -949,15 +1017,15 @@ const handleUploadFiles = useCallback(async () => {
     
     // Se não for consistente, padronizar os botões antes de prosseguir
     if (!consistency.isConsistent) {
-      // Mostrar alerta sobre a padronização necessária - FIXED with setTimeout
-      if (alert && typeof alert.warning === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta sobre a padronização necessária
+      setTimeout(() => {
+        if (alert && typeof alert.warning === 'function') {
           alert.warning('Inconsistência detectada nos botões. O WhatsApp exige que todos os cards tenham o mesmo número e tipos de botões. Será realizada uma padronização automática.', {
             position: 'top-center',
             autoCloseTime: 5000
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       // Padronizar botões
       const standardizedCards = standardizeButtons();
@@ -979,15 +1047,15 @@ const handleUploadFiles = useCallback(async () => {
         // Informar ao usuário que precisa preencher os campos
         setError('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.');
         
-        // Mostrar alerta sobre campos obrigatórios vazios - FIXED with setTimeout
-        if (alert && typeof alert.warning === 'function') {
-          setTimeout(() => {
+        // Mostrar alerta sobre campos obrigatórios vazios
+        setTimeout(() => {
+          if (alert && typeof alert.warning === 'function') {
             alert.warning('A padronização de botões criou novos campos que precisam ser preenchidos. Por favor, revise os botões em todos os cards.', {
               position: 'top-center',
               autoCloseTime: 7000
             });
-          }, 0);
-        }
+          }
+        }, 0);
         
         return;
       }
@@ -998,15 +1066,15 @@ const handleUploadFiles = useCallback(async () => {
       // Informar ao usuário sobre a padronização
       setSuccess('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.');
       
-      // Mostrar alerta sobre a padronização automática - FIXED with setTimeout
-      if (alert && typeof alert.success === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta sobre a padronização automática
+      setTimeout(() => {
+        if (alert && typeof alert.success === 'function') {
           alert.success('Botões padronizados automaticamente para atender aos requisitos do WhatsApp.', {
             position: 'top-right',
             autoCloseTime: 3000
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       // Pequena pausa para o usuário ver a mensagem
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -1022,19 +1090,7 @@ const handleUploadFiles = useCallback(async () => {
       
       // Validar informações do template
       validateTemplate(templateName, bodyText, authKey, cardsToUse);
-      
-      setSuccess('Validações concluídas. Criando template...');
-      
-      // Mostrar alerta de criação - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
-          alert.info('Validações concluídas. Criando template...', {
-            position: 'top-right',
-            autoCloseTime: 3000
-          });
-        }, 0);
-      }
-      
+
       // Criar template na API
       const { templateJson, sendTemplateJson, builderTemplateJson } = await createTemplate(
         templateName, 
@@ -1050,17 +1106,15 @@ const handleUploadFiles = useCallback(async () => {
         sendTemplate: sendTemplateJson,
         builderTemplate: builderTemplateJson
       });
-
-      setSuccess('Template criado com sucesso!');
       
-      // Mostrar alerta de sucesso - FIXED with setTimeout
-      if (alert && typeof alert.success === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de sucesso
+      setTimeout(() => {
+        if (alert && typeof alert.success === 'function') {
           alert.success('Template criado com sucesso!', {
             position: 'top-right'
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       // Salvar o estado atual
       saveCurrentState();
@@ -1071,15 +1125,15 @@ const handleUploadFiles = useCallback(async () => {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
       
-      // Mostrar alerta de erro - FIXED with setTimeout
-      if (alert && typeof alert.error === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de erro
+      setTimeout(() => {
+        if (alert && typeof alert.error === 'function') {
           alert.error(`Erro ao criar template: ${errorMessage}`, {
             position: 'top-center',
             autoCloseTime: 7000
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       console.error('Erro ao criar template:', err);
     } finally {
@@ -1096,14 +1150,14 @@ const handleUploadFiles = useCallback(async () => {
       const errorMsg = 'Número de telefone é obrigatório para enviar o template';
       setError(errorMsg);
       
-      // Mostrar alerta de erro - FIXED with setTimeout
-      if (alert && typeof alert.error === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de erro
+      setTimeout(() => {
+        if (alert && typeof alert.error === 'function') {
           alert.error(errorMsg, {
             position: 'top-center'
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       return;
     }
@@ -1113,15 +1167,15 @@ const handleUploadFiles = useCallback(async () => {
     setSuccess('');
 
     try {
-      // Mostrar alerta de envio - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de envio
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
           alert.info(`Enviando template para ${phoneNumberToSend}...`, {
             position: 'top-right',
             autoCloseTime: 3000
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       const formattedPhone = validatePhoneNumber(phoneNumberToSend);
       
@@ -1136,29 +1190,29 @@ const handleUploadFiles = useCallback(async () => {
       const successMsg = `Template enviado com sucesso para ${phoneNumberToSend}!`;
       setSuccess(successMsg);
       
-      // Mostrar alerta de sucesso - FIXED with setTimeout
-      if (alert && typeof alert.success === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de sucesso
+      setTimeout(() => {
+        if (alert && typeof alert.success === 'function') {
           alert.success(successMsg, {
             position: 'top-right'
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       return true;
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
       
-      // Mostrar alerta de erro - FIXED with setTimeout
-      if (alert && typeof alert.error === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de erro
+      setTimeout(() => {
+        if (alert && typeof alert.error === 'function') {
           alert.error(`Erro no envio: ${errorMessage}`, {
             position: 'top-center',
             autoCloseTime: 7000
           });
-        }, 0);
-      }
+        }
+      }, 0);
       
       console.error("Erro no envio:", err);
       throw err;
@@ -1167,23 +1221,21 @@ const handleUploadFiles = useCallback(async () => {
     }
   }, [phoneNumber, finalJson, authKey, alert]);
   
-  /**
-   * Copia o JSON do template para a área de transferência
-   */
+  // Copiar o JSON do template para a área de transferência
   const copyToClipboard = useCallback((jsonType) => {
     try {
       if (!finalJson || !finalJson[jsonType]) {
         const errorMsg = 'Não foi possível copiar. JSON não disponível.';
         setError(errorMsg);
         
-        // Mostrar alerta de erro - FIXED with setTimeout
-        if (alert && typeof alert.error === 'function') {
-          setTimeout(() => {
+        // Mostrar alerta de erro
+        setTimeout(() => {
+          if (alert && typeof alert.error === 'function') {
             alert.error(errorMsg, {
               position: 'top-center'
             });
-          }, 0);
-        }
+          }
+        }, 0);
         
         return;
       }
@@ -1193,15 +1245,15 @@ const handleUploadFiles = useCallback(async () => {
           const successMsg = `JSON para ${jsonType === 'createTemplate' ? 'criação do template' : jsonType === 'sendTemplate' ? 'envio do template' : 'integração com Builder'} copiado!`;
           setSuccess(successMsg);
           
-          // Mostrar alerta de sucesso - FIXED with setTimeout
-          if (alert && typeof alert.success === 'function') {
-            setTimeout(() => {
+          // Mostrar alerta de sucesso
+          setTimeout(() => {
+            if (alert && typeof alert.success === 'function') {
               alert.success(successMsg, {
                 position: 'bottom-right',
                 autoCloseTime: 3000
               });
-            }, 0);
-          }
+            }
+          }, 0);
           
           // Limpar a mensagem de sucesso após 3 segundos
           setTimeout(() => {
@@ -1212,33 +1264,31 @@ const handleUploadFiles = useCallback(async () => {
           const errorMsg = `Erro ao copiar: ${err.message}`;
           setError(errorMsg);
           
-          // Mostrar alerta de erro - FIXED with setTimeout
-          if (alert && typeof alert.error === 'function') {
-            setTimeout(() => {
+          // Mostrar alerta de erro
+          setTimeout(() => {
+            if (alert && typeof alert.error === 'function') {
               alert.error(errorMsg, {
                 position: 'top-center'
               });
-            }, 0);
-          }
+            }
+          }, 0);
         });
     } catch (err) {
       const errorMsg = `Erro ao copiar: ${err.message}`;
       setError(errorMsg);
       
-      // Mostrar alerta de erro - FIXED with setTimeout
-      if (alert && typeof alert.error === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de erro
+      setTimeout(() => {
+        if (alert && typeof alert.error === 'function') {
           alert.error(errorMsg, {
             position: 'top-center'
           });
-        }, 0);
-      }
+        }
+      }, 0);
     }
   }, [finalJson, alert]);
   
-  /**
-   * Reinicia o formulário para criar um novo template
-   */
+  // Reiniciar o formulário para criar um novo template
   const resetForm = useCallback(() => {
     // Confirmar antes de resetar
     if (window.confirm('Tem certeza que deseja criar um novo template? Os dados atuais serão perdidos.')) {
@@ -1258,80 +1308,110 @@ const handleUploadFiles = useCallback(async () => {
       setLastSavedTime(null);
       setUnsavedChanges(false);
       
-      // Mostrar alerta de reset - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de reset
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
           alert.info('Template resetado. Você pode começar um novo template agora.', {
             position: 'top-right',
             autoCloseTime: 3000
           });
-        }, 0);
-      }
+        }
+      }, 0);
     }
   }, [alert]);
 
-  /**
-   * Vai para o passo anterior no fluxo
-   */
+  // Ir para o passo anterior
   const goToPreviousStep = useCallback(() => {
     if (step > 1) {
+      // Salvar o estado atual antes de voltar ao passo anterior
+      // Isso é crucial para preservar os fileHandles entre passos
+      saveCurrentState();
+      
       setStep(prev => prev - 1);
       setError('');
-      setSuccess('');
       
-      // Mostrar alerta de navegação - FIXED with setTimeout
-      if (alert && typeof alert.info === 'function') {
-        setTimeout(() => {
+      // Mostrar alerta de navegação
+      setTimeout(() => {
+        if (alert && typeof alert.info === 'function') {
           alert.info(`Retornando para o passo ${step - 1}`, {
             position: 'bottom-right',
             autoCloseTime: 2000
           });
-        }, 0);
-      }
+        }
+      }, 0);
     }
-  }, [step, alert]);
+  }, [step, alert, saveCurrentState]);
 
-  /**
-   * Limpa as mensagens de erro e sucesso
-   */
+  // Limpar mensagens
   const clearMessages = useCallback(() => {
     setError('');
     setSuccess('');
   }, []);
 
-  // Atualizar os campos de texto com limpeza de validação
+  // Atualizar campos de texto com limpeza de validação
   const handleInputChange = useCallback((field, value) => {
-    setHasInteracted(true);
-
+    setHasInteracted(true); // Marcar que o usuário interagiu
+    
+    // Atualizar o campo apropriado
     switch (field) {
+      case 'authKey':
+        setAuthKey(value);
+        break;
       case 'templateName':
         setTemplateName(value);
         break;
       case 'bodyText':
         setBodyText(value);
         break;
-      case 'language':
-        setLanguage(value);
-        break;
       case 'phoneNumber':
         setPhoneNumber(value);
-        break;
-      case 'authKey':
-        setAuthKey(value);
         break;
       default:
         break;
     }
     
-    // Limpar erro de validação relacionado a este campo
+    // Marcar alterações não salvas
+    setUnsavedChanges(true);
+    
+    // Limpar erros de validação relacionados ao campo
     if (validationErrors[field]) {
-      setValidationErrors(prev => {
+      setValidationErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
       });
     }
   }, [validationErrors]);
+
+  // Manipulador de Save/Load e status de salvamento para conectar com UI
+  const handleSaveBeforeUpload = useCallback(() => {
+    // Verificar se a função saveCurrentState existe
+    const saveSuccess = saveCurrentState();
+    
+    if (saveSuccess) {
+      // Adicionar alerta de sucesso
+      setTimeout(() => {
+        if (alert && typeof alert.success === 'function') {
+          alert.success("Rascunho salvo com sucesso!", {
+            position: 'bottom-right',
+            autoCloseTime: 3000
+          });
+        }
+      }, 0);
+    } else {
+      // Mostrar erro se o salvamento falhou
+      setTimeout(() => {
+        if (alert && typeof alert.error === 'function') {
+          alert.error("Não foi possível salvar o rascunho.", {
+            position: 'top-center',
+            autoCloseTime: 5000
+          });
+        }
+      }, 0);
+    }
+    
+    return saveSuccess;
+  }, [saveCurrentState, alert]);
 
   return {
     // Estados
@@ -1351,6 +1431,8 @@ const handleUploadFiles = useCallback(async () => {
     validationErrors,
     unsavedChanges,
     lastSavedTime,
+    hasInteracted,
+    setHasInteracted,
     
     // Métodos
     handleAddCard,
@@ -1368,16 +1450,18 @@ const handleUploadFiles = useCallback(async () => {
     clearMessages,
     isStepValid,
     handleInputChange,
+    handleNextStep,
     
-    // Novas funções para sincronização de botões
+    // Funções de sincronização de botões
     checkButtonConsistency,
     standardizeButtons,
     applyButtonStandardization,
     syncButtonType,
     syncAddButton,
     syncRemoveButton,
-
-    hasInteracted,
-    setHasInteracted
+    
+    // Funções específicas de rascunho
+    saveCurrentState,
+    handleSaveBeforeUpload,
   };
 };
