@@ -173,6 +173,20 @@ export const useWhatsAppTemplate = () => {
       }
     };
   }, [templateName, language, bodyText, cards, authKey, unsavedChanges, saveCurrentState]);
+
+  const showValidationErrors = useCallback((errorMessages) => {
+    if (!errorMessages || errorMessages.length === 0) return;
+  
+    // Use o `useAlertSafe` para evitar alertas duplicados ou muito frequentes
+    if (alert && typeof alert.error === 'function') {
+      setTimeout(() => {
+        alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
+          position: 'top-center',
+          autoCloseTime: 7000
+        });
+      }, 0);
+    }
+  }, [alert]);
   
   // Validation functions with safe alert handling - FIXED to avoid calling alert during render
   const validateStepOne = useCallback((triggerAlerts = false) => {
@@ -204,20 +218,7 @@ export const useWhatsAppTemplate = () => {
     return errorMessages.length === 0;
   }, [authKey, cards, numCards, showValidationErrors]);
   
-  // Show validation errors - separate function to call alerts outside of render
-  const showValidationErrors = useCallback((errorMessages) => {
-    if (!errorMessages || errorMessages.length === 0) return;
-  
-    // Use o `useAlertSafe` para evitar alertas duplicados ou muito frequentes
-    if (alert && typeof alert.error === 'function') {
-      setTimeout(() => {
-        alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
-          position: 'top-center',
-          autoCloseTime: 7000
-        });
-      }, 0);
-    }
-  }, [alert]);
+
 
 
   
