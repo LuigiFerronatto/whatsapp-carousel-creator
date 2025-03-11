@@ -1,6 +1,6 @@
 // hooks/useTextContent.js
 import { useContext } from 'react';
-import { TextContentContext } from '../contexts/TextContentContext';
+import { TextContentContext } from '../../contexts/TextContentContext';
 
 /**
  * Hook para acessar o conteúdo de texto centralizado

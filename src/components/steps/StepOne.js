@@ -205,26 +205,6 @@ const StepOne = ({
     }
   }, [error, success, alert]);
 
-  // Verifica quantos cards já possuem fileHandles
-  const cardsWithFileHandles = cards.slice(0, numCards).filter(card => 
-    card.fileUrl && card.fileHandle && card.fileHandle !== ''
-  ).length;
-
-  // Função para limpar todos os fileHandles
-  const handleClearAllFileHandles = useCallback(() => {
-    if (window.confirm('Tem certeza que deseja limpar tudo? Isso forçará um novo upload para todos os cards.')) {
-      // Atualizar cada card para remover fileHandle
-      for (let i = 0; i < numCards; i++) {
-        updateCard(i, 'fileHandle', '');
-      }
-      
-      // Mostrar alerta de limpeza
-      alert.info('Todos os arquivos foram limpos. Você precisará fazer upload novamente.', {
-        position: 'top-center',
-        autoCloseTime: 3000
-      });
-    }
-  }, [cards, numCards, updateCard, alert]);
 
   // Verifica se o passo é válido
   const checkStepValidity = useCallback(() => {
@@ -296,8 +276,8 @@ const StepOne = ({
                 label="Chave de Autorização (Router Key)"
                 type={isKeyVisible ? "text" : "password"}
                 value={authKey}
-                onChange={(e) => setAuthKey(e.target.value)}
-                placeholder="Digite sua chave de autorização"
+                onBlur={(e) => setAuthKey(e.target.value)}
+                placeholder="Digite sua chave de autorização, exemplo: 'Key XXXXXX'"
                 hintMessage="Esta chave é necessária para enviar arquivos e criar templates. Você pode encontrá-la no portal Blip no seu roteador conectado ao Canal WhatsApp."
                 hintVariant="simple"
                 hintIsCompact={true}
@@ -330,7 +310,7 @@ const StepOne = ({
               <div className={steps.sectionIconContainer}>
                 <FiKey size={24} />
               </div>
-              <h3>Autenticação</h3>
+              <h3>Quantidade de Cards</h3>
             </div>
               <div className={styles.cardCounter}>
                 <span className={styles.cardCountLabel}>Número de cards:</span>

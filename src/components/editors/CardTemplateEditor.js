@@ -164,11 +164,6 @@ const CardTemplateEditor = ({
 
   const getCardColor = useCallback(() => {
     const colors = [
-      'var(--blip-action)',
-      'var(--mountain-meadow)',
-      'var(--marigold-yellow)',
-      'var(--chilean-fire)',
-      'var(--windsor)',
       'var(--extended-ocean-light)',
       'var(--extended-ocean-dark)',
       'var(--extended-blue-light)',

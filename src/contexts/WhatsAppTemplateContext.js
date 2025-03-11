@@ -1,6 +1,6 @@
-// contexts/WhatsAppTemplateContext.js
+// WhatsAppTemplateContext.js
 import React, { createContext, useContext, useMemo } from 'react';
-import { useWhatsAppTemplate } from '../hooks/useWhatsAppTemplate';
+import { useWhatsAppTemplate } from '../hooks/template/useWhatsAppTemplate';
 
 // Create the context with a default empty value
 const WhatsAppTemplateContext = createContext(null);

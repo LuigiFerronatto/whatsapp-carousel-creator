@@ -1,7 +1,7 @@
 // hooks/useFileUpload.js
 import { useState, useCallback } from 'react';
-import { useAlert } from '../components/ui/AlertMessage/AlertContext';
-import { createAzureBlobService } from '../services/storage/azureBlobService';
+import { useAlert } from '../../components/ui/AlertMessage/AlertContext';
+import { createAzureBlobService } from '../../services/storage/azureBlobService';
 
 export const useFileUpload = () => {
   const [isUploading, setIsUploading] = useState(false);

@@ -1,6 +1,6 @@
 // contexts/WhatsAppTemplateContext.js
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { useWhatsAppTemplate } from '../hooks/useWhatsAppTemplate';
+import { useWhatsAppTemplate } from '../hooks/template/useWhatsAppTemplate';
 
 // Criar o contexto
 const WhatsAppTemplateContext = createContext();

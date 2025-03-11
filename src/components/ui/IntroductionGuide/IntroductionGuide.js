@@ -111,7 +111,7 @@ const IntroductionGuide = ({ onClose }) => {
           <button className={styles.nextButton} onClick={nextStep}>
             {currentStep < steps.length - 1 ? (
               <>
-                Seguir
+                Continuar
                 <FiChevronRight size={18} />
               </>
             ) : (

@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 // Hooks personalizados
-import { useFileUpload } from '../../hooks/useFileUpload';
+import { useFileUpload } from '../../hooks/common/useFileUpload';
 import { useAlert } from '../ui/AlertMessage/AlertContext';
 
 // Componentes
