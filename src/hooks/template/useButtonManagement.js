@@ -166,7 +166,7 @@ export const useButtonManagement = (state, cardManagement) => {
     // Exibir mensagem de sucesso
     setTimeout(() => {
       if (alert && typeof alert.success === 'function') {
-        alert.success('Botões padronizados com sucesso em todos os cards!', {
+        alert.success("BUTTON_STANDARDIZED", {
           position: 'top-right',
           autoCloseTime: 3000
         });
@@ -214,10 +214,10 @@ export const useButtonManagement = (state, cardManagement) => {
     // Informar sobre a sincronização
     setTimeout(() => {
       if (alert && typeof alert.info === 'function') {
-        alert.info(`Tipo de botão "${newType}" sincronizado em todos os cards`, {
+        alert.info("BUTTON_TYPE_SYNCED", {
           position: 'bottom-right',
           autoCloseTime: 3000
-        });
+        }, newType);
       }
     }, 0);
   }, [numCards, setCards, setUnsavedChanges, alert]);
@@ -252,7 +252,7 @@ export const useButtonManagement = (state, cardManagement) => {
     // Informar sobre a adição de botões
     setTimeout(() => {
       if (alert && typeof alert.info === 'function') {
-        alert.info(`Botão do tipo "${buttonType}" adicionado a todos os cards`, {
+        alert.info("BUTTON_ADDED", {
           position: 'bottom-right',
           autoCloseTime: 3000
         });
@@ -280,7 +280,7 @@ export const useButtonManagement = (state, cardManagement) => {
     // Informar sobre a remoção de botões
     setTimeout(() => {
       if (alert && typeof alert.warning === 'function') {
-        alert.warning(`Botão removido de todos os cards`, {
+        alert.warning("BUTTON_REMOVED", {
           position: 'bottom-right',
           autoCloseTime: 3000
         });
@@ -337,7 +337,7 @@ export const useButtonManagement = (state, cardManagement) => {
       // Mostrar alerta sobre o limite de botões
       setTimeout(() => {
         if (alert && typeof alert.warning === 'function') {
-          alert.warning('Cada card pode ter no máximo 2 botões', {
+          alert.warning("BUTTON_MAX_LIMIT", {
             position: 'top-center'
           });
         }
@@ -379,7 +379,7 @@ export const useButtonManagement = (state, cardManagement) => {
       // Mostrar alerta sobre adição de botão
       setTimeout(() => {
         if (alert && typeof alert.info === 'function') {
-          alert.info(`Botão adicionado ao Card ${cardIndex + 1}`, {
+          alert.info("BUTTON_ADDED", {
             position: 'bottom-right',
             autoCloseTime: 2000
           });
@@ -413,7 +413,7 @@ export const useButtonManagement = (state, cardManagement) => {
       // Mostrar alerta sobre remoção de botão
       setTimeout(() => {
         if (alert && typeof alert.info === 'function') {
-          alert.info(`Botão removido do Card ${cardIndex + 1}`, {
+          alert.info("BUTTON_REMOVED", {
             position: 'bottom-right',
             autoCloseTime: 2000
           });

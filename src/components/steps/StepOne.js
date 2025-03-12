@@ -1,7 +1,7 @@
-// components/steps/StepOne.js - Melhorado
+// components/steps/StepOne.js - Com correções para salvar rascunho
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CardUploadInput from '../editors/CardUploadInput';
-import { useAlert } from '../ui/AlertMessage/AlertContext'; 
+import { useAlertService } from '../../hooks/common/useAlertService';
 import Button from '../ui/Button/Button';
 import { 
   FiUpload, 
@@ -18,6 +18,7 @@ import {
 import styles from './StepOne.module.css';
 import steps from '../../styles/Steps.module.css';
 import Input from '../ui/Input/Input';
+import { saveDraft } from '../../services/storage/localStorageService'; // Importação direta para backup
 
 /**
  * StepOne - Initial step for file configuration
@@ -54,8 +55,8 @@ const StepOne = ({
   const [isKeyVisible, setIsKeyVisible] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   
-  // Initialize alert system
-  const alert = useAlert();
+  // Initialize alertService instead of direct alert 
+  const alertService = useAlertService();
   
   // Refs
   const uploadSectionRef = useRef(null);
@@ -86,39 +87,107 @@ const StepOne = ({
     uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
   
-  // Save draft before upload
-  const handleSaveBeforeUpload = useCallback(() => {
-    // Verifica se a função saveCurrentState existe
-    if (typeof saveCurrentState === 'function') {
-      const success = saveCurrentState();
+  // CORREÇÃO: Função de fallback para salvar diretamente
+  const fallbackSaveDraft = useCallback(() => {
+    try {
+      // Criar um objeto com o estado atual
+      const currentState = {
+        authKey,
+        numCards,
+        cards: cards.slice(0, numCards), // Apenas cards ativos
+        lastSavedTime: new Date()
+      };
+      
+      const success = saveDraft(currentState);
       
       if (success) {
+        console.log('Rascunho salvo com mecanismo de fallback');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Erro no salvamento de fallback:', error);
+      return false;
+    }
+  }, [authKey, numCards, cards]);
+  
+  // Save draft before upload - CORREÇÃO: Adicionado fallback
+  const handleSaveBeforeUpload = useCallback(() => {
+    // Verificar se a função saveCurrentState existe
+    if (typeof saveCurrentState === 'function') {
+      try {
+        const success = saveCurrentState();
+        
+        if (success) {
+          setSavedBeforeUpload(true);
+          
+          // Usar AlertService em vez de alert direto
+          alertService.success('DRAFT_SAVED');
+          
+          setTimeout(() => {
+            setSavedBeforeUpload(false);
+          }, 3000);
+          
+          return true;
+        } else {
+          // Tentar mecanismo de fallback
+          console.warn('saveCurrentState falhou, tentando fallback...');
+          const fallbackSuccess = fallbackSaveDraft();
+          
+          if (fallbackSuccess) {
+            setSavedBeforeUpload(true);
+            
+            alertService.success('DRAFT_SAVED_FALLBACK');
+            
+            setTimeout(() => {
+              setSavedBeforeUpload(false);
+            }, 3000);
+            
+            return true;
+          } else {
+           // Mostrar erro se o salvamento falhou
+           alertService.error('DRAFT_SAVE_ERROR');
+            return false;
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao tentar salvar com saveCurrentState:', error);
+        
+        // Tentar mecanismo de fallback
+        const fallbackSuccess = fallbackSaveDraft();
+        
+        if (fallbackSuccess) {
+          setSavedBeforeUpload(true);
+          alertService.success('DRAFT_SAVED_FALLBACK');
+          setTimeout(() => {
+            setSavedBeforeUpload(false);
+          }, 3000);
+          return true;
+        }
+        
+        alertService.error(`Erro ao salvar rascunho: ${error.message}`);
+        return false;
+      }
+    } else {
+      // Usar mecanismo de fallback se saveCurrentState não existir
+      console.warn('saveCurrentState não disponível, usando fallback direto');
+      const fallbackSuccess = fallbackSaveDraft();
+      
+      if (fallbackSuccess) {
         setSavedBeforeUpload(true);
-        
-        // Adicionar alerta de sucesso
-        alert.success("Rascunho salvo com sucesso!", {
-          position: 'bottom-right',
-          autoCloseTime: 3000
-        });
-        
+        alertService.success('DRAFT_SAVED_FALLBACK');
         setTimeout(() => {
           setSavedBeforeUpload(false);
         }, 3000);
-      } else {
-        // Mostrar erro se o salvamento falhou
-        alert.error("Não foi possível salvar o rascunho.", {
-          position: 'top-center',
-          autoCloseTime: 5000
-        });
+        return true;
       }
-    } else {
+      
       // Mostrar erro se a função não estiver disponível
-      console.error("Função saveCurrentState não está disponível");
-      alert.error("Não foi possível salvar o rascunho. Tente novamente mais tarde.", {
-        position: 'top-center'
-      });
+      console.error("Função saveCurrentState não está disponível e fallback falhou");
+      alertService.error('DRAFT_SAVE_ERROR');
+      return false;
     }
-  }, [saveCurrentState, alert]);
+  }, [saveCurrentState, alertService, fallbackSaveDraft]);
   
   // Check if all cards have valid URLs
   const allCardsHaveUrls = useCallback(() => {
@@ -147,26 +216,40 @@ const StepOne = ({
     try {
       // Verificar se temos a chave de autenticação
       if (!authKey) {
-        alert.error("Chave de autorização (Router Key) é obrigatória para continuar", {
-          position: 'top-center'
-        });
+        alertService.error('AUTH_KEY_REQUIRED');
         return;
       }
       
       // Verificar se todos os cards têm URLs
       if (!allCardsHaveUrls()) {
-        alert.warning("Adicione arquivos para todos os cards antes de continuar", {
-          position: 'top-center'
-        });
+        alertService.warning('CARD_URLS_REQUIRED');
         return;
       }
       
       // Iniciar simulação de progresso
       const stopProgress = simulateUploadProgress();
       
-      // Salvar rascunho antes de upload
-      if (typeof saveCurrentState === 'function') {
-        saveCurrentState();
+      // CORREÇÃO: Salvar rascunho com múltiplas estratégias antes de upload
+      try {
+        let saveSuccess = false;
+        
+        // Tentar com saveCurrentState primeiro
+        if (typeof saveCurrentState === 'function') {
+          saveSuccess = saveCurrentState();
+        }
+        
+        // Se falhar, tentar com fallback
+        if (!saveSuccess) {
+          saveSuccess = fallbackSaveDraft();
+        }
+        
+        if (saveSuccess) {
+          console.log('Estado salvado antes do upload');
+        } else {
+          console.warn('Não foi possível salvar o estado antes do upload');
+        }
+      } catch (error) {
+        console.error('Erro ao tentar salvar estado antes do upload:', error);
       }
       
       // Chamar a função original de upload
@@ -179,31 +262,26 @@ const StepOne = ({
       stopProgress();
       
       // Mostrar alerta de sucesso se não ocorreu erro
-      alert.success("Upload de arquivos concluído com sucesso!", {
-        position: 'top-right'
-      });
+      alertService.success('UPLOAD_SUCCESS');
     } catch (err) {
       // Zerar progresso em caso de erro
       setUploadProgress(0);
       
       // Capturar e mostrar erros como alertas
-      alert.error(`Erro no upload dos arquivos: ${err.message || 'Erro desconhecido'}`, {
-        position: 'top-center',
-        autoCloseTime: 7000
-      });
+      alertService.error('UPLOAD_ERROR', {}, err.message || 'Erro desconhecido');
     }
-  }, [authKey, allCardsHaveUrls, handleUploadFiles, alert, saveCurrentState, simulateUploadProgress]);
+  }, [authKey, allCardsHaveUrls, handleUploadFiles, alertService, saveCurrentState, simulateUploadProgress, fallbackSaveDraft]);
 
   // Mostrar alertas para erros e sucessos existentes
   useEffect(() => {
     if (error) {
-      alert.error(error, { position: 'top-center' });
+      alertService.error(error);
     }
     
     if (success) {
-      alert.success(success, { position: 'top-right' });
+      alertService.success(success);
     }
-  }, [error, success, alert]);
+  }, [error, success, alertService]);
 
 
   // Verifica se o passo é válido
@@ -306,38 +384,38 @@ const StepOne = ({
 
           {/* Card controls section */}
           <div className={styles.cardsControlSection}>
-          <div className={steps.sectionHeader}>
+            <div className={steps.sectionHeader}>
               <div className={steps.sectionIconContainer}>
                 <FiKey size={24} />
               </div>
               <h3>Quantidade de Cards</h3>
             </div>
-              <div className={styles.cardCounter}>
-                <span className={styles.cardCountLabel}>Número de cards:</span>
-                <div className={styles.buttonGroup}>
-                  <Button 
-                    onClick={handleRemoveCard}
-                    disabled={numCards <= 2}
-                    className={styles.controlButton}
-                    aria-label="Remover card"
-                    variant="outline"
-                    color="content"
-                    size="small"
-                    iconLeft={<FiMinus size={18} />}
-                  />
-                  <span className={styles.cardCount}>{numCards}</span>
-                  <Button 
-                    onClick={handleAddCard}
-                    disabled={numCards >= 10}
-                    className={styles.controlButton}
-                    aria-label="Adicionar card"
-                    variant="outline"
-                    color="content"
-                    size="small"
-                    iconLeft={<FiPlus size={18} />}
-                  />
-                </div>
+            <div className={styles.cardCounter}>
+              <span className={styles.cardCountLabel}>Número de cards:</span>
+              <div className={styles.buttonGroup}>
+                <Button 
+                  onClick={handleRemoveCard}
+                  disabled={numCards <= 2}
+                  className={styles.controlButton}
+                  aria-label="Remover card"
+                  variant="outline"
+                  color="content"
+                  size="small"
+                  iconLeft={<FiMinus size={18} />}
+                />
+                <span className={styles.cardCount}>{numCards}</span>
+                <Button 
+                  onClick={handleAddCard}
+                  disabled={numCards >= 10}
+                  className={styles.controlButton}
+                  aria-label="Adicionar card"
+                  variant="outline"
+                  color="content"
+                  size="small"
+                  iconLeft={<FiPlus size={18} />}
+                />
               </div>
+            </div>
             
             <div className={styles.cardControlOptions}>
               <p className={styles.cardControlHelp}>

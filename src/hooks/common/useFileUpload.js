@@ -1,6 +1,6 @@
 // hooks/useFileUpload.js
 import { useState, useCallback } from 'react';
-import { useAlert } from '../../components/ui/AlertMessage/AlertContext';
+import { useAlertService } from './useAlertService';
 import { createAzureBlobService } from '../../services/storage/azureBlobService';
 
 export const useFileUpload = () => {
@@ -9,7 +9,7 @@ export const useFileUpload = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   
-  const alert = useAlert();
+  const alert = useAlertService();
 
   const uploadToAzure = useCallback(async (file, updateProgress = () => {}) => {
     setIsUploading(true);
@@ -31,10 +31,10 @@ export const useFileUpload = () => {
           setUploadProgress(progress);
           updateProgress(progress);
           if (progress % 25 === 0 && progress > 0) {
-            alert.info(`Upload ${progress}% concluído`, {
+            alert.info("UPLOAD_PROGRESS", {
               position: 'bottom-right',
               autoCloseTime: 1500
-            });
+            }, progress);
           }
         };
   
@@ -45,10 +45,10 @@ export const useFileUpload = () => {
   
         setUploadedFile(result);
         
-        alert.success(`Upload do arquivo "${file.name}" concluído com sucesso!`, {
+        alert.success("UPLOAD_COMPLETE", {
           position: 'top-right',
           autoCloseTime: 3000
-        });
+        }, 1);
   
         return result;
         
@@ -79,16 +79,16 @@ export const useFileUpload = () => {
           updateProgress(progress);
           
           if (progress % 25 === 0 && progress > 0) {
-            alert.info(`Upload ${progress}% concluído (modo fallback)`, {
+            alert.info("UPLOAD_PROGRESS", {
               position: 'bottom-right',
               autoCloseTime: 1500
-            });
+            }, `${progress}% (modo fallback)`);
           }
         }
         
         setUploadedFile(simulatedResult);
         
-        alert.success(`Upload do arquivo "${file.name}" concluído em modo fallback!`, {
+        alert.success("UPLOAD_SUCCESS", {
           position: 'top-right',
           autoCloseTime: 3000
         });
@@ -100,10 +100,10 @@ export const useFileUpload = () => {
       console.error('Erro fatal em uploadToAzure:', error);
       setUploadError(error.message || 'Erro no upload do arquivo');
       
-      alert.error(`Falha no upload: ${error.message || 'Erro desconhecido'}`, {
+      alert.error("UPLOAD_ERROR", {
         position: 'top-center',
         autoCloseTime: 5000
-      });
+      }, error.message || 'Erro desconhecido');
       
       throw error;
     } finally {

@@ -1,8 +1,8 @@
-// components/steps/StepTwo.js - Versão melhorada
+// components/steps/StepTwo.js (Modificado)
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
-import { useAlert } from '../ui/AlertMessage/AlertContext';
+import { useAlertService } from '../../hooks/common/useAlertService';
 import Input from '../ui/Input/Input';
 import Hints, { HintsGroup } from '../ui/Hints/Hints';
 import Button from '../ui/Button/Button';
@@ -20,19 +20,15 @@ import {
   FiCornerRightDown,
   FiRefreshCw,
   FiEdit,
-  FiSmile
+  FiSmile,
+  FiX,
+  FiList,
+  FiClipboard
 } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
 import progressbar from '../ui/ProgressBar/ProgressBar.module.css';
 
-/**
- * StepTwo - Componente melhorado para a segunda etapa de configuração do template
- * Corrigido para utilizar saveCurrentState em vez de saveDraftManually
- * 
- * @param {Object} props Propriedades do componente
- * @returns {JSX.Element} Componente StepTwo
- */
 const StepTwo = ({
   templateName,
   setTemplateName,
@@ -48,14 +44,13 @@ const StepTwo = ({
   error,
   loading,
   isStepValid,
-  saveCurrentState, // Substituído de saveDraftManually para saveCurrentState
+  saveCurrentState,
   unsavedChanges,
   lastSavedTime,
-  checkButtonConsistency, // Adicionada verificação de consistência
-  applyButtonStandardization // Adicionada padronização de botões
+  checkButtonConsistency,
+  applyButtonStandardization
 }) => {
-  // Inicializar sistema de alertas
-  const alert = useAlert();
+  const alert = useAlertService();
 
   // Estado local
   const [showHints, setShowHints] = useState(true);
@@ -68,6 +63,7 @@ const StepTwo = ({
   const [previewExpanded, setPreviewExpanded] = useState(false);
   const [templateNameSuggestions, setTemplateNameSuggestions] = useState([]);
   const [showNameSuggestions, setShowNameSuggestions] = useState(false);
+  const [showCardOverview, setShowCardOverview] = useState(false);
   
   // Refs
   const previewRef = useRef(null);
@@ -113,6 +109,44 @@ const StepTwo = ({
   // Status de validação
   const isTemplateNameValid = templateName && templateName.length >= 3;
   const isBodyTextValid = bodyText && bodyText.length > 0;
+
+  // Validação de card completo
+  const isCardComplete = (card) => {
+    if (!card.bodyText) return false;
+    
+    // Verificar se todos os botões têm texto
+    if (!card.buttons.every(button => button.text)) return false;
+    
+    // Verificar campos específicos para cada tipo de botão
+    for (const button of card.buttons) {
+      if (button.type === 'URL' && !button.url) return false;
+      if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) return false;
+    }
+    
+    return true;
+  };
+
+  // Calcular estado de completude para cada card
+  const cardStatus = cards.slice(0, numCards).map((card, index) => ({
+    index,
+    complete: isCardComplete(card),
+    hasText: !!card.bodyText,
+    buttonsComplete: card.buttons.every(button => {
+      if (!button.text) return false;
+      if (button.type === 'URL' && !button.url) return false;
+      if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) return false;
+      return true;
+    }),
+    missingFields: [
+      !card.bodyText ? 'texto do card' : null,
+      ...card.buttons.map((button, btnIndex) => {
+        if (!button.text) return `texto do botão ${btnIndex + 1}`;
+        if (button.type === 'URL' && !button.url) return `URL do botão ${btnIndex + 1}`;
+        if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) return `telefone do botão ${btnIndex + 1}`;
+        return null;
+      })
+    ].filter(Boolean)
+  }));
 
   // Gerar sugestões de nome de template com base no bodyText
   useEffect(() => {
@@ -174,10 +208,10 @@ const StepTwo = ({
 
     // Se tivermos erros, mostramos um alerta com as informações
     if (!allValid && validationErrors.length > 0) {
-      alert.error(`Problemas de validação encontrados:\n${validationErrors.join('\n')}`, {
+      alert.error("VALIDATION_ERRORS_FOUND", {
         position: 'top-center',
         autoCloseTime: 7000
-      });
+      }, validationErrors.join('\n'));
     }
 
     return allValid;
@@ -187,7 +221,7 @@ const StepTwo = ({
   const handleContinue = useCallback(async () => {
     // Validar nome do template
     if (!isTemplateNameValid) {
-      alert.warning("O nome do template deve ter pelo menos 3 caracteres", {
+      alert.warning("TEMPLATE_NAME_SHORT", {
         position: 'top-center'
       });
       return;
@@ -195,7 +229,7 @@ const StepTwo = ({
 
     // Validar texto de introdução
     if (!isBodyTextValid) {
-      alert.warning("A mensagem de introdução é obrigatória", {
+      alert.warning("TEMPLATE_BODY_REQUIRED", {
         position: 'top-center'
       });
       return;
@@ -222,7 +256,7 @@ const StepTwo = ({
             await new Promise(resolve => setTimeout(resolve, 500));
             
             // Mostrar alerta de sucesso para padronização
-            alert.success("Botões padronizados com sucesso!", {
+            alert.success("BUTTON_STANDARDIZED", {
               position: 'bottom-right',
               autoCloseTime: 3000
             });
@@ -244,15 +278,12 @@ const StepTwo = ({
       
         // Tenta criar o template
         await handleCreateTemplate();
-      
-        // REMOVER o alerta de sucesso daqui
-        // Agora o alerta virá do apiService
       } catch (err) {
         // Capturar e mostrar erros como alertas
-        alert.error(`Erro ao criar template: ${err.message || 'Falha desconhecida'}`, {
+        alert.error("TEMPLATE_CREATION_ERROR", {
           position: 'top-center',
           autoCloseTime: 7000
-        });
+        }, err.message || 'Falha desconhecida');
       }}
   }, [
     isTemplateNameValid,
@@ -276,7 +307,7 @@ const StepTwo = ({
         setSavedBeforeUpload(true);
 
         // Adicionar alerta de sucesso
-        alert.success("Rascunho salvo com sucesso!", {
+        alert.success("DRAFT_SAVED", {
           position: 'bottom-right',
           autoCloseTime: 3000
         });
@@ -286,7 +317,7 @@ const StepTwo = ({
         }, 5000);
       } else {
         // Mostrar erro se o salvamento falhou
-        alert.error("Não foi possível salvar o rascunho. Verifique o armazenamento local.", {
+        alert.error("DRAFT_SAVE_ERROR", {
           position: 'top-center',
           autoCloseTime: 5000
         });
@@ -294,7 +325,7 @@ const StepTwo = ({
     } else {
       // Mostrar erro se a função não estiver disponível
       console.error("Função saveCurrentState não está disponível");
-      alert.error("Não foi possível salvar o rascunho. Tente novamente mais tarde.", {
+      alert.error("DRAFT_SAVE_ERROR", {
         position: 'top-center'
       });
     }
@@ -317,27 +348,24 @@ const StepTwo = ({
     return isStepValid(2);
   }, [isStepValid, isTemplateNameValid, isBodyTextValid, validateCards]);
   
-  // Função para copiar texto para o clipboard
-  const copyToClipboard = useCallback((text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      alert.info("Texto copiado para a área de transferência", {
-        position: 'bottom-right',
-        autoCloseTime: 2000
-      });
-    }).catch(err => {
-      console.error('Erro ao copiar texto: ', err);
-      alert.error("Falha ao copiar texto", {
-        position: 'bottom-right'
-      });
+  // Função para navegar diretamente para um card com problemas
+  const navigateToCard = (index) => {
+    setActiveCard(index);
+    setFocusedInput({ cardIndex: index, buttonIndex: null });
+    
+    // Rolagem suave até o editor de card
+    document.querySelector(`.${styles.activeCardEditor}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
     });
-  }, [alert]);
+  };
 
   // Aplicar uma sugestão de nome de template
   const applyNameSuggestion = useCallback((suggestion) => {
     setTemplateName(suggestion);
     setShowNameSuggestions(false);
     
-    alert.success("Nome do template aplicado!", {
+    alert.success("TEMPLATE_NAME_APPLIED", {
       position: 'bottom-right',
       autoCloseTime: 2000
     });
@@ -382,53 +410,173 @@ const StepTwo = ({
     { code: "ar_SA", name: "العربية (المملكة العربية السعودية)" }
   ];
 
+  // NOVA FUNÇÃO: Calcular número de cards completos vs. incompletos
+  const cardCompletionStats = useCallback(() => {
+    const total = numCards;
+    const complete = cardStatus.filter(cs => cs.complete).length;
+    const incomplete = total - complete;
+    
+    return {
+      total,
+      complete,
+      incomplete,
+      percentage: Math.round((complete / total) * 100)
+    };
+  }, [numCards, cardStatus]);
+
+  // NOVO COMPONENTE: Card Checklist Modal
+  const CardOverviewModal = ({ onClose }) => {
+    const stats = cardCompletionStats();
+    
+    return (
+      <div className={styles.cardOverviewModal}>
+        <div className={styles.cardOverviewContent}>
+          <div className={styles.cardOverviewHeader}>
+            <h3>Visão Geral dos Cards</h3>
+            <button onClick={onClose} className={styles.closeModalButton}>
+              <FiX size={20} />
+            </button>
+          </div>
+          
+          <div className={styles.cardStats}>
+            <div className={styles.cardStatItem}>
+              <span className={styles.cardStatValue}>{stats.total}</span>
+              <span className={styles.cardStatLabel}>Total</span>
+            </div>
+            <div className={styles.cardStatItem}>
+              <span className={`${styles.cardStatValue} ${styles.complete}`}>{stats.complete}</span>
+              <span className={styles.cardStatLabel}>Completos</span>
+            </div>
+            <div className={styles.cardStatItem}>
+              <span className={`${styles.cardStatValue} ${styles.incomplete}`}>{stats.incomplete}</span>
+              <span className={styles.cardStatLabel}>Incompletos</span>
+            </div>
+          </div>
+          
+          <div className={styles.cardProgressBar}>
+            <div 
+              className={styles.cardProgressFill} 
+              style={{width: `${stats.percentage}%`}}
+            >
+              {stats.percentage > 15 && `${stats.percentage}%`}
+            </div>
+            {stats.percentage <= 15 && <span className={styles.outsidePercentage}>{stats.percentage}%</span>}
+          </div>
+          
+          <div className={styles.cardList}>
+            {cardStatus.map((status, idx) => (
+              <div 
+                key={idx} 
+                className={`${styles.cardStatusItem} ${status.complete ? styles.cardComplete : styles.cardIncomplete}`}
+                onClick={() => {
+                  navigateToCard(idx);
+                  onClose();
+                }}
+              >
+                <div className={styles.cardStatusHeader}>
+                  <span className={styles.cardNumber}>Card {idx + 1}</span>
+                  {status.complete ? (
+                    <FiCheckCircle className={styles.completeIcon} size={18} />
+                  ) : (
+                    <FiAlertTriangle className={styles.incompleteIcon} size={18} />
+                  )}
+                </div>
+                
+                {!status.complete && (
+                  <div className={styles.cardMissingFields}>
+                    <span className={styles.missingLabel}>Faltando:</span>
+                    <ul className={styles.missingList}>
+                      {status.missingFields.map((field, fieldIdx) => (
+                        <li key={fieldIdx}>{field}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={steps.container}>
       <div className={steps.introStepWrapper}>
         <h2 className={steps.stepTitle}>Criação de Template</h2>
         <p className={steps.stepDescription}>
-          Configure os detalhes do seu template, adicione os textos iniciais dos cartões, adicione formatação para os textos e veja o preview logo ao lado!
+          Configure os detalhes do seu template, adicione os textos e botões para cada cartão.
         </p>
         
-        {/* Barra de progresso da etapa */}
+        {/* MODIFICADO: Barra de progresso da etapa melhorada */}
         <div className={steps.stepProgressContainer}>
-          <div className={steps.stepProgressBar}>
-            <div 
-              className={steps.stepProgressFill} 
-              style={{width: `${completionPercentage}%`}}
-            ></div>
+          <div className={styles.progressStatus}>
+            <span className={styles.progressLabel}>Progresso geral:</span>
+            <div className={styles.stepProgressBarWrapper}>
+              <div className={steps.stepProgressBar}>
+                <div 
+                  className={styles.stepProgressFill} 
+                  style={{width: `${completionPercentage}%`}}
+                ></div>
+              </div>
+              <span className={styles.progressPercentage}>{completionPercentage}%</span>
+            </div>
           </div>
-          <span className={steps.stepProgressText}>
-            {completionPercentage === 100 ? 'Pronto para continuar!' : `${completionPercentage}% completo`}
-          </span>
+          
+          {/* NOVA SEÇÃO: Estatísticas dos cards */}
+          <div className={styles.cardsStatus}>
+            <span className={styles.progressLabel}>Cards:</span>
+            <div className={styles.cardStatusBadges}>
+              {cardCompletionStats().complete > 0 && (
+                <span className={styles.completeBadge}>
+                  <FiCheckCircle size={14} />
+                  {cardCompletionStats().complete} completo{cardCompletionStats().complete !== 1 ? 's' : ''}
+                </span>
+              )}
+              {cardCompletionStats().incomplete > 0 && (
+                <span className={styles.incompleteBadge}>
+                  <FiAlertTriangle size={14} />
+                  {cardCompletionStats().incomplete} incompleto{cardCompletionStats().incomplete !== 1 ? 's' : ''}
+                </span>
+              )}
+              <button
+                className={styles.viewCardOverviewButton}
+                onClick={() => setShowCardOverview(true)}
+                title="Ver visão geral dos cards"
+              >
+                <FiList size={16} />
+                Ver detalhes
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className={styles.viewControls}>
-          <Button
-            className={styles.viewToggle}
-            onClick={() => setShowPreview(!showPreview)}
-            aria-label={showPreview ? "Ocultar visualização" : "Mostrar visualização"}
-            variant="text"
-            color="content"
-            size="small"
-            iconLeft={showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-          >
-            {showPreview ? "Ocultar visualização" : "Mostrar visualização"}
-          </Button>
+        <Button
+          className={styles.viewToggle}
+          onClick={() => setShowPreview(!showPreview)}
+          aria-label={showPreview ? "Ocultar visualização" : "Mostrar visualização"}
+          variant="text"
+          color="content"
+          size="small"
+          iconLeft={showPreview ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+        >
+          {showPreview ? "Ocultar visualização" : "Mostrar visualização"}
+        </Button>
 
-          <Button
-            className={styles.hintsToggle}
-            onClick={() => setShowHints(!showHints)}
-            aria-label={showHints ? "Ocultar dicas" : "Mostrar dicas"}
-            variant="text"
-            color="content"
-            size="small"
-            iconLeft={<FiInfo size={16} />}
-          >
-            {showHints ? "Ocultar dicas" : "Mostrar dicas"}
-          </Button>
-        </div>
+        <Button
+          className={styles.hintsToggle}
+          onClick={() => setShowHints(!showHints)}
+          aria-label={showHints ? "Ocultar dicas" : "Mostrar dicas"}
+          variant="text"
+          color="content"
+          size="small"
+          iconLeft={<FiInfo size={16} />}
+        >
+          {showHints ? "Ocultar dicas" : "Mostrar dicas"}
+        </Button>
+      </div>
         
       <div className={`${styles.contentWrapper} ${previewExpanded ? styles.previewExpanded : ''}`}>
         <div 
@@ -438,7 +586,7 @@ const StepTwo = ({
           <div className={steps.containerCard}>
             <div className={steps.sectionHeader}>
               <div className={steps.sectionIconContainer}>
-              <FiEdit size={24}/>
+                <FiEdit size={24}/>
               </div>
               <h3>Informações Básicas</h3>
             </div>
@@ -468,7 +616,7 @@ const StepTwo = ({
                   hintIsCompact={true}
                 />
                 
-                {/* {showNameSuggestions && templateNameSuggestions.length > 0 && (
+                {showNameSuggestions && templateNameSuggestions.length > 0 && (
                   <div className={styles.nameSuggestions}>
                     <span className={styles.suggestionLabel}>Sugestões de nome:</span>
                     <div className={styles.suggestionButtons}>
@@ -493,9 +641,8 @@ const StepTwo = ({
                       Dispensar sugestões
                     </button>
                   </div>
-                )} */}
-
-                </div>
+                )}
+              </div>
 
               <Input
                 id="language"
@@ -539,30 +686,6 @@ const StepTwo = ({
                   clearable
                   hintIsCompact={true}
                 />
-                
-                {/* <div className={styles.textActions}>
-                  <Button
-                    variant="text"
-                    color="primary"
-                    size="small"
-                    iconLeft={<FiCopy size={14} />}
-                    onClick={() => copyToClipboard(bodyText)}
-                    className={styles.textActionButton}
-                  >
-                    Copiar texto
-                  </Button>
-                  
-                  <Button
-                    variant="text"
-                    color="primary"
-                    size="small"
-                    iconLeft={<FiSmile size={14} />}
-                    onClick={() => setBodyText(prev => prev + " 👋")}
-                    className={styles.textActionButton}
-                  >
-                    Adicionar emoji
-                  </Button>
-                </div> */}
               </div>
             </div>
           </div>
@@ -581,7 +704,7 @@ const StepTwo = ({
                     size="small"
                     onClick={() => {
                       applyButtonStandardization();
-                      alert.success("Botões padronizados com sucesso!", {
+                      alert.success("BUTTON_STANDARDIZED", {
                         position: 'bottom-right'
                       });
                     }}
@@ -594,53 +717,58 @@ const StepTwo = ({
           )}
 
           <div className={steps.containerCard}>
-          <div className={steps.sectionHeader}>
+            <div className={steps.sectionHeader}>
               <div className={steps.sectionIconContainer}>
-              <FiEdit size={24}/>
+                <FiEdit size={24}/>
               </div>
               <h3>Conteúdo dos Cards</h3>
             </div>
 
-            <div className={styles.cardTabs}>
-              {cards.slice(0, numCards).map((_, index) => (
-                <Button
-                  key={index}
-                  className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''}`}
-                  onClick={() => setActiveCard(index)}
-                  variant={activeCard === index ? "solid" : "outline"}
-                  color={activeCard === index ? "primary" : "content"}
-                  size="small"
-                >
-                  Card {index + 1}
-                  {!cards[index].bodyText && <span className={styles.incompleteIndicator}>!</span>}
-                </Button>
-              ))}
+            {/* MODIFICADO: Melhor navegação entre tabs */}
+            <div className={styles.cardTabsContainer}>
+              <div className={styles.cardTabs}>
+                {cards.slice(0, numCards).map((_, index) => {
+                  const isComplete = cardStatus[index].complete;
+                  const missingFields = cardStatus[index].missingFields;
+                  
+                  return (
+                    <Button
+                      key={index}
+                      className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''} ${
+                        isComplete ? styles.completeCardTab : styles.incompleteCardTab
+                      }`}
+                      onClick={() => setActiveCard(index)}
+                      variant={activeCard === index ? "solid" : "outline"}
+                      color={activeCard === index ? (isComplete ? "success" : "primary") : "content"}
+                      size="small"
+                    >
+                      Card {index + 1}
+                      {isComplete ? (
+                        <span className={styles.completeIndicator}>
+                          <FiCheckCircle size={14} />
+                        </span>
+                      ) : (
+                        <span className={styles.incompleteIndicator}>
+                          {missingFields.length}
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
+              </div>
               
-              {/* <div className={styles.cardNavButtons}>
-                <Button
-                  variant="outline"
-                  color="content"
-                  size="small"
-                  iconLeft={<FiChevronLeft size={16} />}
-                  onClick={() => setActiveCard(prev => Math.max(0, prev - 1))}
-                  disabled={activeCard === 0}
-                  className={styles.navButton}
-                >
-                  Anterior
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  color="content"
-                  size="small"
-                  iconRight={<FiChevronRight size={16} />}
-                  onClick={() => setActiveCard(prev => Math.min(numCards - 1, prev + 1))}
-                  disabled={activeCard === numCards - 1}
-                  className={styles.navButton}
-                >
-                  Próximo
-                </Button>
-              </div> */}
+              {/* NOVO: Mostrar dica ou progresso dos cards */}
+              {activeCard !== null && !cardStatus[activeCard].complete && (
+                <div className={styles.cardCompletionHint}>
+                  <FiInfo size={16} />
+                  <div>
+                    <strong>Campos faltantes no Card {activeCard + 1}:</strong>
+                    <span className={styles.missingFieldsList}>
+                      {cardStatus[activeCard].missingFields.join(', ')}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className={styles.activeCardEditor}>
@@ -659,6 +787,9 @@ const StepTwo = ({
                   }
                   focusedInput={focusedInput}
                   setFocusedInput={setFocusedInput}
+                  // NOVO: Passar informações sobre campos obrigatórios faltantes
+                  missingFields={cardStatus[activeCard].missingFields}
+                  isComplete={cardStatus[activeCard].complete}
                 />
               )}
             </div>
@@ -735,23 +866,15 @@ const StepTwo = ({
                   focusedInput={focusedInput}
                 />
               </div>
-              
-              {/* Botões de refresh para a visualização */}
-              {/* <div className={styles.previewActions}>
-                <Button
-                  variant="outline"
-                  color="content"
-                  size="small"
-                  iconLeft={<FiRefreshCw size={16} />}
-                  onClick={() => setFocusedInput({ cardIndex: null, buttonIndex: null })}
-                >
-                  Atualizar visualização
-                </Button>
-              </div> */}
             </div>
           </div>
         )}
       </div>
+
+      {/* Modal de visão geral dos cards */}
+      {showCardOverview && (
+        <CardOverviewModal onClose={() => setShowCardOverview(false)} />
+      )}
     </div>
   );
 };

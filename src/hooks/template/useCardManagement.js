@@ -1,107 +1,104 @@
-// hooks/template/useCardManagement.js
+// hooks/template/useCardManagement.js - Com AlertService
 import { useCallback } from 'react';
+import { useAlertService } from '../common/useAlertService';
 
 export const useCardManagement = (state) => {
   const {
-    cards, setCards,
-    numCards, setNumCards,
-    setUnsavedChanges,
-    validationErrors, setValidationErrors,
-    alert
+    cards, setCards, numCards, setNumCards, setUnsavedChanges,
+    createEmptyCard
   } = state;
+
+  // Usar AlertService em vez de alert direto
+  const alertService = useAlertService();
+
+  // Atualizar um campo específico de um card
+  const updateCard = useCallback((index, field, value) => {
+    // Verificar se o índice está dentro dos limites
+    if (index < 0 || index >= cards.length) {
+      console.error(`Tentativa de atualizar card com índice inválido: ${index}`);
+      return;
+    }
+    
+    setCards(prevCards => {
+      const newCards = [...prevCards];
+      
+      // Se estamos tentando alterar um card que não existe no array atual,
+      // preencher o array até o índice necessário
+      if (index >= newCards.length) {
+        while (newCards.length <= index) {
+          newCards.push(createEmptyCard());
+        }
+      }
+      
+      // Atualizar o campo específico
+      newCards[index] = {
+        ...newCards[index],
+        [field]: value
+      };
+      
+      return newCards;
+    });
+    
+    // Marcar que há alterações não salvas
+    setUnsavedChanges(true);
+  }, [cards, setCards, setUnsavedChanges, createEmptyCard]);
 
   // Adicionar um novo card
   const handleAddCard = useCallback(() => {
-    if (numCards < 10) {
-      setNumCards(prev => prev + 1);
-      setCards(prev => [...prev, state.createEmptyCard()]);
-      
-      // Marcar alterações não salvas
-      setUnsavedChanges(true);
-      
-      // Mostrar alerta
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Card ${numCards + 1} adicionado ao carrossel`, {
-            position: 'bottom-right',
-            autoCloseTime: 2000
-          });
-        }
-      }, 0);
-    } else {
-      // Mostrar alerta de limite máximo
-      setTimeout(() => {
-        if (alert && typeof alert.warning === 'function') {
-          alert.warning('Limite máximo de 10 cards atingido', {
-            position: 'top-center'
-          });
-        }
-      }, 0);
+    // Verificar se já atingimos o limite de 10 cards
+    if (numCards >= 10) {
+      alertService.warning('CARD_MAX_LIMIT');
+      return;
     }
-  }, [numCards, setNumCards, setCards, state.createEmptyCard, setUnsavedChanges, alert]);
-  
-  // Remover o último card
-  const handleRemoveCard = useCallback(() => {
-    if (numCards > 2) {
-      setNumCards(prev => prev - 1);
+    
+    // CORREÇÃO: Garantir que temos cards suficientes no array
+    setCards(prevCards => {
+      const newCards = [...prevCards];
       
-      // Não remover o card do array, apenas diminuir o número de cards visíveis
-      // Isso permite recuperar o card se o usuário mudar de ideia
-      
-      // Marcar alterações não salvas
-      setUnsavedChanges(true);
-      
-      // Mostrar alerta
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Card ${numCards} removido do carrossel`, {
-            position: 'bottom-right',
-            autoCloseTime: 2000
-          });
-        }
-      }, 0);
-    } else {
-      // Mostrar alerta de limite mínimo
-      setTimeout(() => {
-        if (alert && typeof alert.warning === 'function') {
-          alert.warning('Um carrossel precisa ter no mínimo 2 cards', {
-            position: 'top-center'
-          });
-        }
-      }, 0);
-    }
-  }, [numCards, setNumCards, setUnsavedChanges, alert]);
-  
-  // Atualizar um campo específico de um card
-  const updateCard = useCallback((index, field, value) => {
-    setCards(prev => {
-      const newCards = [...prev];
-      
-      // Se o índice é válido
-      if (index >= 0 && index < newCards.length) {
-        // Cria uma cópia do card para modificação
-        newCards[index] = { ...newCards[index], [field]: value };
+      // Adicionar cards vazios se o array atual não for grande o suficiente
+      while (newCards.length <= numCards) {
+        newCards.push(createEmptyCard());
       }
       
       return newCards;
     });
     
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
+    // Incrementar o número de cards
+    setNumCards(prevNumCards => {
+      const newNumCards = prevNumCards + 1;
+      console.log(`Aumentando número de cards para ${newNumCards}`);
+      alertService.info('CARD_ADDED');
+      return newNumCards;
+    });
     
-    // Limpar erro de validação relacionado a este campo
-    if (validationErrors[`card_${index}_${field}`]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[`card_${index}_${field}`];
-        return newErrors;
-      });
+    // Marcar que há alterações não salvas
+    setUnsavedChanges(true);
+  }, [numCards, setNumCards, setCards, setUnsavedChanges, createEmptyCard, alertService]);
+
+  // Remover um card
+  const handleRemoveCard = useCallback(() => {
+    // Verificar se estamos no limite mínimo de 2 cards
+    if (numCards <= 2) {
+      alertService.warning('CARD_MIN_LIMIT');
+      return;
     }
-  }, [setCards, setUnsavedChanges, validationErrors, setValidationErrors]);
+    
+    // CORREÇÃO: Não removemos realmente o card do array, apenas diminuímos o numCards
+    // Isso mantém os dados dos cards anteriores disponíveis caso o usuário queira readicioná-los
+    setNumCards(prevNumCards => {
+      const newNumCards = prevNumCards - 1;
+      console.log(`Diminuindo número de cards para ${newNumCards}`);
+      alertService.info('CARD_REMOVED');
+      return newNumCards;
+    });
+    
+    // Marcar que há alterações não salvas
+    setUnsavedChanges(true);
+  }, [numCards, setNumCards, setUnsavedChanges, alertService]);
 
   return {
+    updateCard,
     handleAddCard,
-    handleRemoveCard,
-    updateCard
+    handleRemoveCard
   };
 };

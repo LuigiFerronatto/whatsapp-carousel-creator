@@ -1,15 +1,17 @@
-
-// hooks/template/useStepsValidation.js
+// hooks/template/useStepsValidation.js - Com AlertService
 import { useCallback } from 'react';
+import { useAlertService } from '../common/useAlertService';
 
 export const useStepsValidation = (state, validation, draftManager) => {
   const {
-    setStep, setHasTriedToAdvance, setError,
-    alert
+    setStep, setHasTriedToAdvance, setError
   } = state;
 
   const { validateStepOne, isStepValid } = validation;
   const { saveCurrentState } = draftManager;
+  
+  // Usar AlertService
+  const alertService = useAlertService();
 
   // Avançar para o próximo passo com validação
   const handleNextStep = useCallback(() => {
@@ -19,8 +21,11 @@ export const useStepsValidation = (state, validation, draftManager) => {
       // Salvar o estado atual antes de avançar
       saveCurrentState();
       setStep((prev) => prev + 1); // Avançar para o próximo passo
+    } else {
+      // Usar AlertService para mensagem de validação
+      alertService.error('VALIDATION_ERROR');
     }
-  }, [validateStepOne, saveCurrentState, setHasTriedToAdvance, setStep]);
+  }, [validateStepOne, saveCurrentState, setHasTriedToAdvance, setStep, alertService]);
 
   // Ir para o passo anterior
   const goToPreviousStep = useCallback(() => {
@@ -32,17 +37,10 @@ export const useStepsValidation = (state, validation, draftManager) => {
       setStep(prev => prev - 1);
       setError('');
       
-      // Mostrar alerta de navegação
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Retornando para o passo ${state.step - 1}`, {
-            position: 'bottom-right',
-            autoCloseTime: 2000
-          });
-        }
-      }, 0);
+      // Mostrar alerta de navegação com AlertService
+      alertService.info(`Retornando para o passo ${state.step - 1}`);
     }
-  }, [state.step, saveCurrentState, setStep, setError, alert]);
+  }, [state.step, saveCurrentState, setStep, setError, alertService]);
 
   // Atualizar campos de texto com limpeza de validação
   const handleInputChange = useCallback((field, value) => {
