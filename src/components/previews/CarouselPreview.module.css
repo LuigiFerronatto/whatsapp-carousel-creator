@@ -708,7 +708,7 @@ span .blockquote {
 }
 
 .activeCard {
-  animation: fadeIn 0.3s ease forwards;
+  animation: fadeIn cubic-bezier(1, 0, 0.5, 1) ease forwards;
 }
 
 .inactiveCard {
@@ -929,23 +929,23 @@ span .blockquote {
 
 /* CarouselPreview.module.css */
 .cardHighlighted {
-  box-shadow: 0 0 0 2px var(--blip-action);
+  box-shadow: 0 0 0 0.5rem var(--blip-action);
   animation: highlightPulse 2s infinite;
 }
 
 .buttonHighlighted {
-  box-shadow: 0 0 0 2px var(--blip-action);
+  box-shadow: 0 0 0 0.2rem var(--blip-action);
   animation: highlightPulse 2s infinite;
 }
 
 @keyframes highlightPulse {
   0% {
-    box-shadow: 0 0 0 2px var(--blip-action);
+    box-shadow: 0 0 0 0.3rem var(--blip-action);
   }
   50% {
-    box-shadow: 0 0 0 4px var(--blip-action-light);
+    box-shadow: 0 0 0 0.1rem var(--blip-action-light);
   }
   100% {
-    box-shadow: 0 0 0 2px var(--blip-action);
+    box-shadow: 0 0 0 0.3rem var(--blip-action);
   }
 }
