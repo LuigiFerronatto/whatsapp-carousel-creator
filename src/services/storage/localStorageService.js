@@ -1,115 +1,62 @@
-// services/storage/localStorageService.js - Versão corrigida
+// services/storage/localStorageService.js - CORRIGIDO
+/**
+ * Chave usada para armazenar o rascunho no localStorage
+ */
+const DRAFT_STORAGE_KEY = 'whatsapp_template_draft';
 
 /**
- * Salva um rascunho no localStorage com verificações de segurança
- * Versão melhorada com melhor preservação de fileHandles e tratamento de erros
- * @param {Object} state Estado a ser salvo
- * @returns {boolean} Indica se o salvamento foi bem-sucedido
+ * Salva o estado atual como rascunho no localStorage
+ * @param {Object} state - Estado atual do formulário
+ * @returns {boolean} Indica se o salvamento foi bem sucedido
  */
 export const saveDraft = (state) => {
   try {
-    // Validar se o estado não está vazio
-    if (!state || Object.keys(state).length === 0) {
-      console.warn('Tentativa de salvar rascunho vazio');
+    // Verificar se temos dados válidos
+    if (!state) {
+      console.warn('Tentativa de salvar rascunho com dados inválidos (state é null/undefined)');
       return false;
     }
-
-    // Garantir que os fileHandles sejam preservados para cada card
-    const cardsWithFileHandles = state.cards?.map(card => {
-      // Verificar se há um fileHandle válido
-      const hasValidFileHandle = card.fileHandle && typeof card.fileHandle === 'string' && card.fileHandle.length > 0;
-      
-      // Preserva o fileHandle e adiciona flag para pular upload
-      return {
-        ...card,
-        fileHandle: hasValidFileHandle ? card.fileHandle : '', // Garante que fileHandle nunca seja undefined
-        fileUploadSkippable: hasValidFileHandle && card.fileUrl ? true : false // Flag para saber se podemos pular o upload
-      };
-    }) || [];
-
-    // Adicionar timestamp de criação e preservar fileHandles
-    const draftWithTimestamp = {
-      ...state,
-      cards: cardsWithFileHandles,
-      createdAt: state.createdAt || Date.now(),
-      lastUpdated: Date.now()
-    };
-
-    console.log('Salvando estado do rascunho:', { 
-      templateName: draftWithTimestamp.templateName,
-      cards: `${draftWithTimestamp.cards.length} cards`,
-      authKey: draftWithTimestamp.authKey ? '(definido)' : '(não definido)',
-      lastUpdated: new Date(draftWithTimestamp.lastUpdated).toLocaleString()
-    });
-
-    // Certificar-se de que o objeto é serializável (sem referências circulares)
-    try {
-      const draftString = JSON.stringify(draftWithTimestamp);
-      
-      // Verificar limite de localStorage
-      try {
-        localStorage.setItem('whatsapp_template_draft', draftString);
-        localStorage.setItem('draft_last_saved_time', new Date().toISOString());
-        return true;
-      } catch (storageError) {
-        // Tratar erros de armazenamento
-        if (storageError instanceof DOMException && 
-            (storageError.name === 'QuotaExceededError' || 
-             storageError.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
-          console.error('Limite de armazenamento local excedido');
-          
-          // Limpar rascunhos antigos para liberar espaço
-          clearOldDrafts();
-          
-          // Tentar salvar novamente
-          try {
-            localStorage.setItem('whatsapp_template_draft', draftString);
-            localStorage.setItem('draft_last_saved_time', new Date().toISOString());
-            return true;
-          } catch {
-            console.error('Falha ao salvar rascunho mesmo após limpar rascunhos antigos');
-            return false;
-          }
-        }
-        console.error('Erro de armazenamento:', storageError);
-        return false;
-      }
-    } catch (jsonError) {
-      console.error('Erro ao serializar o rascunho:', jsonError);
-      
-      // Tentar salvar uma versão simplificada do rascunho
-      try {
-        const simplifiedDraft = {
-          templateName: state.templateName || '',
-          language: state.language || 'pt_BR',
-          bodyText: state.bodyText || '',
-          cards: cardsWithFileHandles.map(card => ({
-            fileUrl: card.fileUrl || '',
-            fileType: card.fileType || 'image',
-            fileHandle: card.fileHandle || '',
-            bodyText: card.bodyText || '',
-            buttons: (card.buttons || []).map(btn => ({
-              type: btn.type || 'QUICK_REPLY',
-              text: btn.text || '',
-              url: btn.url || '',
-              phoneNumber: btn.phoneNumber || '',
-              payload: btn.payload || ''
-            }))
-          })),
-          authKey: state.authKey || '',
-          createdAt: state.createdAt || Date.now(),
-          lastUpdated: Date.now()
-        };
-        
-        const simplifiedString = JSON.stringify(simplifiedDraft);
-        localStorage.setItem('whatsapp_template_draft', simplifiedString);
-        localStorage.setItem('draft_last_saved_time', new Date().toISOString());
-        return true;
-      } catch (fallbackError) {
-        console.error('Erro ao salvar versão simplificada do rascunho:', fallbackError);
-        return false;
-      }
+    
+    // Verificação adicional de campos obrigatórios
+    if (!state.cards || !Array.isArray(state.cards) || state.cards.length === 0) {
+      console.warn('Tentativa de salvar rascunho com cards inválidos');
+      // Adicionar cards vazios se não existirem
+      state.cards = state.cards || [];
     }
+    
+    // Converter para string antes de salvar, com tratamento para campos circulares
+    // Usar uma versão segura para serialização
+    const safeState = { ...state };
+    
+    // Certifique-se de que não estamos tentando serializar funções ou objetos circulares
+    // O objeto state pode conter referencias circulares (funções, React contexts)
+    Object.keys(safeState).forEach(key => {
+      // Remover propriedades que não podem ser serializadas
+      if (typeof safeState[key] === 'function' || 
+          (typeof safeState[key] === 'object' && 
+           key !== 'cards' && 
+           key !== 'lastSavedTime' &&
+           key !== 'numCards')) {
+        delete safeState[key];
+      }
+    });
+    
+    const stateString = JSON.stringify(safeState);
+    
+    // Log para debug
+    console.log(`Salvando rascunho com ${safeState.cards.length} cards ativos, numCards=${safeState.numCards}`);
+    
+    // Salvar no localStorage
+    localStorage.setItem(DRAFT_STORAGE_KEY, stateString);
+    
+    // Verificar se o salvamento funcionou
+    const savedItem = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!savedItem) {
+      console.error('Falha ao salvar no localStorage: item não encontrado após salvamento');
+      return false;
+    }
+    
+    return true;
   } catch (error) {
     console.error('Erro ao salvar rascunho:', error);
     return false;
@@ -117,95 +64,77 @@ export const saveDraft = (state) => {
 };
 
 /**
- * Carrega o rascunho do localStorage com verificações adicionais
- * Versão melhorada para validar corretamente fileHandles e tratar dados incompletos
+ * Carrega o rascunho salvo do localStorage
+ * @returns {Object|null} Estado salvo ou null se não existir
  */
 export const loadDraft = () => {
   try {
-    const draftString = localStorage.getItem('whatsapp_template_draft');
+    // Obter a string do localStorage
+    const stateString = localStorage.getItem(DRAFT_STORAGE_KEY);
     
-    if (!draftString) {
+    // Se não existir, retornar null
+    if (!stateString) {
+      console.log('Nenhum rascunho encontrado no localStorage');
       return null;
     }
-
-    // Parse do rascunho
-    const draft = JSON.parse(draftString);
-
-    // Verificar idade do rascunho
-    const MAX_DRAFT_AGE = 30 * 24 * 60 * 60 * 1000; // 30 dias
-    if (draft.createdAt && (Date.now() - draft.createdAt > MAX_DRAFT_AGE)) {
-      console.warn('Rascunho expirado. Removendo...');
-      localStorage.removeItem('whatsapp_template_draft');
+    
+    // Converter de volta para objeto
+    const state = JSON.parse(stateString);
+    
+    // Verificação básica de integridade
+    if (!state || typeof state !== 'object') {
+      console.warn('Rascunho carregado é inválido (não é um objeto)');
       return null;
     }
-
-    // Processar os cards para garantir que fileHandles sejam mantidos
-    const processedCards = draft.cards?.map(card => {
-      // Verificar se há um fileHandle válido
-      const hasValidFileHandle = card.fileHandle && typeof card.fileHandle === 'string' && card.fileHandle.length > 0;
-      
-      return {
-        fileUrl: card.fileUrl || '',
-        fileType: card.fileType || 'image',
-        fileHandle: hasValidFileHandle ? card.fileHandle : '',
-        bodyText: card.bodyText || '',
-        buttons: card.buttons || [{ type: 'QUICK_REPLY', text: '', payload: '' }],
-        fileUploadSkippable: hasValidFileHandle && card.fileUrl ? true : false
-      };
-    });
-
-    // Filtrar e limpar campos indesejados
-    const cleanDraft = {
-      templateName: draft.templateName || '',
-      language: draft.language || 'pt_BR',
-      bodyText: draft.bodyText || '',
-      cards: processedCards && processedCards.length >= 2 ? processedCards : null,
-      authKey: draft.authKey || '',
-      lastSavedTime: draft.lastSavedTime || draft.lastUpdated || new Date().toISOString()
-    };
-
-    console.log('Rascunho carregado:', { 
-      templateName: cleanDraft.templateName,
-      language: cleanDraft.language,
-      cards: cleanDraft.cards ? `${cleanDraft.cards.length} cards` : 'nenhum',
-      bodyText: cleanDraft.bodyText ? 'presente' : 'não definido',
-      authKey: cleanDraft.authKey ? 'presente' : 'não definido',
-      lastSavedTime: cleanDraft.lastSavedTime
-    });
-
-    return cleanDraft;
+    
+    // Garantir que cards seja um array
+    if (!state.cards || !Array.isArray(state.cards)) {
+      console.warn('Rascunho carregado tem cards inválidos');
+      state.cards = [];
+    }
+    
+    // Log para debug
+    console.log(`Rascunho carregado com ${state.cards.length} cards, numCards=${state.numCards}`);
+    
+    return state;
   } catch (error) {
     console.error('Erro ao carregar rascunho:', error);
-    // Limpar rascunho inválido
-    localStorage.removeItem('whatsapp_template_draft');
+    // Se houver erro, tente limpar o rascunho
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      console.log('Rascunho inválido removido após erro');
+    } catch (e) {
+      // Ignorar erro na limpeza
+    }
     return null;
   }
 };
 
 /**
- * Limpa rascunhos antigos do localStorage
+ * Limpa o rascunho salvo do localStorage
+ * @returns {boolean} Indica se a limpeza foi bem sucedida
  */
-const clearOldDrafts = () => {
+export const clearDraft = () => {
   try {
-    // Remove todos os rascunhos relacionados ao template
-    localStorage.removeItem('whatsapp_template_draft');
-    localStorage.removeItem('draft_last_saved_time');
-    localStorage.removeItem('last_draft_identifier');
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    console.log('Rascunho removido com sucesso');
+    return true;
   } catch (error) {
-    console.error('Erro ao limpar rascunhos:', error);
+    console.error('Erro ao limpar rascunho:', error);
+    return false;
   }
 };
 
 /**
- * Limpa completamente o rascunho atual
+ * Verifica se há um rascunho salvo
+ * @returns {boolean} Se existe um rascunho
  */
-export const clearDraft = () => {
+export const hasDraft = () => {
   try {
-    clearOldDrafts();
-    console.log('Rascunho limpo com sucesso');
-    return true;
+    const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    return !!draft;
   } catch (error) {
-    console.error('Erro ao limpar rascunho:', error);
+    console.error('Erro ao verificar rascunho:', error);
     return false;
   }
 };

@@ -1,14 +1,5 @@
-const API_BASE_URL = 'https://msging.net';
-
-/**
- * Cabeçalhos básicos para requisições à API
- * @param {string} authKey - Chave de autorização
- * @returns {Object} Cabeçalhos HTTP
- */
-const getHeaders = (authKey) => ({
-  'Content-Type': 'application/json',
-  'Authorization': authKey
-});
+// services/api/apiSendTemplate.js
+import { API_BASE_URL, getHeaders } from './apiConfig';
 
 /**
  * Envia o template para um número de telefone

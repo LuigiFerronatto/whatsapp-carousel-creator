@@ -1,11 +1,11 @@
 // hooks/useAlertSafe.js
 import { useContext, useRef, useState, useEffect } from 'react';
-import { AlertContext } from '../components/ui/AlertMessage/AlertContext';
+import { AlertContext } from '../../components/ui/AlertMessage/AlertContext';
 
 // Globally shared alert management
 const globalAlertCache = {
   messages: new Map(),
-  timeout: 3000, // Time to consider message as repeated
+  timeout: 5000, // Time to consider message as repeated
   lastAlertTime: 0,
   MIN_ALERT_INTERVAL: 500 // Minimum time between alerts
 };
