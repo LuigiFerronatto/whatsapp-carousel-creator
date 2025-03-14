@@ -1,4 +1,4 @@
-// components/steps/StepTwo.js (Modificado)
+// components/steps/StepTwo.js (Enhanced Version)
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
@@ -23,7 +23,14 @@ import {
   FiSmile,
   FiX,
   FiList,
-  FiClipboard
+  FiClipboard,
+  FiArrowLeft,
+  FiArrowRight,
+  FiZap,
+  FiLayers,
+  FiMaximize,
+  FiMinimize,
+  FiFilter
 } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
@@ -52,7 +59,7 @@ const StepTwo = ({
 }) => {
   const alert = useAlertService();
 
-  // Estado local
+  // Local state with enhancements
   const [showHints, setShowHints] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
   const [validationMessages, setValidationMessages] = useState({});
@@ -65,11 +72,21 @@ const StepTwo = ({
   const [showNameSuggestions, setShowNameSuggestions] = useState(false);
   const [showCardOverview, setShowCardOverview] = useState(false);
   
+  // New states for enhanced UX
+  const [showAutoSavedNotification, setShowAutoSavedNotification] = useState(false);
+  const [autoSaveTimer, setAutoSaveTimer] = useState(null);
+  const [isCardFormMaximized, setIsCardFormMaximized] = useState(false);
+  const [activeSection, setActiveSection] = useState('basic'); // 'basic' or 'cards'
+  const [lastFieldChanged, setLastFieldChanged] = useState(null);
+  const [transitioningCard, setTransitioningCard] = useState(false);
+  const [buttonSyncDone, setButtonSyncDone] = useState(false); // Track button sync notification
+  
   // Refs
   const previewRef = useRef(null);
   const formContainerRef = useRef(null);
+  const cardEditorRef = useRef(null);
 
-  // Verificar consistência de botões quando os cards ou numCards mudarem
+  // Check button consistency when cards or numCards change
   useEffect(() => {
     if (typeof checkButtonConsistency === 'function' && numCards > 1) {
       const consistency = checkButtonConsistency();
@@ -77,7 +94,32 @@ const StepTwo = ({
     }
   }, [checkButtonConsistency, cards, numCards]);
 
-  // Limpar validações quando inputs mudam
+  // Enhanced auto-save functionality
+  useEffect(() => {
+    if (unsavedChanges && typeof saveCurrentState === 'function') {
+      // Clear existing timer
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      
+      // Set new timer for auto-save
+      const timer = setTimeout(() => {
+        try {
+          saveCurrentState();
+          setShowAutoSavedNotification(true);
+          setTimeout(() => setShowAutoSavedNotification(false), 3000);
+        } catch (err) {
+          console.error("Auto-save failed:", err);
+        }
+      }, 30000); // Auto-save after 30 seconds of inactivity
+      
+      setAutoSaveTimer(timer);
+    }
+    
+    return () => {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    };
+  }, [unsavedChanges, saveCurrentState, autoSaveTimer]);
+
+  // Clear validations when inputs change
   useEffect(() => {
     if (templateName) {
       setValidationMessages(prev => {
@@ -96,7 +138,7 @@ const StepTwo = ({
     }
   }, [templateName, bodyText]);
 
-  // Mostrar erros recebidos como propriedades como alertas
+  // Show errors received as properties as alerts
   useEffect(() => {
     if (error) {
       alert.error(error, {
@@ -106,18 +148,41 @@ const StepTwo = ({
     }
   }, [error, alert]);
 
-  // Status de validação
+  // Smooth transition when changing active card
+  useEffect(() => {
+    if (activeCard !== null) {
+      setTransitioningCard(true);
+      const timer = setTimeout(() => {
+        setTransitioningCard(false);
+      }, 300); // Match transition duration
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activeCard]);
+
+  // Track button sync notifications
+  useEffect(() => {
+    if (buttonSyncDone) {
+      const timer = setTimeout(() => {
+        setButtonSyncDone(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [buttonSyncDone]);
+
+  // Validation statuses
   const isTemplateNameValid = templateName && templateName.length >= 3;
   const isBodyTextValid = bodyText && bodyText.length > 0;
 
-  // Validação de card completo
+  // Card completeness validation
   const isCardComplete = (card) => {
     if (!card.bodyText) return false;
     
-    // Verificar se todos os botões têm texto
+    // Check if all buttons have text
     if (!card.buttons.every(button => button.text)) return false;
     
-    // Verificar campos específicos para cada tipo de botão
+    // Check specific fields for each button type
     for (const button of card.buttons) {
       if (button.type === 'URL' && !button.url) return false;
       if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) return false;
@@ -126,7 +191,7 @@ const StepTwo = ({
     return true;
   };
 
-  // Calcular estado de completude para cada card
+  // Calculate completion status for each card
   const cardStatus = cards.slice(0, numCards).map((card, index) => ({
     index,
     complete: isCardComplete(card),
@@ -148,7 +213,7 @@ const StepTwo = ({
     ].filter(Boolean)
   }));
 
-  // Gerar sugestões de nome de template com base no bodyText
+  // Generate template name suggestions based on bodyText
   useEffect(() => {
     if (bodyText && !templateName) {
       const words = bodyText
@@ -171,7 +236,7 @@ const StepTwo = ({
     }
   }, [bodyText, templateName]);
 
-  // Validação completa de cards e botões
+  // Enhanced card and button validation
   const validateCards = useCallback(() => {
     const messages = {};
     let allValid = true;
@@ -206,85 +271,98 @@ const StepTwo = ({
 
     setValidationMessages(messages);
 
-    // Se tivermos erros, mostramos um alerta com as informações
+    // Show alert with errors if any
     if (!allValid && validationErrors.length > 0) {
-      alert.error("VALIDATION_ERRORS_FOUND", {
+      alert.error("Encontramos alguns erros que precisam ser corrigidos:", {
         position: 'top-center',
         autoCloseTime: 7000
       }, validationErrors.join('\n'));
+      
+      // Animate to first card with errors
+      if (validationErrors.length > 0) {
+        const firstErrorCardMatch = validationErrors[0].match(/Card (\d+)/);
+        if (firstErrorCardMatch && firstErrorCardMatch[1]) {
+          const firstErrorCardIndex = parseInt(firstErrorCardMatch[1]) - 1;
+          if (activeCard !== firstErrorCardIndex) {
+            setActiveCard(firstErrorCardIndex);
+          }
+        }
+      }
     }
 
     return allValid;
-  }, [cards, numCards, alert]);
+  }, [cards, numCards, alert, activeCard]);
 
-  // Melhorado o handler para continuar, inclui validação e padronização
+  // Enhanced continue handler with improved validation and standardization
   const handleContinue = useCallback(async () => {
-    // Validar nome do template
+    // Validate template name
     if (!isTemplateNameValid) {
-      alert.warning("TEMPLATE_NAME_SHORT", {
+      alert.warning("O nome do template deve ter pelo menos 3 caracteres", {
         position: 'top-center'
       });
       return;
     }
 
-    // Validar texto de introdução
+    // Validate intro text
     if (!isBodyTextValid) {
-      alert.warning("TEMPLATE_BODY_REQUIRED", {
+      alert.warning("É necessário incluir um texto de introdução", {
         position: 'top-center'
       });
       return;
     }
 
-    // Verificar consistência de botões se houver mais de um card
+    // Check button consistency if there's more than one card
     if (numCards > 1 && typeof checkButtonConsistency === 'function') {
       const consistency = checkButtonConsistency();
 
       if (!consistency.isConsistent) {
-        // Mostrar alerta sobre a inconsistência
+        // Show alert about inconsistency with better UI
         const shouldStandardize = window.confirm(
+          "⚠️ Inconsistência Detectada\n\n" +
           "Os cards possuem configurações diferentes de botões, o que não é permitido pelo WhatsApp.\n\n" +
           "Deseja padronizar os botões automaticamente baseado no primeiro card?\n\n" +
-          "Clique em OK para padronizar ou Cancelar para revisar manualmente."
+          "• OK para padronizar automaticamente\n• Cancelar para ajustar manualmente"
         );
 
         if (shouldStandardize) {
-          // Padronizar botões e continuar
+          // Standardize buttons and continue
           if (typeof applyButtonStandardization === 'function') {
             applyButtonStandardization();
 
-            // Pequena pausa para processar as mudanças
+            // Small pause to process changes
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // Mostrar alerta de sucesso para padronização
-            alert.success("BUTTON_STANDARDIZED", {
+            // Show success alert for standardization
+            alert.success("Botões padronizados com sucesso!", {
               position: 'bottom-right',
               autoCloseTime: 3000
             });
           }
         } else {
-          // Usuário escolheu revisar manualmente
+          // User chose to review manually
           return;
         }
       }
     }
 
-    // Validar os cards
+    // Validate cards
     if (validateCards()) {
       try {
-        // Salvar antes de criar o template
+        // Save before creating the template
         if (typeof saveCurrentState === 'function') {
           saveCurrentState();
         }
       
-        // Tenta criar o template
+        // Attempt to create the template
         await handleCreateTemplate();
       } catch (err) {
-        // Capturar e mostrar erros como alertas
-        alert.error("TEMPLATE_CREATION_ERROR", {
+        // Capture and show errors as alerts
+        alert.error("Erro na criação do template:", {
           position: 'top-center',
           autoCloseTime: 7000
         }, err.message || 'Falha desconhecida');
-      }}
+      }
+    }
   }, [
     isTemplateNameValid,
     isBodyTextValid,
@@ -297,17 +375,17 @@ const StepTwo = ({
     applyButtonStandardization
   ]);
 
-  // Salvar rascunho
+  // Enhanced save draft function
   const handleSaveBeforeUpload = useCallback(() => {
-    // Verificar se a função saveCurrentState existe
+    // Check if saveCurrentState function exists
     if (typeof saveCurrentState === 'function') {
       const success = saveCurrentState();
 
       if (success) {
         setSavedBeforeUpload(true);
 
-        // Adicionar alerta de sucesso
-        alert.success("DRAFT_SAVED", {
+        // Add success alert
+        alert.success("Rascunho salvo com sucesso!", {
           position: 'bottom-right',
           autoCloseTime: 3000
         });
@@ -316,87 +394,94 @@ const StepTwo = ({
           setSavedBeforeUpload(false);
         }, 5000);
       } else {
-        // Mostrar erro se o salvamento falhou
-        alert.error("DRAFT_SAVE_ERROR", {
+        // Show error if saving failed
+        alert.error("Não foi possível salvar o rascunho", {
           position: 'top-center',
           autoCloseTime: 5000
         });
       }
     } else {
-      // Mostrar erro se a função não estiver disponível
-      console.error("Função saveCurrentState não está disponível");
-      alert.error("DRAFT_SAVE_ERROR", {
+      // Show error if function is not available
+      console.error("saveCurrentState function is not available");
+      alert.error("Função de salvamento não disponível", {
         position: 'top-center'
       });
     }
   }, [saveCurrentState, alert]);
 
-  // Verifica se o passo está completo
+  // Check if step is complete
   const checkStepValidity = useCallback(() => {
-    // Se a função isStepValid não estiver disponível, fazer validação local
+    // If isStepValid function is not available, do local validation
     if (typeof isStepValid !== 'function') {
-      // Verificar nome do template e texto
+      // Check template name and text
       if (!isTemplateNameValid || !isBodyTextValid) {
         return false;
       }
 
-      // Verificar cards
+      // Check cards
       return validateCards();
     }
 
-    // Se a função isStepValid estiver disponível, usar ela
+    // If isStepValid function is available, use it
     return isStepValid(2);
   }, [isStepValid, isTemplateNameValid, isBodyTextValid, validateCards]);
   
-  // Função para navegar diretamente para um card com problemas
+  // Function to navigate directly to a card with issues
   const navigateToCard = (index) => {
     setActiveCard(index);
     setFocusedInput({ cardIndex: index, buttonIndex: null });
     
-    // Rolagem suave até o editor de card
-    document.querySelector(`.${styles.activeCardEditor}`)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+    // Smooth scroll to card editor
+    setTimeout(() => {
+      cardEditorRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
   };
 
-  // Aplicar uma sugestão de nome de template
+  // Apply template name suggestion
   const applyNameSuggestion = useCallback((suggestion) => {
     setTemplateName(suggestion);
     setShowNameSuggestions(false);
     
-    alert.success("TEMPLATE_NAME_APPLIED", {
+    alert.success("Nome aplicado com sucesso!", {
       position: 'bottom-right',
       autoCloseTime: 2000
     });
+    
+    // Track the change
+    setLastFieldChanged('templateName');
+    setTimeout(() => setLastFieldChanged(null), 2000);
   }, [setTemplateName, alert]);
 
-  // Toggle para expandir/recolher a prévia
+  // Toggle to expand/collapse preview
   const togglePreviewExpanded = useCallback(() => {
     setPreviewExpanded(!previewExpanded);
     
     if (previewRef.current) {
       if (!previewExpanded) {
-        // Expandindo a prévia: salva o scroll atual, depois faz scroll para a prévia
+        // Expanding preview: save current scroll, then scroll to preview
         setTimeout(() => {
           previewRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       } else {
-        // Recolhendo a prévia: retorna para onde estava
+        // Collapsing preview: return to previous position
         formContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
   }, [previewExpanded]);
 
-  // Calcula o percentual de conclusão baseado no progresso
+  // Calculate completion percentage based on progress
   const completionPercentage = [
     isTemplateNameValid,
     isBodyTextValid,
     cards.slice(0, numCards).every(card => card.bodyText),
     cards.slice(0, numCards).every(card => card.buttons.every(button => button.text)),
-  ].filter(Boolean).length * 25;
+    cards.slice(0, numCards).every(isCardComplete),
+  ].filter(Boolean).length * 20;
 
-  // Opções de idioma para o dropdown
+  // Language options for dropdown
   const languageOptions = [
     { code: "pt_BR", name: "Português (Brasil)" },
     { code: "en_US", name: "English (United States)" },
@@ -410,7 +495,7 @@ const StepTwo = ({
     { code: "ar_SA", name: "العربية (المملكة العربية السعودية)" }
   ];
 
-  // NOVA FUNÇÃO: Calcular número de cards completos vs. incompletos
+  // Calculate card completion statistics
   const cardCompletionStats = useCallback(() => {
     const total = numCards;
     const complete = cardStatus.filter(cs => cs.complete).length;
@@ -424,7 +509,51 @@ const StepTwo = ({
     };
   }, [numCards, cardStatus]);
 
-  // NOVO COMPONENTE: Card Checklist Modal
+  // Enhanced card navigation
+  const goToNextCard = useCallback(() => {
+    if (activeCard < numCards - 1) {
+      setActiveCard(prevCard => prevCard + 1);
+    }
+  }, [activeCard, numCards]);
+
+  const goToPrevCard = useCallback(() => {
+    if (activeCard > 0) {
+      setActiveCard(prevCard => prevCard - 1);
+    }
+  }, [activeCard]);
+
+  // NEW: Enhanced button change handler for all cards
+  const handleButtonTypeChangeForAllCards = useCallback((buttonIndex, newType) => {
+    if (window.confirm(`Esta ação alterará o tipo deste botão em TODOS os cards para "${newType}". Deseja continuar?`)) {
+      // Apply to all cards
+      for (let cardIdx = 0; cardIdx < numCards; cardIdx++) {
+        // Create a copy of the buttons array for this card
+        const newButtons = [...cards[cardIdx].buttons];
+        if (buttonIndex < newButtons.length) {
+          newButtons[buttonIndex] = {
+            ...newButtons[buttonIndex],
+            type: newType,
+            // Make sure type-specific fields exist
+            ...(newType === 'URL' && !newButtons[buttonIndex].url ? { url: '' } : {}),
+            ...(newType === 'PHONE_NUMBER' && !newButtons[buttonIndex].phoneNumber ? { phoneNumber: '' } : {})
+          };
+          
+          // Update the card with new buttons
+          updateCard(cardIdx, 'buttons', newButtons);
+        }
+      }
+      
+      // Show notification
+      alert.success(`Tipo de botão "${newType}" sincronizado em todos os cards!`, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      
+      setButtonSyncDone(true);
+    }
+  }, [cards, numCards, updateCard, alert]);
+
+  // Card Checklist Modal Component
   const CardOverviewModal = ({ onClose }) => {
     const stats = cardCompletionStats();
     
@@ -500,6 +629,36 @@ const StepTwo = ({
     );
   };
 
+  // NEW: Section navigation with tabs
+  const SectionTabs = () => (
+    <div className={styles.sectionTabs}>
+      <button 
+        className={`${styles.sectionTab} ${activeSection === 'basic' ? styles.activeTab : ''}`}
+        onClick={() => setActiveSection('basic')}
+      >
+        <FiEdit size={18} />
+        <span>Informações Básicas</span>
+        {(!isTemplateNameValid || !isBodyTextValid) && (
+          <span className={styles.sectionErrorBadge}>
+            <FiAlertTriangle size={14} />
+          </span>
+        )}
+      </button>
+      <button 
+        className={`${styles.sectionTab} ${activeSection === 'cards' ? styles.activeTab : ''}`}
+        onClick={() => setActiveSection('cards')}
+      >
+        <FiLayers size={18} />
+        <span>Cards do Carrossel</span>
+        {cardStatus.some(card => !card.complete) && (
+          <span className={styles.sectionErrorBadge}>
+            <span className={styles.badgeCount}>{cardStatus.filter(card => !card.complete).length}</span>
+          </span>
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div className={steps.container}>
       <div className={steps.introStepWrapper}>
@@ -508,22 +667,23 @@ const StepTwo = ({
           Configure os detalhes do seu template, adicione os textos e botões para cada cartão.
         </p>
         
-        {/* MODIFICADO: Barra de progresso da etapa melhorada */}
+        {/* Enhanced progress bar */}
         <div className={steps.stepProgressContainer}>
           <div className={styles.progressStatus}>
             <span className={styles.progressLabel}>Progresso geral:</span>
             <div className={styles.stepProgressBarWrapper}>
-              <div className={steps.stepProgressBar}>
+              <div className={styles.stepProgressBar}>
                 <div 
                   className={styles.stepProgressFill} 
                   style={{width: `${completionPercentage}%`}}
+                  data-percentage={`${completionPercentage}%`}
                 ></div>
               </div>
               <span className={styles.progressPercentage}>{completionPercentage}%</span>
             </div>
           </div>
           
-          {/* NOVA SEÇÃO: Estatísticas dos cards */}
+          {/* Card statistics */}
           <div className={styles.cardsStatus}>
             <span className={styles.progressLabel}>Cards:</span>
             <div className={styles.cardStatusBadges}>
@@ -552,6 +712,7 @@ const StepTwo = ({
         </div>
       </div>
 
+      {/* Enhanced view controls */}
       <div className={styles.viewControls}>
         <Button
           className={styles.viewToggle}
@@ -576,14 +737,34 @@ const StepTwo = ({
         >
           {showHints ? "Ocultar dicas" : "Mostrar dicas"}
         </Button>
+        
+        {/* NEW: Enhanced layout controls */}
+        {showPreview && (
+          <Button
+            className={styles.expandToggle}
+            onClick={togglePreviewExpanded}
+            aria-label={previewExpanded ? "Minimizar prévia" : "Expandir prévia"}
+            variant="text"
+            color="content"
+            size="small"
+            iconLeft={previewExpanded ? <FiMinimize size={16} /> : <FiMaximize size={16} />}
+          >
+            {previewExpanded ? "Minimizar prévia" : "Expandir prévia"}
+          </Button>
+        )}
       </div>
         
+      {/* Enhanced content wrapper with transitions */}
       <div className={`${styles.contentWrapper} ${previewExpanded ? styles.previewExpanded : ''}`}>
         <div 
-          className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''}`}
+          className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''} ${isCardFormMaximized ? styles.maximized : ''}`}
           ref={formContainerRef}
         >
-          <div className={steps.containerCard}>
+          {/* NEW: Section navigation */}
+          <SectionTabs />
+          
+          {/* Basic Information Section */}
+          <div className={`${steps.containerCard} ${activeSection !== 'basic' ? styles.hiddenSection : ''}`}>
             <div className={steps.sectionHeader}>
               <div className={steps.sectionIconContainer}>
                 <FiEdit size={24}/>
@@ -598,7 +779,11 @@ const StepTwo = ({
                   name="templateName"
                   label="Nome do Template"
                   value={templateName}
-                  onChange={(e) => setTemplateName(e.target.value)}
+                  onChange={(e) => {
+                    setTemplateName(e.target.value);
+                    setLastFieldChanged('templateName');
+                    setTimeout(() => setLastFieldChanged(null), 2000);
+                  }}
                   placeholder="Exemplo: meu_carrossel_promocional"
                   required
                   minLength={3}
@@ -614,6 +799,7 @@ const StepTwo = ({
                   allowFormatting
                   validateOnChange
                   hintIsCompact={true}
+                  className={lastFieldChanged === 'templateName' ? styles.highlightedField : ''}
                 />
                 
                 {showNameSuggestions && templateNameSuggestions.length > 0 && (
@@ -649,7 +835,11 @@ const StepTwo = ({
                 name="language"
                 label="Idioma do Template"
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={(e) => {
+                  setLanguage(e.target.value);
+                  setLastFieldChanged('language');
+                  setTimeout(() => setLastFieldChanged(null), 2000);
+                }}
                 placeholder="Escolha um idioma"
                 required
                 isDropdown={true}
@@ -662,6 +852,7 @@ const StepTwo = ({
                 fullWidth
                 hintIsCompact={true}
                 searchable
+                className={lastFieldChanged === 'language' ? styles.highlightedField : ''}
               />
 
               <div className={styles.bodyTextContainer}>
@@ -671,7 +862,11 @@ const StepTwo = ({
                   type="textarea"
                   label="Mensagem de introdução"
                   value={bodyText}
-                  onChange={(e) => setBodyText(e.target.value)}
+                  onChange={(e) => {
+                    setBodyText(e.target.value);
+                    setLastFieldChanged('bodyText');
+                    setTimeout(() => setLastFieldChanged(null), 2000);
+                  }}
                   placeholder="Esse texto aparecerá antes do carrossel. Seja claro e envolvente para seus clientes."
                   maxLength={1024}
                   rows={3}
@@ -685,79 +880,113 @@ const StepTwo = ({
                   showCharCounter
                   clearable
                   hintIsCompact={true}
+                  className={lastFieldChanged === 'bodyText' ? styles.highlightedField : ''}
                 />
               </div>
             </div>
           </div>
 
-          {/* Alerta de inconsistência de botões */}
-          {numCards > 1 && !buttonConsistencyStatus.isConsistent && (
-            <div className={styles.buttonInconsistencyWarning}>
-              <FiAlertTriangle size={20} />
-              <div>
-                <h4>Atenção! Inconsistência de botões detectada</h4>
-                <p>{buttonConsistencyStatus.message}</p>
-                {typeof applyButtonStandardization === 'function' && (
-                  <Button
-                    variant="outline"
-                    color="warning"
-                    size="small"
-                    onClick={() => {
-                      applyButtonStandardization();
-                      alert.success("BUTTON_STANDARDIZED", {
-                        position: 'bottom-right'
-                      });
-                    }}
-                  >
-                    Padronizar botões automaticamente
-                  </Button>
-                )}
+          {/* Card Content Section */}
+          <div className={`${steps.containerCard} ${activeSection !== 'cards' ? styles.hiddenSection : ''}`}>
+            {/* Button inconsistency warning */}
+            {numCards > 1 && !buttonConsistencyStatus.isConsistent && (
+              <div className={styles.buttonInconsistencyWarning}>
+                <FiAlertTriangle size={20} />
+                <div>
+                  <h4>Atenção! Inconsistência de botões detectada</h4>
+                  <p>{buttonConsistencyStatus.message}</p>
+                  {typeof applyButtonStandardization === 'function' && (
+                    <Button
+                      variant="outline"
+                      color="warning"
+                      size="small"
+                      onClick={() => {
+                        applyButtonStandardization();
+                        alert.success("Botões padronizados com sucesso!", {
+                          position: 'bottom-right'
+                        });
+                        setButtonSyncDone(true);
+                      }}
+                      iconLeft={<FiZap size={16} />}
+                    >
+                      Padronizar botões automaticamente
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-
-          <div className={steps.containerCard}>
-            <div className={steps.sectionHeader}>
-              <div className={steps.sectionIconContainer}>
-                <FiEdit size={24}/>
+            )}
+            
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIconContainer}>
+                <FiLayers size={24}/>
               </div>
               <h3>Conteúdo dos Cards</h3>
+              
+              {/* NEW: Card maximize/restore control */}
+              <button 
+                className={styles.maximizeCardFormButton}
+                onClick={() => setIsCardFormMaximized(!isCardFormMaximized)}
+                title={isCardFormMaximized ? "Restaurar visualização" : "Expandir editor de cards"}
+              >
+                {isCardFormMaximized ? <FiMinimize size={18} /> : <FiMaximize size={18} />}
+              </button>
             </div>
 
-            {/* MODIFICADO: Melhor navegação entre tabs */}
+            {/* Enhanced card tabs with better navigation */}
             <div className={styles.cardTabsContainer}>
-              <div className={styles.cardTabs}>
-                {cards.slice(0, numCards).map((_, index) => {
-                  const isComplete = cardStatus[index].complete;
-                  const missingFields = cardStatus[index].missingFields;
-                  
-                  return (
-                    <Button
-                      key={index}
-                      className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''} ${
-                        isComplete ? styles.completeCardTab : styles.incompleteCardTab
-                      }`}
-                      onClick={() => setActiveCard(index)}
-                      variant={activeCard === index ? "solid" : "outline"}
-                      color={activeCard === index ? (isComplete ? "success" : "primary") : "content"}
-                      size="small"
-                    >
-                      Card {index + 1}
-                      {isComplete ? (
-                        <span className={styles.completeIndicator}>
-                          <FiCheckCircle size={14} />
-                        </span>
-                      ) : (
-                        <span className={styles.incompleteIndicator}>
-                          {missingFields.length}
-                        </span>
-                      )}
-                    </Button>
-                  );
-                })}
+              {/* NEW: Card navigation buttons */}
+              <div className={styles.cardNavigation}>
+                <button 
+                  className={styles.cardNavButton}
+                  onClick={goToPrevCard}
+                  disabled={activeCard <= 0}
+                  title="Card anterior"
+                >
+                  <FiArrowLeft size={16} />
+                </button>
+                
+                <div className={styles.cardTabs}>
+                  {cards.slice(0, numCards).map((_, index) => {
+                    const isComplete = cardStatus[index].complete;
+                    const missingFields = cardStatus[index].missingFields;
+                    
+                    return (
+                      <Button
+                        key={index}
+                        className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''} ${
+                          isComplete ? styles.completeCardTab : styles.incompleteCardTab
+                        }`}
+                        onClick={() => setActiveCard(index)}
+                        variant={activeCard === index ? "solid" : "outline"}
+                        color={activeCard === index ? (isComplete ? "success" : "primary") : "content"}
+                        size="small"
+                      >
+                        Card {index + 1}
+                        {isComplete ? (
+                          <span className={styles.completeIndicator}>
+                            <FiCheckCircle size={14} />
+                          </span>
+                        ) : (
+                          <span className={styles.incompleteIndicator}>
+                            {missingFields.length}
+                          </span>
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <button 
+                  className={styles.cardNavButton}
+                  onClick={goToNextCard}
+                  disabled={activeCard >= numCards - 1}
+                  title="Próximo card"
+                >
+                  <FiArrowRight size={16} />
+                </button>
               </div>
               
-              {/* NOVO: Mostrar dica ou progresso dos cards */}
+              {/* Card completion hint */}
               {activeCard !== null && !cardStatus[activeCard].complete && (
                 <div className={styles.cardCompletionHint}>
                   <FiInfo size={16} />
@@ -769,9 +998,28 @@ const StepTwo = ({
                   </div>
                 </div>
               )}
+              
+              {/* NEW: Button synchronization info */}
+              {numCards > 1 && (
+                <div className={styles.cardSyncInfo}>
+                  <div className={`${styles.syncIndicator} ${buttonSyncDone ? styles.syncDone : ''}`}>
+                    {buttonSyncDone ? <FiCheckCircle size={14} /> : <FiRefreshCw size={14} className={styles.syncIcon} />}
+                  </div>
+                  <span>
+                    {buttonSyncDone ? 
+                      "Sincronização de botões concluída!" : 
+                      "Alterações em botões serão sincronizadas em todos os cards."
+                    }
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className={styles.activeCardEditor}>
+            {/* Active card editor with transition effect */}
+            <div 
+              className={`${styles.activeCardEditor} ${transitioningCard ? styles.cardTransitioning : ''}`}
+              ref={cardEditorRef}
+            >
               {cards[activeCard] && (
                 <CardTemplateEditor
                   id={`card-${activeCard}`}
@@ -787,14 +1035,15 @@ const StepTwo = ({
                   }
                   focusedInput={focusedInput}
                   setFocusedInput={setFocusedInput}
-                  // NOVO: Passar informações sobre campos obrigatórios faltantes
                   missingFields={cardStatus[activeCard].missingFields}
                   isComplete={cardStatus[activeCard].complete}
+                  syncButtonTypeForAllCards={handleButtonTypeChangeForAllCards} // Pass the new sync function
                 />
               )}
             </div>
           </div>
 
+          {/* Action buttons section */}
           <div className={steps.actionSection}>
             <Button
               onClick={() => setStep(1)}
@@ -814,6 +1063,7 @@ const StepTwo = ({
               onClick={handleSaveBeforeUpload}
               iconLeft={savedBeforeUpload ? <FiCheckCircle size={18} /> : <FiSave size={18} />}
               fullWidth
+              className={savedBeforeUpload ? styles.savedButton : ''}
             >
               {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
             </Button>
@@ -833,20 +1083,30 @@ const StepTwo = ({
             </Button>
           </div>
 
-          {/* Mostrar informação de último salvamento */}
-          {lastSavedTime && !savedBeforeUpload && (
-            <div className={steps.lastSavedInfo}>
-              <FiInfo size={14} />
-              <span>
-                Último salvamento: {new Date(lastSavedTime).toLocaleString()}
-                {unsavedChanges && (
-                  <span className={steps.unsavedIndicator}> (Alterações não salvas)</span>
-                )}
-              </span>
-            </div>
-          )}
+          {/* Save information */}
+          <div className={`${steps.lastSavedInfo} ${showAutoSavedNotification ? styles.showAutoSave : ''}`}>
+            <FiInfo size={14} />
+            <span>
+              {showAutoSavedNotification ? (
+                <span className={styles.autoSaveNotification}>
+                  <FiCheckCircle size={14} className={styles.autoSaveIcon} />
+                  Salvo automaticamente
+                </span>
+              ) : lastSavedTime ? (
+                <>
+                  Último salvamento: {new Date(lastSavedTime).toLocaleString()}
+                  {unsavedChanges && (
+                    <span className={steps.unsavedIndicator}> (Alterações não salvas)</span>
+                  )}
+                </>
+              ) : (
+                "Nenhum salvamento realizado"
+              )}
+            </span>
+          </div>
         </div>
 
+        {/* Enhanced preview container */}
         {showPreview && (
           <div 
             className={`${styles.previewContainer} ${previewExpanded ? styles.expanded : ''}`}
@@ -854,7 +1114,16 @@ const StepTwo = ({
           >
             <div className={styles.previewWrapper}>
               <div className={styles.previewHeader}>
-                <h3 className={styles.previewTitle}>Pré-visualização do Carrossel</h3>
+                <h3 className={styles.previewTitle}>
+                  Pré-visualização do Carrossel
+                  <button 
+                    className={styles.previewToggleButton}
+                    onClick={togglePreviewExpanded}
+                    title={previewExpanded ? "Minimizar" : "Expandir"}
+                  >
+                    {previewExpanded ? <FiMinimize size={16} /> : <FiMaximize size={16} />}
+                  </button>
+                </h3>
               </div>
               <p className={styles.previewSubtitle}>
                 Visualização ao vivo de como seu carrossel aparecerá no WhatsApp
@@ -871,7 +1140,7 @@ const StepTwo = ({
         )}
       </div>
 
-      {/* Modal de visão geral dos cards */}
+      {/* Card overview modal */}
       {showCardOverview && (
         <CardOverviewModal onClose={() => setShowCardOverview(false)} />
       )}

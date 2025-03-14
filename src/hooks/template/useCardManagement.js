@@ -1,36 +1,48 @@
-// hooks/template/useCardManagement.js - Com AlertService
+// hooks/template/useCardManagement.js
 import { useCallback } from 'react';
 import { useAlertService } from '../common/useAlertService';
 
+/**
+ * Hook for managing carousel cards
+ * 
+ * @param {Object} state - Template state from useTemplateState hook
+ * @returns {Object} Card management methods and state
+ */
 export const useCardManagement = (state) => {
   const {
     cards, setCards, numCards, setNumCards, setUnsavedChanges,
     createEmptyCard
   } = state;
 
-  // Usar AlertService em vez de alert direto
+  // Use AlertService instead of direct alerts
   const alertService = useAlertService();
 
-  // Atualizar um campo específico de um card
+  /**
+   * Update a specific field of a card
+   * 
+   * @param {number} index - Index of the card to update
+   * @param {string} field - Field name to update
+   * @param {any} value - New value for the field
+   */
   const updateCard = useCallback((index, field, value) => {
-    // Verificar se o índice está dentro dos limites
+    // Check if index is within bounds
     if (index < 0 || index >= cards.length) {
-      console.error(`Tentativa de atualizar card com índice inválido: ${index}`);
+      console.error(`Attempted to update card with invalid index: ${index}`);
       return;
     }
     
     setCards(prevCards => {
       const newCards = [...prevCards];
       
-      // Se estamos tentando alterar um card que não existe no array atual,
-      // preencher o array até o índice necessário
+      // If we're trying to update a card that doesn't exist in the current array,
+      // fill the array up to the necessary index
       if (index >= newCards.length) {
         while (newCards.length <= index) {
           newCards.push(createEmptyCard());
         }
       }
       
-      // Atualizar o campo específico
+      // Update the specific field
       newCards[index] = {
         ...newCards[index],
         [field]: value
@@ -39,23 +51,28 @@ export const useCardManagement = (state) => {
       return newCards;
     });
     
-    // Marcar que há alterações não salvas
+    // Mark that there are unsaved changes
     setUnsavedChanges(true);
   }, [cards, setCards, setUnsavedChanges, createEmptyCard]);
 
-  // Adicionar um novo card
+  /**
+   * Add a new card to the carousel
+   */
   const handleAddCard = useCallback(() => {
-    // Verificar se já atingimos o limite de 10 cards
+    // Check if we've already reached the limit of 10 cards
     if (numCards >= 10) {
-      alertService.warning('CARD_MAX_LIMIT');
+      alertService.warning('Maximum limit of 10 cards reached.', {
+        position: 'top-center',
+        autoCloseTime: 3000
+      });
       return;
     }
     
-    // CORREÇÃO: Garantir que temos cards suficientes no array
+    // Ensure we have enough cards in the array
     setCards(prevCards => {
       const newCards = [...prevCards];
       
-      // Adicionar cards vazios se o array atual não for grande o suficiente
+      // Add empty cards if the current array isn't large enough
       while (newCards.length <= numCards) {
         newCards.push(createEmptyCard());
       }
@@ -63,36 +80,47 @@ export const useCardManagement = (state) => {
       return newCards;
     });
     
-    // Incrementar o número de cards
+    // Increment the number of cards
     setNumCards(prevNumCards => {
       const newNumCards = prevNumCards + 1;
-      console.log(`Aumentando número de cards para ${newNumCards}`);
-      alertService.info('CARD_ADDED');
+      console.log(`Increasing number of cards to ${newNumCards}`);
+      alertService.info('Card added successfully.', {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
       return newNumCards;
     });
     
-    // Marcar que há alterações não salvas
+    // Mark that there are unsaved changes
     setUnsavedChanges(true);
   }, [numCards, setNumCards, setCards, setUnsavedChanges, createEmptyCard, alertService]);
 
-  // Remover um card
+  /**
+   * Remove the last card from the carousel
+   */
   const handleRemoveCard = useCallback(() => {
-    // Verificar se estamos no limite mínimo de 2 cards
+    // Check if we're at the minimum limit of 2 cards
     if (numCards <= 2) {
-      alertService.warning('CARD_MIN_LIMIT');
+      alertService.warning('Minimum of 2 cards required.', {
+        position: 'top-center',
+        autoCloseTime: 3000
+      });
       return;
     }
     
-    // CORREÇÃO: Não removemos realmente o card do array, apenas diminuímos o numCards
-    // Isso mantém os dados dos cards anteriores disponíveis caso o usuário queira readicioná-los
+    // We don't actually remove the card from the array, just decrease numCards
+    // This keeps the data of previous cards available in case the user wants to add them back
     setNumCards(prevNumCards => {
       const newNumCards = prevNumCards - 1;
-      console.log(`Diminuindo número de cards para ${newNumCards}`);
-      alertService.info('CARD_REMOVED');
+      console.log(`Decreasing number of cards to ${newNumCards}`);
+      alertService.info('Card removed.', {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
       return newNumCards;
     });
     
-    // Marcar que há alterações não salvas
+    // Mark that there are unsaved changes
     setUnsavedChanges(true);
   }, [numCards, setNumCards, setUnsavedChanges, alertService]);
 

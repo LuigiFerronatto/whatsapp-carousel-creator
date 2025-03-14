@@ -6,44 +6,57 @@ import { useValidation } from '../common/useValidation';
 import { useDraftManager } from './useDraftManager';
 import { useTemplatePersistence } from './useTemplatePersistence';
 import { useStepsValidation } from './useStepsValidation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
+/**
+ * Main hook that combines all template-related functionality
+ * 
+ * @returns {Object} Consolidated template state and methods
+ */
 export const useWhatsAppTemplate = () => {
-  // Estado base
+  // Base state
   const state = useTemplateState();
   
-  // Gerenciamento de cards
+  // Card management
   const cardManagement = useCardManagement(state);
   
-  // Validação
+  // Validation
   const validation = useValidation(state);
   
-  // Gerenciamento de rascunhos
+  // Draft management
   const draftManager = useDraftManager(state);
   
-  // Gerenciamento de botões
+  // Button management
   const buttonManagement = useButtonManagement(state, cardManagement);
   
-  // Persistência do template
+  // Template persistence
   const templatePersistence = useTemplatePersistence(state, validation, draftManager, cardManagement);
   
-  // Validação de etapas
+  // Step validation
   const stepsValidation = useStepsValidation(state, validation, draftManager);
 
-  // Limpar mensagens
+  // Add a ref to track if we've already saved for the current step
+  // This helps prevent infinite save loops
+  const savedForStepRef = useRef({});
+
+  /**
+   * Clear error and success messages
+   */
   const clearMessages = () => {
     state.setError('');
     state.setSuccess('');
   };
 
-  // Resetar o formulário para criar um novo template
+  /**
+   * Reset the form to create a new template
+   */
   const resetForm = () => {
-    // Confirmar antes de resetar
-    if (window.confirm('Tem certeza que deseja criar um novo template? Os dados atuais serão perdidos.')) {
-      // Limpar o rascunho salvo primeiro
+    // Confirm before resetting
+    if (window.confirm('Are you sure you want to create a new template? Current data will be lost.')) {
+      // Clear saved draft first
       draftManager.clearDraft();
       
-      // Resetar todos os estados
+      // Reset all states
       state.setStep(1);
       state.setCards(Array(2).fill().map(() => state.createEmptyCard()));
       state.setNumCards(2);
@@ -60,13 +73,16 @@ export const useWhatsAppTemplate = () => {
       state.setUploadResults([]);
       state.setHasTriedToAdvance(false);
       
-      // Reiniciar a ref de controle de carregamento do rascunho
+      // Reset draft loading control ref
       state.draftLoadedRef.current = false;
       
-      // Mostrar alerta de reset
+      // Reset our save tracking ref
+      savedForStepRef.current = {};
+      
+      // Show reset alert
       setTimeout(() => {
         if (state.alert && typeof state.alert.info === 'function') {
-          state.alert.info('Template resetado. Você pode começar um novo template agora.', {
+          state.alert.info('Template reset. You can start a new template now.', {
             position: 'top-right',
             autoCloseTime: 3000
           });
@@ -75,38 +91,52 @@ export const useWhatsAppTemplate = () => {
     }
   };
 
-  // Monitorar mudança de step para garantir que os fileHandles sejam preservados
+  // Fixed effect to prevent infinite loop
   useEffect(() => {
-    if (state.step === 2 && state.cards.some(card => card.fileHandle)) {
-      // Salvar o estado quando avançar para o step 2 para garantir que os fileHandles sejam preservados
+    // Only save if we're on step 2 AND we haven't saved for this step transition yet
+    // AND there are fileHandles to preserve
+    if (
+      state.step === 2 && 
+      !savedForStepRef.current[state.step] && 
+      state.cards.some(card => card.fileHandle)
+    ) {
+      // Mark this step as saved
+      savedForStepRef.current[state.step] = true;
+      
+      // Now save state
       draftManager.saveCurrentState();
-      console.log('Estado salvo ao avançar para step 2, fileHandles preservados');
+      console.log('State saved when advancing to step 2, fileHandles preserved');
     }
-  }, [state.step, state.cards, draftManager.saveCurrentState]);
+    
+    // Reset the saved flag when step changes
+    if (savedForStepRef.current[state.step] && state.step !== 2) {
+      savedForStepRef.current[state.step] = false;
+    }
+  }, [state.step]);
 
   return {
-    // Estados do template
+    // Template state
     ...state,
     
-    // Gerenciamento de cards
+    // Card management
     ...cardManagement,
     
-    // Gerenciamento de botões
+    // Button management
     ...buttonManagement,
     
-    // Validação
+    // Validation
     ...validation,
     
-    // Gerenciamento de rascunhos
+    // Draft management
     ...draftManager,
     
-    // Persistência do template
+    // Template persistence
     ...templatePersistence,
     
-    // Validação de etapas
+    // Step validation
     ...stepsValidation,
     
-    // Funções utilitárias
+    // Utility functions
     clearMessages,
     resetForm
   };

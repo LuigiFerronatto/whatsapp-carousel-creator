@@ -11,22 +11,22 @@ import styles from './WhatsAppCarouselCreator.module.css';
 import Footer from './ui/Footer/Footer';
 
 /**
- * Componente principal para o aplicativo Criador de Carrossel do WhatsApp
- * Melhorado com UI/UX aprimorada com base no sistema de design
+ * Main component for the WhatsApp Carousel Creator app
+ * Enhanced with improved UI/UX based on the design system
  * 
- * @returns {JSX.Element} Componente WhatsAppCarouselCreator
+ * @returns {JSX.Element} WhatsAppCarouselCreator component
  */
 const WhatsAppCarouselCreator = () => {
-  // Obter contexto do template
+  // Get template context
   const templateContext = useWhatsAppTemplateContext();
   const { step, setStep, isStepValid, resetForm } = templateContext;
   
-  // Estado local
+  // Local state
   const [showGuide, setShowGuide] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showTips, setShowTips] = useState(true);
 
-  // Verificar se o guia de introdução foi mostrado antes
+  // Check if introduction guide has been shown before
   useEffect(() => {
     const hasSeenGuide = localStorage.getItem('introductionGuideShown');
     if (!hasSeenGuide) {
@@ -34,7 +34,15 @@ const WhatsAppCarouselCreator = () => {
     }
   }, []);
 
-  // Monitorar posição de rolagem para mostrar/ocultar botão de rolar para o topo
+  // Check if tips should be shown based on user preference
+  useEffect(() => {
+    const tipsPreference = localStorage.getItem('showTips');
+    if (tipsPreference !== null) {
+      setShowTips(tipsPreference === 'true');
+    }
+  }, []);
+
+  // Monitor scroll position to show/hide scroll to top button
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
@@ -44,7 +52,7 @@ const WhatsAppCarouselCreator = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Função para rolar para o topo
+  // Function to scroll to top
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -52,19 +60,19 @@ const WhatsAppCarouselCreator = () => {
     });
   };
 
-  // Alternar visibilidade das dicas
+  // Toggle tips visibility
   const toggleTips = () => {
     setShowTips(!showTips);
     localStorage.setItem('showTips', String(!showTips));
   };
 
-  // Marcar guia como mostrado
+  // Mark guide as shown
   const handleGuideClose = () => {
     setShowGuide(false);
     localStorage.setItem('introductionGuideShown', 'true');
   };
 
-  // Renderizar etapa atual com base no estado
+  // Render current step based on state
   const renderCurrentStep = () => {
     switch(step) {
       case 1:
@@ -81,9 +89,9 @@ const WhatsAppCarouselCreator = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Criador de Carrossel do WhatsApp</h1>
+        <h1 className={styles.title}>WhatsApp Carousel Creator</h1>
         <p className={styles.subtitle}>
-          Crie templates interativos de carrossel para seu Router no Blip através de mensagens da API do WhatsApp Business
+          Create interactive carousel templates for your Blip Router through WhatsApp Business API messages
         </p>
 
         <ProgressHeader 
@@ -100,7 +108,7 @@ const WhatsAppCarouselCreator = () => {
       <button 
         className={`${styles.scrollTopButton} ${showScrollTop ? styles.showScrollTop : ''}`}
         onClick={scrollToTop}
-        aria-label="Voltar ao topo"
+        aria-label="Back to top"
       >
         <FiArrowUp size={20} />
       </button>
@@ -108,6 +116,16 @@ const WhatsAppCarouselCreator = () => {
       {showGuide && (
         <IntroductionGuide onClose={handleGuideClose} />
       )}
+      
+      <div className={styles.settingsBar}>
+        <button 
+          className={`${styles.tipsToggle} ${showTips ? styles.active : ''}`}
+          onClick={toggleTips}
+          aria-label={showTips ? "Hide tips" : "Show tips"}
+        >
+          {showTips ? "Hide Tips" : "Show Tips"}
+        </button>
+      </div>
 
       <Footer />
     </div>

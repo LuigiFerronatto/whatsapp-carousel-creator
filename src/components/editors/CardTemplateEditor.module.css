@@ -1,4 +1,4 @@
-/* CardTemplateEditor.module.css - Versão avançada com melhor UI/UX */
+/* Enhanced CardTemplateEditor.module.css */
 
 .cardContainer {
   margin-bottom: var(--spacing-5);
@@ -17,7 +17,7 @@
   transform: translateY(-3px);
 }
 
-/* Estados do card */
+/* Card states */
 .completeCard {
   border-color: rgba(132, 235, 188, 0.3);
 }
@@ -49,7 +49,7 @@
   padding-bottom: var(--spacing-4);
 }
 
-/* Cabeçalho do Card */
+/* Card Header */
 .cardHeader {
   display: flex;
   justify-content: space-between;
@@ -57,6 +57,7 @@
   padding: var(--spacing-4) var(--spacing-5) var(--spacing-3);
   border-bottom: 1px solid var(--color-border-3);
   background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
 }
 
 .cardTitleSection {
@@ -84,7 +85,7 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Status do card na barra de título */
+/* Card status badge */
 .cardStatus {
   display: flex;
   align-items: center;
@@ -117,8 +118,8 @@
   color: var(--color-negative);
 }
 
-/* Ações do card */
-.cardActions {
+/* Enhanced card header actions */
+.cardHeaderActions {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -200,7 +201,11 @@
   transform: rotate(180deg);
 }
 
-/* Informações de ID do arquivo */
+.expanded:hover {
+  transform: rotate(225deg);
+}
+
+/* File handle info */
 .fileHandleInfo {
   display: flex;
   align-items: center;
@@ -295,27 +300,72 @@
   100% { opacity: 0; transform: translate(-50%, -5px); }
 }
 
-.previewButton {
+/* Enhanced Card Actions Menu */
+.cardActionsMenu {
+  position: relative;
+}
+
+.actionToggleButton {
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
-  background-color: var(--color-surface-0);
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-surface-1);
   border: 1px solid var(--color-border-2);
-  font-size: var(--fs-p3);
-  color: var(--blip-blue-brand);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-circle);
+  color: var(--color-content-default);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.previewButton:hover {
-  background-color: rgba(197, 217, 251, 0.1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transform: translateY(-1px);
+.actionToggleButton:hover {
+  background-color: var(--color-surface-2);
+  color: var(--color-primary);
+  transform: translateY(-2px);
 }
 
-/* Barra de completude do card */
+.cardActionsMenu.expanded .actionToggleButton {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.actionsList {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background-color: var(--color-surface-0);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-1);
+  width: 160px;
+  box-shadow: var(--shadow-2);
+  z-index: 10;
+  animation: fadeIn 0.2s ease;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-p3);
+  color: var(--color-content-default);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.actionButton:hover {
+  background-color: var(--color-surface-1);
+  color: var(--color-primary);
+}
+
+/* Card completion bar */
 .cardCompletionBar {
   padding: var(--spacing-2) var(--spacing-5);
   background-color: rgba(249, 159, 159, 0.05);
@@ -341,7 +391,7 @@
   font-weight: var(--fw-semibold);
 }
 
-/* Mensagens de validação */
+/* Validation message */
 .validationMessage {
   margin: 0 var(--spacing-5) var(--spacing-4);
   padding: var(--spacing-3) var(--spacing-4);
@@ -369,7 +419,7 @@
   color: var(--color-negative);
 }
 
-/* Preview de imagem */
+/* Image preview */
 .imagePreviewContainer {
   position: relative;
   margin: 0 var(--spacing-5) var(--spacing-4);
@@ -417,7 +467,7 @@
   transform: scale(1.1) rotate(90deg);
 }
 
-/* Conteúdo principal do card */
+/* Card content */
 .cardContent {
   padding: var(--spacing-4) var(--spacing-5) var(--spacing-5);
   animation: expandContent 0.3s ease-out;
@@ -428,7 +478,7 @@
   to { opacity: 1; max-height: 2000px; transform: translateY(0); }
 }
 
-/* Abas do editor */
+/* Enhanced Editor Tabs */
 .editorTabs {
   display: flex;
   gap: var(--spacing-3);
@@ -458,6 +508,7 @@
 .editorTab:hover {
   background-color: rgba(197, 217, 251, 0.1);
   color: var(--blip-blue-brand);
+  transform: translateY(-3px);
 }
 
 .activeTab {
@@ -504,7 +555,11 @@
   font-weight: var(--fw-semibold);
 }
 
-/* Banner para campos faltantes */
+.editorContent {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Enhanced banners for missing fields */
 .missingFieldBanner, .missingButtonsBanner {
   background-color: rgba(249, 159, 159, 0.1);
   border: 1px solid rgba(249, 159, 159, 0.3);
@@ -529,7 +584,50 @@
   background-color: rgba(249, 159, 159, 0.03) !important;
 }
 
-/* Seção de campos de card */
+/* WhatsApp requirement banner */
+.whatsappRequirementBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  background-color: rgba(197, 217, 251, 0.1);
+  border: 1px solid rgba(197, 217, 251, 0.3);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-p2);
+  color: var(--blip-dark);
+  animation: fadeIn 0.3s ease;
+}
+
+.whatsappRequirementBanner strong {
+  font-weight: var(--fw-bold);
+}
+
+.syncNote {
+  display: block;
+  margin-top: var(--spacing-1);
+  font-size: var(--fs-p3);
+  font-style: italic;
+  color: var(--blip-blue-brand);
+}
+
+/* Sync completed banner */
+.syncCompletedBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  background-color: rgba(132, 235, 188, 0.1);
+  border: 1px solid rgba(132, 235, 188, 0.3);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-p2);
+  color: var(--color-positive);
+  font-weight: var(--fw-semibold);
+  animation: fadeInOut 3s ease;
+}
+
+/* Card field sections */
 .cardFieldSection {
   margin-bottom: var(--spacing-5);
 }
@@ -554,7 +652,7 @@
   100% { border-color: var(--color-border-2); background-color: rgba(197, 217, 251, 0); }
 }
 
-/* Seção de botões */
+/* Enhanced buttons section */
 .buttonsSection {
   margin-top: var(--spacing-2);
 }
@@ -632,7 +730,7 @@
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Preview colapsado */
+/* Enhanced collapsed preview */
 .collapsedPreview {
   padding: var(--spacing-3) var(--spacing-5);
   display: grid;
@@ -704,7 +802,7 @@
   font-weight: var(--fw-semibold);
 }
 
-/* Responsividade */
+/* Responsiveness */
 @media (max-width: 992px) {
   .collapsedPreview {
     grid-template-columns: 1fr;
@@ -718,7 +816,7 @@
     padding: var(--spacing-3) var(--spacing-4);
   }
   
-  .cardActions {
+  .cardHeaderActions {
     align-self: flex-end;
     margin-top: calc(-1 * var(--spacing-6));
   }
@@ -756,6 +854,12 @@
     padding: var(--spacing-2) var(--spacing-3);
     font-size: var(--fs-p3);
   }
+  
+  .whatsappRequirementBanner {
+    flex-direction: column;
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--fs-p3);
+  }
 }
 
 @media (max-width: 480px) {
@@ -775,5 +879,9 @@
   
   .activeTab {
     border-bottom-color: var(--color-border-2);
+  }
+  
+  .cardContent {
+    padding: var(--spacing-2) var(--spacing-3) var(--spacing-3);
   }
 }
