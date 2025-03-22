@@ -116,16 +116,6 @@ const WhatsAppCarouselCreator = () => {
       {showGuide && (
         <IntroductionGuide onClose={handleGuideClose} />
       )}
-      
-      <div className={styles.settingsBar}>
-        <button 
-          className={`${styles.tipsToggle} ${showTips ? styles.active : ''}`}
-          onClick={toggleTips}
-          aria-label={showTips ? "Hide tips" : "Show tips"}
-        >
-          {showTips ? "Hide Tips" : "Show Tips"}
-        </button>
-      </div>
 
       <Footer />
     </div>

@@ -88,20 +88,34 @@ const StepTwo = ({
 
   // Check button consistency when cards or numCards change
   useEffect(() => {
+    // We only need to check consistency when cards change AND we have multiple cards
     if (typeof checkButtonConsistency === 'function' && numCards > 1) {
-      const consistency = checkButtonConsistency();
-      setButtonConsistencyStatus(consistency);
+      // Use a small delay to batch changes
+      const timer = setTimeout(() => {
+        const consistency = checkButtonConsistency();
+        setButtonConsistencyStatus(consistency);
+      }, 100);
+      
+      // Clean up timer
+      return () => clearTimeout(timer);
     }
-  }, [checkButtonConsistency, cards, numCards]);
+  }, [checkButtonConsistency, numCards]);
 
   // Enhanced auto-save functionality
-  useEffect(() => {
+  // Enhanced auto-save functionality with better performance
+useEffect(() => {
+  let autoSaveTimerId = null;
+  
+  const setupAutoSave = () => {
+    // Only set up auto-save if we have unsaved changes
     if (unsavedChanges && typeof saveCurrentState === 'function') {
       // Clear existing timer
-      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      if (autoSaveTimerId) {
+        clearTimeout(autoSaveTimerId);
+      }
       
       // Set new timer for auto-save
-      const timer = setTimeout(() => {
+      autoSaveTimerId = setTimeout(() => {
         try {
           saveCurrentState();
           setShowAutoSavedNotification(true);
@@ -109,34 +123,48 @@ const StepTwo = ({
         } catch (err) {
           console.error("Auto-save failed:", err);
         }
+        // Clear reference after auto-save completes
+        autoSaveTimerId = null;
       }, 30000); // Auto-save after 30 seconds of inactivity
-      
-      setAutoSaveTimer(timer);
     }
-    
-    return () => {
-      if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    };
-  }, [unsavedChanges, saveCurrentState, autoSaveTimer]);
+  };
+  
+  // Call setup function initially
+  setupAutoSave();
+  
+  // Return cleanup function to clear timer on unmount or when dependencies change
+  return () => {
+    if (autoSaveTimerId) {
+      clearTimeout(autoSaveTimerId);
+    }
+  };
+}, [unsavedChanges, saveCurrentState]); // Remove autoSaveTimer from dependencies
 
   // Clear validations when inputs change
   useEffect(() => {
-    if (templateName) {
-      setValidationMessages(prev => {
-        const newMessages = { ...prev };
+    // Batch validation updates into a single state change
+    setValidationMessages(prev => {
+      const newMessages = { ...prev };
+      
+      if (templateName) {
         delete newMessages.templateName;
-        return newMessages;
-      });
-    }
-
-    if (bodyText) {
-      setValidationMessages(prev => {
-        const newMessages = { ...prev };
+      }
+      
+      return newMessages;
+    });
+  }, [templateName]);
+  
+  useEffect(() => {
+    setValidationMessages(prev => {
+      const newMessages = { ...prev };
+      
+      if (bodyText) {
         delete newMessages.bodyText;
-        return newMessages;
-      });
-    }
-  }, [templateName, bodyText]);
+      }
+      
+      return newMessages;
+    });
+  }, [bodyText]);
 
   // Show errors received as properties as alerts
   useEffect(() => {
@@ -802,7 +830,7 @@ const StepTwo = ({
                   className={lastFieldChanged === 'templateName' ? styles.highlightedField : ''}
                 />
                 
-                {showNameSuggestions && templateNameSuggestions.length > 0 && (
+                {/* {showNameSuggestions && templateNameSuggestions.length > 0 && (
                   <div className={styles.nameSuggestions}>
                     <span className={styles.suggestionLabel}>Sugestões de nome:</span>
                     <div className={styles.suggestionButtons}>
@@ -827,7 +855,7 @@ const StepTwo = ({
                       Dispensar sugestões
                     </button>
                   </div>
-                )}
+                )} */}
               </div>
 
               <Input
@@ -916,8 +944,8 @@ const StepTwo = ({
               </div>
             )}
             
-            <div className={styles.sectionHeader}>
-              <div className={styles.sectionIconContainer}>
+            <div className={steps.sectionHeader}>
+              <div className={steps.sectionIconContainer}>
                 <FiLayers size={24}/>
               </div>
               <h3>Conteúdo dos Cards</h3>
@@ -1037,7 +1065,7 @@ const StepTwo = ({
                   setFocusedInput={setFocusedInput}
                   missingFields={cardStatus[activeCard].missingFields}
                   isComplete={cardStatus[activeCard].complete}
-                  syncButtonTypeForAllCards={handleButtonTypeChangeForAllCards} // Pass the new sync function
+                  syncButtonTypeForAllCards={handleButtonTypeChangeForAllCards}
                 />
               )}
             </div>

@@ -32,6 +32,11 @@ export const useCardManagement = (state) => {
     }
     
     setCards(prevCards => {
+      // Skip update if the value is the same to prevent unnecessary re-renders
+      if (prevCards[index] && prevCards[index][field] === value) {
+        return prevCards;
+      }
+      
       const newCards = [...prevCards];
       
       // If we're trying to update a card that doesn't exist in the current array,
@@ -51,8 +56,20 @@ export const useCardManagement = (state) => {
       return newCards;
     });
     
-    // Mark that there are unsaved changes
-    setUnsavedChanges(true);
+    // Throttle unsaved changes updates by using a timeout
+    // This prevents too many state updates while typing
+    if (field === 'bodyText' || (field === 'buttons' && typeof value === 'object')) {
+      // Use a debounce technique for text fields to avoid setting unsavedChanges on every keystroke
+      if (!window._unsavedChangeTimeout) {
+        window._unsavedChangeTimeout = setTimeout(() => {
+          setUnsavedChanges(true);
+          window._unsavedChangeTimeout = null;
+        }, 1000); // Wait 1 second after typing stops
+      }
+    } else {
+      // For non-text fields, update immediately
+      setUnsavedChanges(true);
+    }
   }, [cards, setCards, setUnsavedChanges, createEmptyCard]);
 
   /**
@@ -124,9 +141,18 @@ export const useCardManagement = (state) => {
     setUnsavedChanges(true);
   }, [numCards, setNumCards, setUnsavedChanges, alertService]);
 
+  // Clean up any debounce timers on unmount
+  const cleanup = useCallback(() => {
+    if (window._unsavedChangeTimeout) {
+      clearTimeout(window._unsavedChangeTimeout);
+      window._unsavedChangeTimeout = null;
+    }
+  }, []);
+
   return {
     updateCard,
     handleAddCard,
-    handleRemoveCard
+    handleRemoveCard,
+    cleanup
   };
 };

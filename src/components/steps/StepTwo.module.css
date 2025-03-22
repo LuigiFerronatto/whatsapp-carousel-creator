@@ -280,7 +280,7 @@
 .cardTabs {
   display: flex;
   gap: var(--spacing-1);
-  overflow-x: auto;
+  overflow: visible;
   padding-bottom: var(--spacing-2);
   flex-grow: 1;
   scroll-behavior: smooth;
@@ -443,17 +443,17 @@
 
 /* Preview Container */
 .previewContainer {
-  flex: 0 0 30%;
+  flex: 0 45%;
   position: sticky;
   top: var(--spacing-4);
   align-self: flex-start;
   transition: all var(--transition-normal);
-  max-height: calc(100vh - 100px);
+  max-height: 100vh;
   overflow: hidden;
 }
 
 .previewContainer.expanded {
-  flex: 0 0 40%;
+  flex: 60%;
 }
 
 .previewWrapper {
@@ -462,6 +462,7 @@
   box-shadow: var(--shadow-1);
   overflow: hidden;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-border-2);

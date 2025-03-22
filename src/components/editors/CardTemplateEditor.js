@@ -61,14 +61,19 @@ const CardTemplateEditor = ({
 
   // Clear changed fields highlighting after timeout
   useEffect(() => {
+    let timer;
+    
+    // Only create a new timer if fields have changed
     if (changedFields.length > 0) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         setChangedFields([]);
       }, 3000);
-      
-      return () => clearTimeout(timer);
     }
-  }, [changedFields]);
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [changedFields.length]);
 
   // Clear button sync notification after timeout
   useEffect(() => {
@@ -90,13 +95,34 @@ const CardTemplateEditor = ({
     return missingFields.some(field => field.includes(fieldName));
   };
 
-  // Handle card text change
-  const handleBodyTextChange = useCallback((e) => {
-    updateCard(index, 'bodyText', e.target.value);
+  // Handle card text change with debouncing to prevent excessive re-renders
+const handleBodyTextChange = useCallback((e) => {
+  const newValue = e.target.value;
+  
+  // Use a simple debounce pattern to avoid triggering too many updates
+  if (window._textChangeTimeout) {
+    clearTimeout(window._textChangeTimeout);
+  }
+  
+  window._textChangeTimeout = setTimeout(() => {
+    updateCard(index, 'bodyText', newValue);
+    
     if (!changedFields.includes('bodyText')) {
       setChangedFields(prev => [...prev, 'bodyText']);
     }
-  }, [updateCard, index, changedFields]);
+    
+    window._textChangeTimeout = null;
+  }, 150); // Small delay for typing
+}, [updateCard, index, changedFields, setChangedFields]);
+
+useEffect(() => {
+  return () => {
+    if (window._textChangeTimeout) {
+      clearTimeout(window._textChangeTimeout);
+      window._textChangeTimeout = null;
+    }
+  };
+}, []);
 
   // Update all buttons at once
   const updateButtons = useCallback((newButtons) => {
@@ -316,7 +342,6 @@ const CardTemplateEditor = ({
         allowFormatting={true}
         textFormatting={true}
         textFormattingCompact={true}
-        textFormattingDarkMode={false}
         showCharCounter
         characterCounterVariant="default"
         required
@@ -332,8 +357,8 @@ const CardTemplateEditor = ({
           "Para listas: * para tópicos, 1. para numeração.",
           "Para citações, comece a linha com >."
         ]}
-        validateOnChange={true}
-        validateOnBlur={true}
+        // validateOnChange={true}
+        // validateOnBlur={true}
         error={!isTextValid && card.bodyText !== '' ? "O texto não atende aos requisitos mínimos." : ""}
       />
     </div>
@@ -494,14 +519,7 @@ const CardTemplateEditor = ({
 
   // Card actions menu (more options)
   const renderCardActions = () => (
-    <div className={`${styles.cardActionsMenu} ${actionsExpanded ? styles.expanded : ''}`}>
-      <button 
-        className={styles.actionToggleButton}
-        onClick={() => setActionsExpanded(!actionsExpanded)}
-        title={actionsExpanded ? "Ocultar ações" : "Mostrar ações"}
-      >
-        {actionsExpanded ? <FiMinimize2 size={16} /> : <FiMaximize2 size={16} />}
-      </button>
+    <div className={`${styles.cardActionsMenu} ${actionsExpanded ? styles.expanded : ''}`}> 
       
       {actionsExpanded && (
         <div className={styles.actionsList}>
