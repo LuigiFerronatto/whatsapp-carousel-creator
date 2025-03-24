@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 // Hooks personalizados
 import { useFileUpload } from '../../hooks/common/useFileUpload';
-import { useAlert } from '../ui/AlertMessage/AlertContext';
+import { useAlertService } from '../../hooks/common/useAlertService';
 
 // Componentes
 import Button from '../ui/Button/Button';
@@ -34,7 +34,7 @@ import styles from './CardUploadInput.module.css';
  */
 const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
   // Inicializar sistema de alertas
-  const alert = useAlert();
+  const alert = useAlertService();
   
   // Estado local
   const [uploadMethod, setUploadMethod] = useState(card.fileUrl ? 'url' : 'file');
@@ -188,10 +188,10 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     const isAcceptedType = [...acceptedImageTypes, ...acceptedVideoTypes].includes(file.type);
     
     if (!isAcceptedType) {
-      alert.error(`Tipo de arquivo não suportado: ${file.type}. Use JPEG, PNG, GIF, WebP, MP4 ou WebM.`, {
+      alert.error("FILE_TYPE_ERROR", {
         position: 'top-center',
         autoCloseTime: 5000
-      });
+      }, file.type);
       return false;
     }
     
@@ -202,10 +202,10 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
     if (file.size > maxSize) {
       const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
       const limit = isImage ? '10MB' : '30MB';
-      alert.error(`Arquivo muito grande: ${sizeInMB}MB. O limite para ${isImage ? 'imagens' : 'vídeos'} é ${limit}.`, {
+      alert.error("FILE_SIZE_ERROR", {
         position: 'top-center',
         autoCloseTime: 5000
-      });
+      }, sizeInMB + "MB", limit);
       return false;
     }
     
@@ -248,7 +248,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       // Mostrar alerta de progresso
       const progressToastId = `upload-progress-${index}-${Date.now()}`;
       setTimeout(() => {
-        alert.info(`Enviando ${fileType === 'image' ? 'imagem' : 'vídeo'} para o Card ${index + 1}...`, {
+        alert.info("UPLOAD_STARTED", {
           id: progressToastId,
           position: 'bottom-right',
           autoCloseTime: false,
@@ -292,7 +292,7 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
       }, 100);
       
       // Alerta de sucesso com animação
-      alert.success(`Arquivo "${displayName}" configurado para o Card ${index + 1}!`, {
+      alert.success("UPLOAD_SUCCESS", {
         position: 'bottom-right',
         autoCloseTime: 3000
       });
@@ -316,10 +316,10 @@ const CardUploadInput = ({ index, card, updateCard, totalCards }) => {
         dropAreaRef.current?.classList.remove(styles.uploadError);
       }, 1000);
       
-      alert.error(`Erro no upload: ${error.message || 'Erro desconhecido'}`, {
+      alert.error("UPLOAD_ERROR", {
         position: 'top-center',
         autoCloseTime: 5000
-      });
+      }, error.message || 'Erro desconhecido');
       
       setPreviewError(true);
     } finally {

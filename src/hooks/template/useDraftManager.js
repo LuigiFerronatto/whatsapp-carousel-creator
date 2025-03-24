@@ -1,6 +1,7 @@
-// hooks/template/useDraftManager.js
+// hooks/template/useDraftManager.js - Com AlertService
 import { useCallback, useEffect } from 'react';
 import { saveDraft, loadDraft, clearDraft } from '../../services/storage/localStorageService';
+import { useAlertService } from '../common/useAlertService';
 
 export const useDraftManager = (state) => {
   const {
@@ -8,8 +9,11 @@ export const useDraftManager = (state) => {
     numCards, step, draftLoadedRef,
     setLastSavedTime, setUnsavedChanges,
     setTemplateName, setLanguage, setBodyText, setAuthKey,
-    setCards, setNumCards, alert
+    setCards, setNumCards
   } = state;
+
+  // Usar o AlertService no lugar de alert direto
+  const alertService = useAlertService();
 
   // Carregar rascunho na inicialização
   useEffect(() => {
@@ -33,29 +37,33 @@ export const useDraftManager = (state) => {
         if (savedDraft.bodyText) setBodyText(savedDraft.bodyText);
         if (savedDraft.authKey) setAuthKey(savedDraft.authKey);
         
-        // Aplicar cards salvos com validação adicional
-        const processedCards = savedDraft.cards.map(card => ({
-          ...state.createEmptyCard(), // Base com valores padrão
-          ...card, // Sobrescrever com valores salvos
-          fileHandle: card.fileHandle || '',
-          buttons: card.buttons && card.buttons.length > 0 
-            ? card.buttons 
-            : [{ type: 'QUICK_REPLY', text: '', payload: '' }]
-        }));
+        // CORREÇÃO: Garantir que temos array completo e consistente com o numCards do rascunho
+        // Isso resolve o problema quando o usuário aumenta ou diminui o número de cards
+        const savedNumCards = Math.max(2, Math.min(savedDraft.numCards || 2, 10));
         
-        // Garantir que temos pelo menos 2 cards
-        while (processedCards.length < 2) {
-          processedCards.push(state.createEmptyCard());
-        }
+        // Iniciar com um array completo de cards vazios
+        const fullCardArray = Array(10).fill().map((_, i) => {
+          // Para índices dentro do savedDraft.cards, usar o card salvo
+          if (i < savedDraft.cards.length) {
+            return {
+              ...state.createEmptyCard(), // Base com valores padrão
+              ...savedDraft.cards[i], // Sobrescrever com valores salvos
+              fileHandle: savedDraft.cards[i].fileHandle || '',
+              buttons: savedDraft.cards[i].buttons && savedDraft.cards[i].buttons.length > 0 
+                ? savedDraft.cards[i].buttons 
+                : [{ type: 'QUICK_REPLY', text: '', payload: '' }]
+            };
+          }
+          // Para índices além do tamanho do rascunho, criar cards vazios
+          return state.createEmptyCard();
+        });
         
         // Definir o número correto de cards
-        const numCardsToSet = Math.max(2, Math.min(savedDraft.numCards || 2, processedCards.length));
+        setCards(fullCardArray);
+        setNumCards(savedNumCards);
         
-        setCards(processedCards);
-        setNumCards(numCardsToSet);
-        
-        console.log('Cards carregados do rascunho:', numCardsToSet);
-        console.log('Cards com fileHandles:', processedCards.filter(c => c.fileHandle).length);
+        console.log(`Cards carregados do rascunho: ${savedNumCards} ativos de ${fullCardArray.length} total`);
+        console.log('Cards com fileHandles:', fullCardArray.filter(c => c.fileHandle).length);
         
         // Definir último salvamento
         if (savedDraft.lastSavedTime) {
@@ -66,17 +74,13 @@ export const useDraftManager = (state) => {
           setLastSavedTime(savedTime);
         }
         
-        // Mostrar confirmação ao usuário
+        // Mostrar confirmação ao usuário usando AlertService
         setTimeout(() => {
-          if (alert && typeof alert.info === 'function') {
-            alert.info('Rascunho anterior carregado com sucesso!', {
-              position: 'top-right',
-              autoCloseTime: 3000
-            });
-          }
+          alertService.info('DRAFT_LOAD_SUCCESS');
         }, 1000);
       } catch (error) {
         console.error('Erro ao carregar dados salvos:', error);
+        alertService.error('DRAFT_LOAD_ERROR');
       }
     };
     
@@ -85,25 +89,29 @@ export const useDraftManager = (state) => {
     draftLoadedRef.current = true;
   }, [
     draftLoadedRef, setTemplateName, setLanguage, setBodyText, setAuthKey,
-    setCards, setNumCards, setLastSavedTime, alert, state.createEmptyCard
+    setCards, setNumCards, setLastSavedTime, alertService, state.createEmptyCard
   ]);
 
   // Salvar o estado atual no localStorage
   const saveCurrentState = useCallback(() => {
-    // Criar objeto com estado atual, limitando apenas aos cards ativos
-    const state = {
+    // CORREÇÃO: Criar objeto com estado atual limitando apenas aos cards ativos
+    // Isso evita que o localStorage tenha mais cards do que o necessário
+    const currentState = {
       templateName,
       language,
       bodyText,
       cards: cards.slice(0, numCards), // Salvar apenas os cards ativos
       authKey,
-      numCards,
+      numCards, // Importante salvar o numCards atual
       step,
       lastSavedTime: new Date()
     };
     
+    // Log para depuração
+    console.log(`Salvando estado com ${numCards} cards ativos`);
+    
     // Chamar saveDraft e obter resultado
-    const saveSuccess = saveDraft(state);
+    const saveSuccess = saveDraft(currentState);
     
     if (saveSuccess) {
       // Atualizar estado de UI
@@ -127,33 +135,28 @@ export const useDraftManager = (state) => {
     const saveSuccess = saveCurrentState();
     
     if (saveSuccess) {
-      // Adicionar alerta de sucesso
-      setTimeout(() => {
-        if (alert && typeof alert.success === 'function') {
-          alert.success("Rascunho salvo com sucesso!", {
-            position: 'bottom-right',
-            autoCloseTime: 3000
-          });
-        }
-      }, 0);
+      // Adicionar alerta de sucesso com AlertService
+      alertService.success('DRAFT_SAVED');
     } else {
       // Mostrar erro se o salvamento falhou
-      setTimeout(() => {
-        if (alert && typeof alert.error === 'function') {
-          alert.error("Não foi possível salvar o rascunho.", {
-            position: 'top-center',
-            autoCloseTime: 5000
-          });
-        }
-      }, 0);
+      alertService.error('DRAFT_SAVE_ERROR');
     }
     
     return saveSuccess;
-  }, [saveCurrentState, alert]);
+  }, [saveCurrentState, alertService]);
+
+  // Limpar rascunho do localStorage
+  const handleClearDraft = useCallback(() => {
+    const cleared = clearDraft();
+    if (cleared) {
+      alertService.info('DRAFT_CLEARED');
+    }
+    return cleared;
+  }, [alertService]);
 
   return {
     saveCurrentState,
     handleSaveBeforeUpload,
-    clearDraft
+    clearDraft: handleClearDraft
   };
 };

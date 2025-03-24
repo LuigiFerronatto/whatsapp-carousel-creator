@@ -1,107 +1,158 @@
 // hooks/template/useCardManagement.js
 import { useCallback } from 'react';
+import { useAlertService } from '../common/useAlertService';
 
+/**
+ * Hook for managing carousel cards
+ * 
+ * @param {Object} state - Template state from useTemplateState hook
+ * @returns {Object} Card management methods and state
+ */
 export const useCardManagement = (state) => {
   const {
-    cards, setCards,
-    numCards, setNumCards,
-    setUnsavedChanges,
-    validationErrors, setValidationErrors,
-    alert
+    cards, setCards, numCards, setNumCards, setUnsavedChanges,
+    createEmptyCard
   } = state;
 
-  // Adicionar um novo card
-  const handleAddCard = useCallback(() => {
-    if (numCards < 10) {
-      setNumCards(prev => prev + 1);
-      setCards(prev => [...prev, state.createEmptyCard()]);
-      
-      // Marcar alterações não salvas
-      setUnsavedChanges(true);
-      
-      // Mostrar alerta
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Card ${numCards + 1} adicionado ao carrossel`, {
-            position: 'bottom-right',
-            autoCloseTime: 2000
-          });
-        }
-      }, 0);
-    } else {
-      // Mostrar alerta de limite máximo
-      setTimeout(() => {
-        if (alert && typeof alert.warning === 'function') {
-          alert.warning('Limite máximo de 10 cards atingido', {
-            position: 'top-center'
-          });
-        }
-      }, 0);
-    }
-  }, [numCards, setNumCards, setCards, state.createEmptyCard, setUnsavedChanges, alert]);
-  
-  // Remover o último card
-  const handleRemoveCard = useCallback(() => {
-    if (numCards > 2) {
-      setNumCards(prev => prev - 1);
-      
-      // Não remover o card do array, apenas diminuir o número de cards visíveis
-      // Isso permite recuperar o card se o usuário mudar de ideia
-      
-      // Marcar alterações não salvas
-      setUnsavedChanges(true);
-      
-      // Mostrar alerta
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Card ${numCards} removido do carrossel`, {
-            position: 'bottom-right',
-            autoCloseTime: 2000
-          });
-        }
-      }, 0);
-    } else {
-      // Mostrar alerta de limite mínimo
-      setTimeout(() => {
-        if (alert && typeof alert.warning === 'function') {
-          alert.warning('Um carrossel precisa ter no mínimo 2 cards', {
-            position: 'top-center'
-          });
-        }
-      }, 0);
-    }
-  }, [numCards, setNumCards, setUnsavedChanges, alert]);
-  
-  // Atualizar um campo específico de um card
+  // Use AlertService instead of direct alerts
+  const alertService = useAlertService();
+
+  /**
+   * Update a specific field of a card
+   * 
+   * @param {number} index - Index of the card to update
+   * @param {string} field - Field name to update
+   * @param {any} value - New value for the field
+   */
   const updateCard = useCallback((index, field, value) => {
-    setCards(prev => {
-      const newCards = [...prev];
+    // Check if index is within bounds
+    if (index < 0 || index >= cards.length) {
+      console.error(`Attempted to update card with invalid index: ${index}`);
+      return;
+    }
+    
+    setCards(prevCards => {
+      // Skip update if the value is the same to prevent unnecessary re-renders
+      if (prevCards[index] && prevCards[index][field] === value) {
+        return prevCards;
+      }
       
-      // Se o índice é válido
-      if (index >= 0 && index < newCards.length) {
-        // Cria uma cópia do card para modificação
-        newCards[index] = { ...newCards[index], [field]: value };
+      const newCards = [...prevCards];
+      
+      // If we're trying to update a card that doesn't exist in the current array,
+      // fill the array up to the necessary index
+      if (index >= newCards.length) {
+        while (newCards.length <= index) {
+          newCards.push(createEmptyCard());
+        }
+      }
+      
+      // Update the specific field
+      newCards[index] = {
+        ...newCards[index],
+        [field]: value
+      };
+      
+      return newCards;
+    });
+    
+    // Throttle unsaved changes updates by using a timeout
+    // This prevents too many state updates while typing
+    if (field === 'bodyText' || (field === 'buttons' && typeof value === 'object')) {
+      // Use a debounce technique for text fields to avoid setting unsavedChanges on every keystroke
+      if (!window._unsavedChangeTimeout) {
+        window._unsavedChangeTimeout = setTimeout(() => {
+          setUnsavedChanges(true);
+          window._unsavedChangeTimeout = null;
+        }, 1000); // Wait 1 second after typing stops
+      }
+    } else {
+      // For non-text fields, update immediately
+      setUnsavedChanges(true);
+    }
+  }, [cards, setCards, setUnsavedChanges, createEmptyCard]);
+
+  /**
+   * Add a new card to the carousel
+   */
+  const handleAddCard = useCallback(() => {
+    // Check if we've already reached the limit of 10 cards
+    if (numCards >= 10) {
+      alertService.warning('Maximum limit of 10 cards reached.', {
+        position: 'top-center',
+        autoCloseTime: 3000
+      });
+      return;
+    }
+    
+    // Ensure we have enough cards in the array
+    setCards(prevCards => {
+      const newCards = [...prevCards];
+      
+      // Add empty cards if the current array isn't large enough
+      while (newCards.length <= numCards) {
+        newCards.push(createEmptyCard());
       }
       
       return newCards;
     });
     
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
-    
-    // Limpar erro de validação relacionado a este campo
-    if (validationErrors[`card_${index}_${field}`]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[`card_${index}_${field}`];
-        return newErrors;
+    // Increment the number of cards
+    setNumCards(prevNumCards => {
+      const newNumCards = prevNumCards + 1;
+      console.log(`Increasing number of cards to ${newNumCards}`);
+      alertService.info('Card added successfully.', {
+        position: 'bottom-right',
+        autoCloseTime: 3000
       });
+      return newNumCards;
+    });
+    
+    // Mark that there are unsaved changes
+    setUnsavedChanges(true);
+  }, [numCards, setNumCards, setCards, setUnsavedChanges, createEmptyCard, alertService]);
+
+  /**
+   * Remove the last card from the carousel
+   */
+  const handleRemoveCard = useCallback(() => {
+    // Check if we're at the minimum limit of 2 cards
+    if (numCards <= 2) {
+      alertService.warning('Minimum of 2 cards required.', {
+        position: 'top-center',
+        autoCloseTime: 3000
+      });
+      return;
     }
-  }, [setCards, setUnsavedChanges, validationErrors, setValidationErrors]);
+    
+    // We don't actually remove the card from the array, just decrease numCards
+    // This keeps the data of previous cards available in case the user wants to add them back
+    setNumCards(prevNumCards => {
+      const newNumCards = prevNumCards - 1;
+      console.log(`Decreasing number of cards to ${newNumCards}`);
+      alertService.info('Card removed.', {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+      return newNumCards;
+    });
+    
+    // Mark that there are unsaved changes
+    setUnsavedChanges(true);
+  }, [numCards, setNumCards, setUnsavedChanges, alertService]);
+
+  // Clean up any debounce timers on unmount
+  const cleanup = useCallback(() => {
+    if (window._unsavedChangeTimeout) {
+      clearTimeout(window._unsavedChangeTimeout);
+      window._unsavedChangeTimeout = null;
+    }
+  }, []);
 
   return {
+    updateCard,
     handleAddCard,
     handleRemoveCard,
-    updateCard
+    cleanup
   };
 };

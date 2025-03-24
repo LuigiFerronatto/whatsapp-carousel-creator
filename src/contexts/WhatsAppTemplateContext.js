@@ -1,4 +1,4 @@
-// WhatsAppTemplateContext.js
+// /contexts/WhatsAppTemplateContext.js
 import React, { createContext, useContext, useMemo } from 'react';
 import { useWhatsAppTemplate } from '../hooks/template/useWhatsAppTemplate';
 
