@@ -1,436 +1,356 @@
 // hooks/template/useButtonManagement.js
 import { useCallback } from 'react';
 
+/**
+ * Hook for managing WhatsApp template buttons across cards
+ * 
+ * @param {Object} state - Template state from useTemplateState hook
+ * @param {Object} cardManagement - Card management methods from useCardManagement hook
+ * @returns {Object} Button management methods
+ */
 export const useButtonManagement = (state, cardManagement) => {
   const {
     cards, setCards,
     numCards,
     setUnsavedChanges,
-    validationErrors, setValidationErrors,
     alert
   } = state;
 
-  const { updateCard } = cardManagement;
-
-  // Verificar consistência dos botões entre todos os cards
+  /**
+   * Check button consistency across all cards
+   * 
+   * @returns {Object} Consistency status and message
+   */
   const checkButtonConsistency = useCallback(() => {
-    const activeCards = cards.slice(0, numCards);
-    
-    // Consistente se houver apenas um card
-    if (activeCards.length <= 1) {
-      return { 
-        isConsistent: true,
-        message: "Consistente: Apenas um card no carrossel."
-      };
+    // If there's only one card, it's already consistent
+    if (numCards <= 1) {
+      return { isConsistent: true, message: "Consistent" };
     }
     
-    // Coletar informações do primeiro card como referência
-    const referenceButtons = activeCards[0].buttons;
+    // Use the first card as reference
+    const referenceButtons = cards[0]?.buttons || [];
+    
+    // Safety check if first card doesn't have buttons
+    if (!referenceButtons.length) {
+      return { isConsistent: true, message: "No buttons to check" };
+    }
+
     const referenceCount = referenceButtons.length;
     const referenceTypes = referenceButtons.map(button => button.type);
     
-    // Verificar consistência em todos os cards
+    // Check all cards
     let allSameCount = true;
     let allSameTypes = true;
-    let inconsistentCards = [];
     
-    activeCards.forEach((card, index) => {
-      if (index === 0) return; // Pular o primeiro card (referência)
-      
-      // Verificar quantidade de botões
-      if (card.buttons.length !== referenceCount) {
-        allSameCount = false;
-        inconsistentCards.push({
-          cardIndex: index,
-          issue: `Quantidade diferente de botões: ${card.buttons.length} vs ${referenceCount}`
-        });
+    for (let i = 1; i < numCards; i++) {
+      // Safety check for invalid cards
+      if (!cards[i] || !Array.isArray(cards[i].buttons)) {
+        continue;
       }
       
-      // Verificar tipos de botões se a quantidade for a mesma
-      if (card.buttons.length === referenceCount) {
-        for (let i = 0; i < referenceCount; i++) {
-          if (card.buttons[i].type !== referenceTypes[i]) {
-            allSameTypes = false;
-            inconsistentCards.push({
-              cardIndex: index,
-              buttonIndex: i,
-              issue: `Tipo de botão diferente: ${card.buttons[i].type} vs ${referenceTypes[i]}`
-            });
-          }
+      // Check button count
+      if (cards[i].buttons.length !== referenceCount) {
+        allSameCount = false;
+      }
+      
+      // Check button types
+      for (let j = 0; j < Math.min(cards[i].buttons.length, referenceCount); j++) {
+        if (cards[i].buttons[j].type !== referenceTypes[j]) {
+          allSameTypes = false;
         }
       }
-    });
+    }
     
-    // Determinar status geral
+    // Determine overall status
     const isConsistent = allSameCount && allSameTypes;
     
-    // Formatar mensagem detalhada
+    // Mensagem simplificada
     let message = isConsistent 
-      ? "Consistente: Todos os cards têm a mesma quantidade e tipos de botões."
+      ? "Consistente: Todos os cartões têm a mesma configuração de botões."
       : "Inconsistente: ";
       
     if (!allSameCount) {
-      message += "Alguns cards têm números diferentes de botões. ";
+      message += "Alguns cartões têm quantidades diferentes de botões. ";
     }
     
     if (!allSameTypes) {
-      message += "Alguns cards têm tipos diferentes de botões. ";
-    }
-    
-    // Incluir informações sobre padronização
-    if (!isConsistent) {
-      // Encontrar o card com mais botões
-      const maxButtonCount = Math.max(...activeCards.map(card => card.buttons.length));
-      const templateCard = activeCards.find(card => card.buttons.length === maxButtonCount);
-      const templateIndex = activeCards.indexOf(templateCard);
-      
-      message += `A padronização usará como modelo o Card ${templateIndex + 1} com ${maxButtonCount} botões.`;
+      message += "Alguns cartões têm tipos diferentes de botões. ";
     }
     
     return {
       isConsistent,
       message,
-      inconsistentCards,
       allSameCount,
       allSameTypes
     };
   }, [cards, numCards]);
 
-  // Padronizar botões entre todos os cards
-  const standardizeButtons = useCallback(() => {
-    const activeCards = cards.slice(0, numCards);
-    
-    // Se tiver apenas um card, não precisa padronizar
-    if (activeCards.length <= 1) {
-      return cards;
-    }
-    
-    // Encontrar o card com mais botões para usar como modelo
-    const maxButtonCount = Math.max(...activeCards.map(card => card.buttons.length));
-    const templateCard = activeCards.find(card => card.buttons.length === maxButtonCount);
-    const templateButtons = templateCard.buttons;
-    
-    // Criar cópia dos cards para modificação
-    const standardizedCards = [...cards];
-    
-    // Padronizar todos os cards ativos
-    for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
-      const card = standardizedCards[cardIndex];
-      
-      // Se já é o card template, pular
-      if (card === templateCard) continue;
-      
-      const newButtons = [];
-      
-      // Para cada botão no card modelo
-      for (let btnIndex = 0; btnIndex < templateButtons.length; btnIndex++) {
-        const templateButton = templateButtons[btnIndex];
-        
-        if (btnIndex < card.buttons.length) {
-          // Card já tem este botão, atualizar apenas o tipo
-          const existingButton = card.buttons[btnIndex];
-          newButtons.push({
-            ...existingButton,
-            type: templateButton.type,
-            // Garantir campos específicos do tipo
-            ...(templateButton.type === 'URL' && !existingButton.url ? { url: '' } : {}),
-            ...(templateButton.type === 'PHONE_NUMBER' && !existingButton.phoneNumber ? { phoneNumber: '' } : {}),
-            ...(templateButton.type === 'QUICK_REPLY' && !existingButton.payload ? { payload: '' } : {})
-          });
-        } else {
-          // Card não tem este botão, criar novo baseado no template
-          newButtons.push({
-            type: templateButton.type,
-            text: '', // Texto vazio para o usuário preencher
-            ...(templateButton.type === 'URL' ? { url: '' } : {}),
-            ...(templateButton.type === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
-            ...(templateButton.type === 'QUICK_REPLY' ? { payload: '' } : {})
-          });
-        }
-      }
-      
-      standardizedCards[cardIndex] = { ...card, buttons: newButtons };
-    }
-    
-    return standardizedCards;
-  }, [cards, numCards]);
-
-  // Aplicar padronização de botões
+  /**
+   * Standardize buttons across all cards using the first card as a template
+   */
   const applyButtonStandardization = useCallback(() => {
-    const standardizedCards = standardizeButtons();
-    setCards(standardizedCards);
-    
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
-    
-    // Exibir mensagem de sucesso
-    setTimeout(() => {
-      if (alert && typeof alert.success === 'function') {
-        alert.success('Botões padronizados com sucesso em todos os cards!', {
-          position: 'top-right',
-          autoCloseTime: 3000
-        });
-      }
-    }, 0);
-  }, [standardizeButtons, setCards, setUnsavedChanges, alert]);
-
-  // Sincronizar tipo de botão em todos os cards
-  const syncButtonType = useCallback((buttonIndex, newType) => {
-    // Atualizar o tipo do botão em todos os cards ativos
-    setCards(prev => {
-      const newCards = [...prev];
-      
-      // Percorrer todos os cards ativos
-      for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
-        // Verificar se o card tem um botão nesse índice
-        if (newCards[cardIndex].buttons.length > buttonIndex) {
-          const cardButtons = [...newCards[cardIndex].buttons];
-          const existingButton = cardButtons[buttonIndex];
-          
-          // Atualizar o tipo do botão mantendo os outros campos
-          cardButtons[buttonIndex] = {
-            ...existingButton,
-            type: newType,
-            // Adicionar campos específicos do tipo se não existirem
-            ...(newType === 'URL' && !existingButton.url ? { url: '' } : {}),
-            ...(newType === 'PHONE_NUMBER' && !existingButton.phoneNumber ? { phoneNumber: '' } : {}),
-            ...(newType === 'QUICK_REPLY' && !existingButton.payload ? { payload: '' } : {})
-          };
-          
-          // Atualizar o card
-          newCards[cardIndex] = {
-            ...newCards[cardIndex],
-            buttons: cardButtons
-          };
-        }
-      }
-      
-      return newCards;
-    });
-    
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
-    
-    // Informar sobre a sincronização
-    setTimeout(() => {
-      if (alert && typeof alert.info === 'function') {
-        alert.info(`Tipo de botão "${newType}" sincronizado em todos os cards`, {
-          position: 'bottom-right',
-          autoCloseTime: 3000
-        });
-      }
-    }, 0);
-  }, [numCards, setCards, setUnsavedChanges, alert]);
-
-  // Sincronizar adição de botão em todos os cards
-  const syncAddButton = useCallback((cardIndex, buttonType = 'QUICK_REPLY') => {
-    setCards(prev => {
-      const newCards = [...prev];
-      
-      // Adicionar novo botão em todos os cards ativos
-      for (let i = 0; i < numCards; i++) {
-        if (i !== cardIndex) {
-          const newButton = { 
-            type: buttonType, 
-            text: '',
-            ...(buttonType === 'URL' ? { url: '' } : {}),
-            ...(buttonType === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
-            ...(buttonType === 'QUICK_REPLY' ? { payload: '' } : {})
-          };
-          
-          const cardButtons = [...newCards[i].buttons, newButton];
-          newCards[i] = { ...newCards[i], buttons: cardButtons };
-        }
-      }
-      
-      return newCards;
-    });
-    
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
-    
-    // Informar sobre a adição de botões
-    setTimeout(() => {
-      if (alert && typeof alert.info === 'function') {
-        alert.info(`Botão do tipo "${buttonType}" adicionado a todos os cards`, {
-          position: 'bottom-right',
-          autoCloseTime: 3000
-        });
-      }
-    }, 0);
-  }, [numCards, setCards, setUnsavedChanges, alert]);
-
-  // Sincronizar remoção de botão em todos os cards
-  const syncRemoveButton = useCallback((buttonIndex) => {
-    setCards(prev => {
-      const newCards = [...prev];
-      
-      // Remover o botão em todos os cards ativos
-      for (let cardIndex = 0; cardIndex < numCards; cardIndex++) {
-        const cardButtons = newCards[cardIndex].buttons.filter((_, idx) => idx !== buttonIndex);
-        newCards[cardIndex] = { ...newCards[cardIndex], buttons: cardButtons };
-      }
-      
-      return newCards;
-    });
-    
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
-    
-    // Informar sobre a remoção de botões
-    setTimeout(() => {
-      if (alert && typeof alert.warning === 'function') {
-        alert.warning(`Botão removido de todos os cards`, {
-          position: 'bottom-right',
-          autoCloseTime: 3000
-        });
-      }
-    }, 0);
-  }, [numCards, setCards, setUnsavedChanges, alert]);
-  
-  // Atualizar um campo específico de um botão em um card
-  const updateButtonField = useCallback((cardIndex, buttonIndex, field, value) => {
-    setCards(prev => {
-      const newCards = [...prev];
-      
-      // Verificar se o card existe
-      if (cardIndex >= 0 && cardIndex < newCards.length) {
-        const card = newCards[cardIndex];
-        
-        // Verificar se o botão existe
-        if (buttonIndex >= 0 && buttonIndex < card.buttons.length) {
-          // Criar cópias para preservar imutabilidade
-          const newButtons = [...card.buttons];
-          newButtons[buttonIndex] = { ...newButtons[buttonIndex], [field]: value };
-          
-          // Atualizar o card com os novos botões
-          newCards[cardIndex] = { ...card, buttons: newButtons };
-        }
-      }
-      
-      return newCards;
-    });
-    
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
-    
-    // Se estiver alterando o tipo do botão e for o primeiro card, sincronizar com os outros
-    if (field === 'type' && cardIndex === 0 && numCards > 1) {
-      syncButtonType(buttonIndex, value);
-    }
-    
-    // Limpar erro de validação relacionado a este campo
-    if (validationErrors[`card_${cardIndex}_button_${buttonIndex}_${field}`]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[`card_${cardIndex}_button_${buttonIndex}_${field}`];
-        return newErrors;
-      });
-    }
-  }, [setCards, setUnsavedChanges, numCards, syncButtonType, validationErrors, setValidationErrors]);
-  
-  // Adicionar um novo botão a um card
-  const addButton = useCallback((cardIndex) => {
-    // Verificar se já possui o máximo de botões
-    const card = cards[cardIndex];
-    if (!card || card.buttons.length >= 2) {
-      // Mostrar alerta sobre o limite de botões
-      setTimeout(() => {
-        if (alert && typeof alert.warning === 'function') {
-          alert.warning('Cada card pode ter no máximo 2 botões', {
-            position: 'top-center'
-          });
-        }
-      }, 0);
+    // If there's only one card, no need to standardize
+    if (numCards <= 1) {
       return;
     }
     
-    // Obter o tipo de botão padrão (usar o tipo do primeiro botão do primeiro card, ou QUICK_REPLY)
-    const defaultButtonType = cards[0]?.buttons[0]?.type || 'QUICK_REPLY';
+    // Safety check - ensure cards array and first card exist
+    if (!Array.isArray(cards) || cards.length === 0 || !cards[0]) {
+      console.warn("Cannot standardize buttons: Invalid cards data");
+      return;
+    }
     
-    setCards(prev => {
-      const newCards = [...prev];
+    // Copy buttons from the first card as a template
+    const templateButtons = cards[0].buttons || [];
+    
+    // Update all other cards
+    const newCards = [...cards];
+    
+    for (let i = 1; i < numCards; i++) {
+      // Skip invalid card entries
+      if (!newCards[i]) continue;
       
-      // Se o card existe
-      if (cardIndex >= 0 && cardIndex < newCards.length) {
-        const newButton = { 
-          type: defaultButtonType, 
-          text: '',
-          ...(defaultButtonType === 'URL' ? { url: '' } : {}),
-          ...(defaultButtonType === 'PHONE_NUMBER' ? { phoneNumber: '' } : {}),
-          ...(defaultButtonType === 'QUICK_REPLY' ? { payload: '' } : {})
-        };
+      const newButtons = [];
+      
+      // Create new buttons based on the template
+      for (let j = 0; j < templateButtons.length; j++) {
+        const templateButton = templateButtons[j];
         
-        // Adicionar novo botão aos botões existentes
-        const newButtons = [...newCards[cardIndex].buttons, newButton];
-        newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
-      }
-      
-      return newCards;
-    });
-    
-    // Marcar alterações não salvas
-    setUnsavedChanges(true);
-    
-    // Se tiver mais de um card, sincronizar a adição com os outros cards
-    if (numCards > 1) {
-      syncAddButton(cardIndex, defaultButtonType);
-    } else {
-      // Mostrar alerta sobre adição de botão
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Botão adicionado ao Card ${cardIndex + 1}`, {
-            position: 'bottom-right',
-            autoCloseTime: 2000
+        // Safety check - ensure current card has buttons array
+        if (!Array.isArray(newCards[i].buttons)) {
+          newCards[i].buttons = [];
+        }
+        
+        if (j < newCards[i].buttons.length) {
+          // Keep existing button data, but update the type
+          newButtons.push({
+            ...newCards[i].buttons[j],
+            type: templateButton.type,
+            // Ensure type-specific fields
+            ...(templateButton.type === 'URL' && !newCards[i].buttons[j].url ? { url: '' } : {}),
+            ...(templateButton.type === 'PHONE_NUMBER' && !newCards[i].buttons[j].phoneNumber ? { phoneNumber: '' } : {})
+          });
+        } else {
+          // Add a new button based on the template
+          newButtons.push({
+            type: templateButton.type,
+            text: '',
+            ...(templateButton.type === 'URL' ? { url: '' } : {}),
+            ...(templateButton.type === 'PHONE_NUMBER' ? { phoneNumber: '' } : {})
           });
         }
-      }, 0);
-    }
-  }, [cards, numCards, setCards, setUnsavedChanges, syncAddButton, alert]);
-  
-  // Remover um botão de um card
-  const removeButton = useCallback((cardIndex, buttonIndex) => {
-    setCards(prev => {
-      const newCards = [...prev];
-      
-      // Se o card existe
-      if (cardIndex >= 0 && cardIndex < newCards.length) {
-        // Remover o botão especificado
-        const newButtons = newCards[cardIndex].buttons.filter((_, i) => i !== buttonIndex);
-        newCards[cardIndex] = { ...newCards[cardIndex], buttons: newButtons };
       }
       
-      return newCards;
-    });
+      // Update the card
+      newCards[i] = { ...newCards[i], buttons: newButtons };
+    }
     
-    // Marcar alterações não salvas
+    // Update state
+    setCards(newCards);
     setUnsavedChanges(true);
     
-    // Se tiver mais de um card, sincronizar a remoção com os outros cards
-    if (numCards > 1) {
-      syncRemoveButton(buttonIndex);
-    } else {
-      // Mostrar alerta sobre remoção de botão
-      setTimeout(() => {
-        if (alert && typeof alert.info === 'function') {
-          alert.info(`Botão removido do Card ${cardIndex + 1}`, {
-            position: 'bottom-right',
-            autoCloseTime: 2000
-          });
-        }
-      }, 0);
+    // Notify the user
+    if (alert && typeof alert.success === 'function') {
+      alert.success("Buttons standardized successfully!", {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
     }
-  }, [numCards, setCards, setUnsavedChanges, syncRemoveButton, alert]);
+  }, [cards, numCards, setCards, setUnsavedChanges, alert]);
+
+  /**
+   * Synchronize button type across all cards
+   * 
+   * @param {number} buttonIndex - Index of the button to update
+   * @param {string} newType - New button type
+   */
+  const syncButtonType = useCallback((buttonIndex, newType) => {
+    // Safety check
+    if (!Array.isArray(cards) || cards.length === 0) {
+      console.warn("Cannot sync button types: Invalid cards data");
+      return;
+    }
+    
+    try {
+      const newCards = [...cards];
+      
+      // Update type across all cards
+      for (let i = 0; i < numCards; i++) {
+        // Skip invalid card entries
+        if (!newCards[i]) continue;
+        
+        // Ensure buttons array exists
+        if (!Array.isArray(newCards[i].buttons)) {
+          newCards[i].buttons = [];
+        }
+        
+        if (newCards[i].buttons.length > buttonIndex) {
+          const buttonsCopy = [...newCards[i].buttons];
+          
+          buttonsCopy[buttonIndex] = {
+            ...buttonsCopy[buttonIndex],
+            type: newType,
+            // Add type-specific fields if needed
+            ...(newType === 'URL' && !buttonsCopy[buttonIndex].url ? { url: '' } : {}),
+            ...(newType === 'PHONE_NUMBER' && !buttonsCopy[buttonIndex].phoneNumber ? { phoneNumber: '' } : {})
+          };
+          
+          newCards[i] = { ...newCards[i], buttons: buttonsCopy };
+        }
+      }
+      
+      // Update state
+      setCards(newCards);
+      setUnsavedChanges(true);
+      
+      // Notify the user
+      if (alert && typeof alert.info === 'function') {
+        alert.info(`Button type synchronized across all cards`, {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error in syncButtonType:", error);
+      
+      // Show error message
+      if (alert && typeof alert.error === 'function') {
+        alert.error("Failed to synchronize button type", {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
+      }
+    }
+  }, [cards, numCards, setCards, setUnsavedChanges, alert]);
+
+  /**
+   * Synchronize button addition across all cards
+   * 
+   * @param {number} sourceCardIndex - Index of the source card
+   * @param {string} buttonType - Type of button to add (default: 'QUICK_REPLY')
+   */
+  const syncAddButton = useCallback((sourceCardIndex, buttonType = 'QUICK_REPLY') => {
+    // Safety check
+    if (!Array.isArray(cards) || cards.length === 0) {
+      console.warn("Cannot sync add button: Invalid cards data");
+      return;
+    }
+    
+    try {
+      // Create new button
+      const newButton = { 
+        type: buttonType, 
+        text: '',
+        ...(buttonType === 'URL' ? { url: '' } : {}),
+        ...(buttonType === 'PHONE_NUMBER' ? { phoneNumber: '' } : {})
+      };
+      
+      // Add to all cards
+      const newCards = [...cards];
+      
+      for (let i = 0; i < numCards; i++) {
+        // Skip invalid card entries
+        if (!newCards[i]) continue;
+        
+        // Ensure source card index is valid
+        if (i !== sourceCardIndex) {
+          // Ensure buttons array exists
+          if (!Array.isArray(newCards[i].buttons)) {
+            newCards[i].buttons = [];
+          }
+          
+          newCards[i] = { 
+            ...newCards[i], 
+            buttons: [...newCards[i].buttons, newButton] 
+          };
+        }
+      }
+      
+      // Update state
+      setCards(newCards);
+      setUnsavedChanges(true);
+      
+      // Notify the user
+      if (alert && typeof alert.info === 'function') {
+        alert.info("Button added to all cards", {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error in syncAddButton:", error);
+      
+      // Show error message
+      if (alert && typeof alert.error === 'function') {
+        alert.error("Failed to add button to all cards", {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
+      }
+    }
+  }, [cards, numCards, setCards, setUnsavedChanges, alert]);
+
+  /**
+   * Synchronize button removal across all cards
+   * 
+   * @param {number} buttonIndex - Index of the button to remove
+   */
+  const syncRemoveButton = useCallback((buttonIndex) => {
+    // Safety check
+    if (!Array.isArray(cards) || cards.length === 0) {
+      console.warn("Cannot sync remove button: Invalid cards data");
+      return;
+    }
+    
+    try {
+      // Remove button from all cards
+      const newCards = [...cards];
+      
+      for (let i = 0; i < numCards; i++) {
+        // Skip invalid card entries
+        if (!newCards[i]) continue;
+        
+        // Ensure buttons array exists
+        if (!Array.isArray(newCards[i].buttons)) {
+          newCards[i].buttons = [];
+          continue;
+        }
+        
+        newCards[i] = {
+          ...newCards[i],
+          buttons: newCards[i].buttons.filter((_, idx) => idx !== buttonIndex)
+        };
+      }
+      
+      // Update state
+      setCards(newCards);
+      setUnsavedChanges(true);
+      
+      // Notify the user
+      if (alert && typeof alert.info === 'function') {
+        alert.info("Button removed from all cards", {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
+      }
+    } catch (error) {
+      console.error("Error in syncRemoveButton:", error);
+      
+      // Show error message
+      if (alert && typeof alert.error === 'function') {
+        alert.error("Failed to remove button from all cards", {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
+      }
+    }
+  }, [cards, numCards, setCards, setUnsavedChanges, alert]);
 
   return {
     checkButtonConsistency,
-    standardizeButtons,
     applyButtonStandardization,
     syncButtonType,
     syncAddButton,
-    syncRemoveButton,
-    updateButtonField,
-    addButton,
-    removeButton
+    syncRemoveButton
   };
 };

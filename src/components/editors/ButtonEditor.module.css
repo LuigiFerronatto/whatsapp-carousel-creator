@@ -1,13 +1,12 @@
-/* ButtonEditor.module.css */
+/* ButtonEditor.module.css - Versão otimizada */
 .buttonContainer {
-  padding: var(--spacing-5);
+  padding: 16px;
   background-color: var(--color-surface-0);
-  border-radius: var(--radius-md);
-  margin-bottom: 0;
-  transition: all var(--transition-normal);
+  border-radius: 8px;
   position: relative;
   border: 1px solid var(--color-border-2);
   box-shadow: var(--shadow-1);
+  transition: all 0.3s ease;
 }
 
 .buttonContainer:hover {
@@ -20,10 +19,11 @@
   background-color: rgba(249, 159, 159, 0.05);
 }
 
+/* Selector de tipo de botão */
 .buttonTypeSelector {
   display: flex;
-  margin-bottom: var(--spacing-4);
-  gap: var(--spacing-2);
+  margin-bottom: 12px;
+  gap: 8px;
 }
 
 .typeOption {
@@ -32,12 +32,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-3) var(--spacing-2);
+  padding: 10px 8px;
   background-color: var(--color-surface-1);
   border: 2px solid var(--color-surface-1);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .typeOption:hover {
@@ -59,204 +59,33 @@
   height: 42px;
   background-color: rgba(197, 217, 251, 0.2);
   color: var(--blip-dark);
-  border-radius: var(--radius-circle);
-  margin-bottom: var(--spacing-2);
-  transition: all var(--transition-fast);
+  border-radius: 50%;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .selectedType .typeIconWrapper {
   background-color: var(--color-primary);
-  color: var(--color-bright);
+  color: white;
 }
 
 .typeLabel {
-  font-size: var(--fs-p2);
-  font-weight: var(--fw-bold);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .typeDescription {
-  font-size: var(--fs-p3);
+  font-size: 13px;
   color: var(--dove-gray-2);
-  margin: calc(-1 * var(--spacing-2)) 0 var(--spacing-4) 0;
+  margin: -8px 0 12px 0;
   text-align: center;
   background-color: var(--color-surface-1);
-  padding: var(--spacing-2);
-  border-radius: var(--radius-sm);
+  padding: 6px;
+  border-radius: 4px;
 }
 
-.formGroup {
-  margin-bottom: var(--spacing-5);
-  position: relative;
-}
-
-.formGroup:last-child {
-  margin-bottom: 0;
-}
-
-.inputWrapper {
-  position: relative;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.helpContent h4 {
-  margin-top: 0;
-  margin-bottom: var(--spacing-2);
-  font-size: var(--fs-p2);
-  color: var(--color-content-default);
-}
-
-.helpContent ul {
-  margin: var(--spacing-2) 0;
-  padding-left: var(--spacing-6);
-}
-
-.helpContent li {
-  margin-bottom: var(--spacing-1);
-}
-
-.exampleBox {
-  background-color: var(--color-surface-0);
-  padding: var(--spacing-3);
-  border-radius: var(--radius-sm);
-  margin-top: var(--spacing-2);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-}
-
-.exampleBox strong {
-  font-size: var(--fs-p3);
-  color: var(--color-content-default);
-}
-
-.exampleBox code {
-  background-color: var(--color-surface-1);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-p3);
-  color: var(--color-primary);
-}
-
-.urlInputWrapper, .phoneInputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.testActionButton {
-  position: absolute;
-  right: var(--spacing-2);
-  top: 50%;
-  transform: translateY(-50%);
-  padding: var(--spacing-1) var(--spacing-2);
-  background-color: rgba(197, 217, 251, 0.2);
-  color: var(--blip-dark);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-p3);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-}
-
-.testActionButton:hover:not(:disabled) {
-  background-color: var(--color-primary);
-  color: var(--color-bright);
-}
-
-.testActionButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.urlWarning {
-  font-size: var(--fs-p3);
-  color: var(--extended-yellow-dark);
-  margin-top: var(--spacing-2);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: var(--spacing-2);
-  background-color: rgba(253, 233, 155, 0.2);
-  border-radius: var(--radius-sm);
-}
-
-.phonePreview {
-  font-size: var(--fs-p3);
-  color: var(--color-content-default);
-  margin-top: var(--spacing-2);
-  padding: var(--spacing-2);
-  background-color: var(--color-surface-1);
-  border-radius: var(--radius-sm);
-  text-align: center;
-  font-weight: var(--fw-bold);
-}
-
-.buttonActions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--spacing-4);
-  padding-top: var(--spacing-4);
-  border-top: 1px solid var(--color-border-2);
-}
-
-.removeButton {
-  background-color: rgba(249, 159, 159, 0.1);
-  color: var(--color-negative);
-  border: none;
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-size: var(--fs-p3);
-  font-weight: var(--fw-bold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.removeButton:hover {
-  background-color: rgba(249, 159, 159, 0.2);
-  color: var(--color-negative);
-}
-
-.validationMessage {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  color: var(--color-negative);
-  font-size: var(--fs-p3);
-  margin-top: var(--spacing-2);
-  padding: var(--spacing-2);
-  background-color: rgba(249, 159, 159, 0.1);
-  border-radius: var(--radius-sm);
-}
-
-.validationIcon {
-  flex-shrink: 0;
-}
-
-/* Indicador de bloqueio nos tipos de botão */
-.lockIndicator {
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 18px;
-  height: 18px;
-  background-color: var(--color-surface-1);
-  border-radius: var(--radius-circle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--dove-gray-2);
-  border: 1px solid var(--color-border-2);
-}
-
-/* Estado desabilitado para tipos de botão */
+/* Estado desabilitado */
 .disabledType {
   opacity: 0.6;
   cursor: not-allowed;
@@ -276,50 +105,143 @@
   right: 0;
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
 }
 
-/* Aviso de sincronização entre cards */
+/* Indicador de lock */
+.lockIndicator {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  background-color: var(--color-surface-1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dove-gray-2);
+  border: 1px solid var(--color-border-2);
+}
+
+/* Avisos de sincronização */
 .syncWarning {
   background-color: rgba(197, 217, 251, 0.2);
   color: var(--blip-dark);
-  padding: var(--spacing-3);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-4);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-2);
-  animation: fadeIn var(--transition-normal);
+  gap: 8px;
+  animation: fadeIn 0.3s ease;
   border-left: 3px solid var(--color-primary);
-  font-size: var(--fs-p3);
+  font-size: 13px;
 }
 
-/* Notificação sobre tipos de botão no mesmo padrão */
 .syncNotice {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  margin: calc(-1 * var(--spacing-2)) 0 var(--spacing-2) 0;
-  padding: var(--spacing-2);
+  gap: 8px;
+  margin: -8px 0 8px 0;
+  padding: 6px;
   background-color: var(--color-surface-1);
-  border-radius: var(--radius-sm);
-  font-size: var(--fs-p3);
+  border-radius: 4px;
+  font-size: 13px;
   color: var(--dove-gray-2);
   border-left: 2px solid var(--color-primary);
 }
 
-/* Media Queries for Responsiveness */
+/* Botões de acão */
+.testActionButton {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  background-color: rgba(197, 217, 251, 0.2);
+  color: var(--blip-dark);
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.testActionButton:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.testActionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-2);
+}
+
+.removeButton {
+  background-color: rgba(249, 159, 159, 0.1);
+  color: var(--color-negative);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+  background-color: rgba(249, 159, 159, 0.2);
+  color: var(--color-negative);
+}
+
+/* Validação */
+.validationMessage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-negative);
+  font-size: 13px;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: rgba(249, 159, 159, 0.1);
+  border-radius: 4px;
+}
+
+.validationIcon {
+  flex-shrink: 0;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Media Queries para Responsividade */
 @media (max-width: 768px) {
   .buttonTypeSelector {
     flex-direction: column;
-    gap: var(--spacing-2);
+    gap: 8px;
   }
   
   .typeOption {
     flex-direction: row;
     justify-content: flex-start;
-    gap: var(--spacing-3);
-    padding: var(--spacing-2) var(--spacing-3);
+    gap: 10px;
+    padding: 8px 10px;
   }
   
   .typeIconWrapper {
@@ -328,35 +250,9 @@
     height: 28px;
   }
   
-  .urlInputWrapper .input, .phoneInputWrapper .input {
-    padding-right: var(--spacing-8);
-  }
-  
-  .labelWithProgress {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .characterProgressWrapper {
-    width: 100%;
-    margin-top: var(--spacing-1);
-  }
-}
-
-@media (max-width: 480px) {
-  .labelWithHelp {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-1);
-  }
-  
-  .helpButton {
-    padding-left: 0;
-  }
-  
   .testActionButton {
-    padding: var(--spacing-1) var(--spacing-2);
-    font-size: var(--fs-p4);
+    padding: 4px 8px;
+    font-size: 12px;
   }
   
   .testActionButton span {

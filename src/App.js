@@ -1,9 +1,8 @@
-// App.js
+// App.js - Com AlertServiceProvider
 import React, { useEffect, Suspense, lazy } from 'react';
 import { WhatsAppTemplateProvider } from './contexts/WhatsAppTemplateContext';
-// import { TextContentProvider } from './contexts/TextContentContext';
-// import { ToastProvider } from './components/ui/Feedback/Feedback';
 import { AlertProvider } from './components/ui/AlertMessage/AlertContext';
+import { AlertServiceProvider } from './contexts/AlertServiceContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Loading from './components/ui/Loading/Loading';
 import { createAzureBlobService } from './services/storage/azureBlobService';
@@ -39,10 +38,11 @@ function App() {
 
   return (
       <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-        {/* O AlertProvider DEVE vir antes do WhatsAppTemplateProvider 
+        {/* O AlertProvider DEVE vir antes dos outros providers 
             para que o useAlert esteja disponível */}
         <AlertProvider>
-          {/* <TextContentProvider> */}
+          {/* Adicionar AlertServiceProvider para disponibilizar o serviço centralizado */}
+          <AlertServiceProvider>
             <WhatsAppTemplateProvider>
               <div className="app-container">
                 <main className="app-content">
@@ -66,7 +66,7 @@ function App() {
                 </main>
               </div>
             </WhatsAppTemplateProvider>
-          {/* </TextContentProvider> */}
+          </AlertServiceProvider>
         </AlertProvider>
       </ErrorBoundary>
   );

@@ -1,29 +1,28 @@
-// hooks/common/useValidation.js
+// hooks/common/useValidation.js - Com AlertService
 import { useCallback } from 'react';
+import { useAlertService } from './useAlertService';
 
 export const useValidation = (state) => {
   const { 
-    alert, 
     setValidationErrors, 
     cards, numCards, 
     authKey, templateName, bodyText, phoneNumber,
     hasTriedToAdvance
   } = state;
 
+  // Usar AlertService em vez de alert direto
+  const alertService = useAlertService();
+
   // Função para exibir erros de validação
   const showValidationErrors = useCallback((errorMessages) => {
     if (!errorMessages || errorMessages.length === 0) return;
     
-    // Usar setTimeout para evitar alertas durante a renderização
-    setTimeout(() => {
-      if (alert && typeof alert.error === 'function') {
-        alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
-          position: 'top-center',
-          autoCloseTime: 7000
-        });
-      }
-    }, 0);
-  }, [alert]);
+    // Formatação de mensagens para o alert
+    const formattedErrors = errorMessages.join('\n');
+    
+    // Usar o AlertService para mostrar erros de validação
+    alertService.error('VALIDATION_ERRORS_FOUND', {}, formattedErrors);
+  }, [alertService]);
   
   // Validação do primeiro passo
   const validateStepOne = useCallback((triggerAlerts = false) => {
@@ -138,11 +137,11 @@ export const useValidation = (state) => {
       errorMessages.push('Número de telefone é obrigatório');
     } else {
       try {
-        // Nota: Aqui você precisaria importar validatePhoneNumber de services/validation/validationService
-        // validatePhoneNumber(phoneNumber);
-        // Simulação para o exemplo:
+        // Validação básica do número de telefone
         if (phoneNumber.length < 10) {
-          throw new Error('Número de telefone inválido');
+          const error = new Error('Número de telefone inválido');
+          errors.phoneNumber = error.message;
+          errorMessages.push(error.message);
         }
       } catch (err) {
         errors.phoneNumber = err.message;

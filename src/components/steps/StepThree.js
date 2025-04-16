@@ -1,6 +1,6 @@
 // src/components/StepThree.js - Versão com alertas contextuais
 import React, { useState, useRef, useEffect } from 'react';
-import { useAlert } from '../ui/AlertMessage/AlertContext'; // Adicionar esta importação
+import { useAlertService } from '../../hooks/common/useAlertService'; // Atualizado para useAlertService
 import CarouselPreview from '../previews/CarouselPreview';
 import Button from '../ui/Button/Button';
 import JsonViewer from '../ui/JsonViewer/JsonViewer';
@@ -203,15 +203,15 @@ const PreviewContent = ({
     
     // Adicionar alertas baseados no status
     if (status.status === 'success') {
-      alert.success(`Download concluído: ${previewFormat.toUpperCase()} pronto!`, {
+      alert.success("PREVIEW_SUCCESS", {
         position: 'bottom-right',
         autoCloseTime: 3000
-      });
+      }, previewFormat.toUpperCase());
     } else if (status.status === 'error') {
-      alert.error(`Falha ao gerar ${previewFormat.toUpperCase()}: ${status.message}`, {
+      alert.error("PREVIEW_ERROR", {
         position: 'top-center',
         autoCloseTime: 7000
-      });
+      }, previewFormat.toUpperCase(), status.message);
     }
   };
 
@@ -257,7 +257,7 @@ const PreviewContent = ({
           );
           
           // Alerta quando a pré-renderização for concluída
-          alert.info("Pré-renderização concluída. O download será mais rápido agora!", {
+          alert.info("PRE_RENDER_COMPLETE", {
             position: 'bottom-right',
             autoCloseTime: 3000
           });
@@ -361,9 +361,9 @@ const PreviewContent = ({
         setDownloadStatus({ status: 'success', message: 'Download concluído!', progress: 100 });
         
         // Mostrar alerta de sucesso
-        alert.success(`${previewFormat.toUpperCase()} gerado com sucesso!`, {
+        alert.success("PREVIEW_SUCCESS", {
           position: 'bottom-right'
-        });
+        }, previewFormat.toUpperCase());
         
         // Reset status após um delay
         setTimeout(() => {
@@ -480,10 +480,10 @@ const PreviewContent = ({
       });
       
       // Mostrar alerta de sucesso
-      alert.success(`${previewFormat.toUpperCase()} gerado com sucesso!`, {
+      alert.success("PREVIEW_SUCCESS", {
         position: 'bottom-right',
         autoCloseTime: 3000
-      });
+      }, previewFormat.toUpperCase());
       
       // Reset status after a delay
       setTimeout(() => {
@@ -498,10 +498,10 @@ const PreviewContent = ({
       });
       
       // Mostrar alerta de erro
-      alert.error(`Erro na geração do ${previewFormat.toUpperCase()}: ${error?.message || 'Falha desconhecida'}`, {
+      alert.error("PREVIEW_ERROR", {
         position: 'top-center',
         autoCloseTime: 7000
-      });
+      }, previewFormat.toUpperCase(), error?.message || 'Falha desconhecida');
     } finally {
       // Voltar para o primeiro card após a captura
       setTimeout(() => {
@@ -534,10 +534,10 @@ const PreviewContent = ({
       setDownloadStatus({ status: 'success', message: 'Download concluído!' });
       
       // Mostrar alerta de sucesso
-      alert.success("Imagem estática gerada com sucesso!", {
+      alert.success("PREVIEW_SUCCESS", {
         position: 'bottom-right',
         autoCloseTime: 3000
-      });
+      }, "Imagem estática");
       
       // Reset status after a delay
       setTimeout(() => {
@@ -551,10 +551,10 @@ const PreviewContent = ({
       });
       
       // Mostrar alerta de erro
-      alert.error(`Erro ao gerar imagem: ${error.message || 'Falha desconhecida'}`, {
+      alert.error("PREVIEW_ERROR", {
         position: 'top-center',
         autoCloseTime: 5000
-      });
+      }, "imagem", error.message || 'Falha desconhecida');
     } finally {
       setIsGeneratingPreview(false);
     }
@@ -641,7 +641,7 @@ const StepThree = ({
   loading
 }) => {
   // Inicializar sistema de alertas
-  const alert = useAlert();
+  const alert = useAlertService();
   
   // State
   const [activeView, setActiveView] = useState('send');
@@ -693,7 +693,7 @@ const StepThree = ({
         });
         
         // Mostrar alerta de erro
-        alert.warning('Não foi possível carregar as ferramentas de vídeo. A opção de imagem estática ainda está disponível.', {
+        alert.warning("FFMPEG_LOAD_ERROR", {
           position: 'top-center',
           autoCloseTime: 7000
         });
@@ -732,10 +732,10 @@ const StepThree = ({
     });
 
     // Mostrar alerta de sucesso ao copiar
-    alert.info(`JSON do tipo "${jsonType}" copiado para a área de transferência`, {
+    alert.info("JSON_COPIED", {
       position: 'bottom-right',
       autoCloseTime: 2000
-    });
+    }, jsonType);
 
     setTimeout(() => {
       setJustCopied({
@@ -749,9 +749,9 @@ const StepThree = ({
   const handleDownload = (jsonType) => {
     // Verifica se há um JSON válido para download
     if (!finalJson || !finalJson[jsonType]) {
-      alert.error(`Tipo de JSON "${jsonType}" não disponível para download`, {
+      alert.error("JSON_NOT_AVAILABLE", {
         position: 'top-center'
-      });
+      }, jsonType);
       return;
     }
 
@@ -775,22 +775,22 @@ const StepThree = ({
       }, 100);
       
       // Mostrar alerta de sucesso
-      alert.success(`JSON "${jsonType}" baixado com sucesso`, {
+      alert.success("JSON_DOWNLOAD_SUCCESS", {
         position: 'bottom-right',
         autoCloseTime: 3000
-      });
+      }, jsonType);
     } catch (error) {
       console.error('Erro ao fazer download do JSON:', error);
-      alert.error(`Falha ao baixar o JSON. ${error.message || 'Tente novamente.'}`, {
+      alert.error("JSON_DOWNLOAD_ERROR", {
         position: 'top-center'
-      });
+      }, error.message || 'Tente novamente.');
     }
   };
   
   // Enviar o template para o número de telefone
   const handleSendTemplate = async () => {
     if (!phoneNumber) {
-      alert.warning("É necessário fornecer um número de telefone válido", {
+      alert.warning("PHONE_REQUIRED", {
         position: 'top-center'
       });
       return;
@@ -1021,7 +1021,7 @@ const StepThree = ({
         <Button
           onClick={() => {
             resetForm();
-            alert.info("Iniciando um novo template. Dados anteriores foram limpos.", {
+            alert.info("NEW_TEMPLATE_ALERT", {
               position: 'top-right',
               autoCloseTime: 3000
             });

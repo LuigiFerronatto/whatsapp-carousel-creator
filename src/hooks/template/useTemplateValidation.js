@@ -1,6 +1,6 @@
 // hooks/template/useTemplateValidation.js
 import { useCallback } from 'react';
-import { useAlertSafe } from '../common/useAlertSafe';
+import { useAlertService } from '../common/useAlertService';
 
 /**
  * Hook para gerenciar todas as validações relacionadas ao template WhatsApp
@@ -15,7 +15,7 @@ export const useTemplateValidation = (
   hasTriedToAdvance,
   setValidationErrors
 ) => {
-  const alert = useAlertSafe();
+  const alert = useAlertService();
 
   // Função para exibir erros de validação
   const showValidationErrors = useCallback((errorMessages) => {
@@ -24,10 +24,10 @@ export const useTemplateValidation = (
     // Usar setTimeout para evitar alertas durante a renderização
     setTimeout(() => {
       if (alert && typeof alert.error === 'function') {
-        alert.error(`Problemas de validação encontrados:\n${errorMessages.join('\n')}`, {
+        alert.error("VALIDATION_ERRORS_FOUND", {
           position: 'top-center',
           autoCloseTime: 7000
-        });
+        }, errorMessages.join('\n'));
       }
     }, 0);
   }, [alert]);

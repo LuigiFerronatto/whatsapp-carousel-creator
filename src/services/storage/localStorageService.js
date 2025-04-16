@@ -1,8 +1,37 @@
-// services/storage/localStorageService.js
+// Modificação do src/services/storage/localStorageService.js
 /**
  * Chave usada para armazenar o rascunho no localStorage
  */
 const DRAFT_STORAGE_KEY = 'whatsapp_template_draft';
+
+/**
+ * Obtém informações resumidas sobre o rascunho salvo
+ * @returns {Object|null} Informações resumidas do rascunho ou null se não existir
+ */
+export const getDraftInfo = () => {
+  try {
+    // Obter a string do localStorage
+    const stateString = localStorage.getItem(DRAFT_STORAGE_KEY);
+    
+    // Se não existir, retornar null
+    if (!stateString) {
+      return null;
+    }
+    
+    // Converter de volta para objeto e extrair apenas informações básicas
+    const state = JSON.parse(stateString);
+    
+    return {
+      templateName: state.templateName,
+      numCards: state.numCards,
+      lastSavedTime: state.lastSavedTime,
+      hasCards: Array.isArray(state.cards) && state.cards.length > 0
+    };
+  } catch (error) {
+    console.error('Erro ao obter informações do rascunho:', error);
+    return null;
+  }
+};
 
 /**
  * Salva o estado atual como rascunho no localStorage
