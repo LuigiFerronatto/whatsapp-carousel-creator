@@ -1,4 +1,4 @@
-// components/steps/StepTwo.js (Enhanced Version)
+// components/steps/StepTwo.js - Enhanced with ProgressBar component
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
@@ -6,6 +6,7 @@ import { useAlertService } from '../../hooks/common/useAlertService';
 import Input from '../ui/Input/Input';
 import Hints, { HintsGroup } from '../ui/Hints/Hints';
 import Button from '../ui/Button/Button';
+import ProgressBar from '../ui/ProgressBar/ProgressBar';
 import {
   FiSave,
   FiCheck,
@@ -30,11 +31,12 @@ import {
   FiLayers,
   FiMaximize,
   FiMinimize,
-  FiFilter
+  FiFilter,
+  FiMessageSquare,
+  FiCreditCard
 } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
 import steps from '../../styles/Steps.module.css';
-import progressbar from '../ui/ProgressBar/ProgressBar.module.css';
 
 const StepTwo = ({
   templateName,
@@ -71,16 +73,16 @@ const StepTwo = ({
   const [templateNameSuggestions, setTemplateNameSuggestions] = useState([]);
   const [showNameSuggestions, setShowNameSuggestions] = useState(false);
   const [showCardOverview, setShowCardOverview] = useState(false);
-  
+
   // New states for enhanced UX
   const [showAutoSavedNotification, setShowAutoSavedNotification] = useState(false);
-  const [autoSaveTimer, setAutoSaveTimer] = useState(null);
   const [isCardFormMaximized, setIsCardFormMaximized] = useState(false);
   const [activeSection, setActiveSection] = useState('basic'); // 'basic' or 'cards'
   const [lastFieldChanged, setLastFieldChanged] = useState(null);
   const [transitioningCard, setTransitioningCard] = useState(false);
   const [buttonSyncDone, setButtonSyncDone] = useState(false); // Track button sync notification
-  
+  const [templateCreationProgress, setTemplateCreationProgress] = useState(0);
+
   // Refs
   const previewRef = useRef(null);
   const formContainerRef = useRef(null);
@@ -95,73 +97,72 @@ const StepTwo = ({
         const consistency = checkButtonConsistency();
         setButtonConsistencyStatus(consistency);
       }, 100);
-      
+
       // Clean up timer
       return () => clearTimeout(timer);
     }
   }, [checkButtonConsistency, numCards]);
 
-  // Enhanced auto-save functionality
   // Enhanced auto-save functionality with better performance
-useEffect(() => {
-  let autoSaveTimerId = null;
-  
-  const setupAutoSave = () => {
-    // Only set up auto-save if we have unsaved changes
-    if (unsavedChanges && typeof saveCurrentState === 'function') {
-      // Clear existing timer
+  useEffect(() => {
+    let autoSaveTimerId = null;
+
+    const setupAutoSave = () => {
+      // Only set up auto-save if we have unsaved changes
+      if (unsavedChanges && typeof saveCurrentState === 'function') {
+        // Clear existing timer
+        if (autoSaveTimerId) {
+          clearTimeout(autoSaveTimerId);
+        }
+
+        // Set new timer for auto-save
+        autoSaveTimerId = setTimeout(() => {
+          try {
+            saveCurrentState();
+            setShowAutoSavedNotification(true);
+            setTimeout(() => setShowAutoSavedNotification(false), 3000);
+          } catch (err) {
+            console.error("Auto-save failed:", err);
+          }
+          // Clear reference after auto-save completes
+          autoSaveTimerId = null;
+        }, 30000); // Auto-save after 30 seconds of inactivity
+      }
+    };
+
+    // Call setup function initially
+    setupAutoSave();
+
+    // Return cleanup function to clear timer on unmount or when dependencies change
+    return () => {
       if (autoSaveTimerId) {
         clearTimeout(autoSaveTimerId);
       }
-      
-      // Set new timer for auto-save
-      autoSaveTimerId = setTimeout(() => {
-        try {
-          saveCurrentState();
-          setShowAutoSavedNotification(true);
-          setTimeout(() => setShowAutoSavedNotification(false), 3000);
-        } catch (err) {
-          console.error("Auto-save failed:", err);
-        }
-        // Clear reference after auto-save completes
-        autoSaveTimerId = null;
-      }, 30000); // Auto-save after 30 seconds of inactivity
-    }
-  };
-  
-  // Call setup function initially
-  setupAutoSave();
-  
-  // Return cleanup function to clear timer on unmount or when dependencies change
-  return () => {
-    if (autoSaveTimerId) {
-      clearTimeout(autoSaveTimerId);
-    }
-  };
-}, [unsavedChanges, saveCurrentState]); // Remove autoSaveTimer from dependencies
+    };
+  }, [unsavedChanges, saveCurrentState]); // Remove autoSaveTimer from dependencies
 
   // Clear validations when inputs change
   useEffect(() => {
     // Batch validation updates into a single state change
     setValidationMessages(prev => {
       const newMessages = { ...prev };
-      
+
       if (templateName) {
         delete newMessages.templateName;
       }
-      
+
       return newMessages;
     });
   }, [templateName]);
-  
+
   useEffect(() => {
     setValidationMessages(prev => {
       const newMessages = { ...prev };
-      
+
       if (bodyText) {
         delete newMessages.bodyText;
       }
-      
+
       return newMessages;
     });
   }, [bodyText]);
@@ -183,7 +184,7 @@ useEffect(() => {
       const timer = setTimeout(() => {
         setTransitioningCard(false);
       }, 300); // Match transition duration
-      
+
       return () => clearTimeout(timer);
     }
   }, [activeCard]);
@@ -194,10 +195,67 @@ useEffect(() => {
       const timer = setTimeout(() => {
         setButtonSyncDone(false);
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [buttonSyncDone]);
+
+  // Simulate template creation progress during loading state
+  useEffect(() => {
+    if (loading) {
+      setTemplateCreationProgress(0);
+
+      const updateProgress = () => {
+        // Simulate realistic progress increments with occasional pauses
+        const intervals = [
+          { target: 20, time: 300 },
+          { target: 40, time: 500 },
+          { target: 60, time: 400 },
+          { target: 80, time: 600 },
+          { target: 95, time: 700 }
+        ];
+
+        let currentInterval = 0;
+
+        const incrementProgress = () => {
+          if (currentInterval >= intervals.length) return;
+
+          const { target, time } = intervals[currentInterval];
+          const step = (target - templateCreationProgress) / (time / 50);
+
+          const timer = setInterval(() => {
+            setTemplateCreationProgress(prev => {
+              const next = prev + step;
+              if (next >= target) {
+                clearInterval(timer);
+                currentInterval++;
+
+                if (currentInterval < intervals.length) {
+                  setTimeout(incrementProgress, 200); // Pause between phases
+                }
+
+                return target;
+              }
+              return next;
+            });
+          }, 50);
+
+          return () => clearInterval(timer);
+        };
+
+        incrementProgress();
+      };
+
+      updateProgress();
+
+      return () => {
+        // Cleanup handled by internal functions
+      };
+    } else {
+      // Reset progress when loading is done
+      setTemplateCreationProgress(0);
+    }
+  }, [loading]);
 
   // Validation statuses
   const isTemplateNameValid = templateName && templateName.length >= 3;
@@ -206,16 +264,16 @@ useEffect(() => {
   // Card completeness validation
   const isCardComplete = (card) => {
     if (!card.bodyText) return false;
-    
+
     // Check if all buttons have text
     if (!card.buttons.every(button => button.text)) return false;
-    
+
     // Check specific fields for each button type
     for (const button of card.buttons) {
       if (button.type === 'URL' && !button.url) return false;
       if (button.type === 'PHONE_NUMBER' && !button.phoneNumber) return false;
     }
-    
+
     return true;
   };
 
@@ -250,14 +308,14 @@ useEffect(() => {
         .split(' ')
         .filter(word => word.length > 3)
         .slice(0, 3);
-      
+
       if (words.length > 0) {
         const suggestions = [
           words.join('_').substring(0, 20),
           `carousel_${words[0]}`,
           `template_${words[0]}`
         ];
-        
+
         setTemplateNameSuggestions(suggestions);
         setShowNameSuggestions(true);
       }
@@ -305,7 +363,7 @@ useEffect(() => {
         position: 'top-center',
         autoCloseTime: 7000
       }, validationErrors.join('\n'));
-      
+
       // Animate to first card with errors
       if (validationErrors.length > 0) {
         const firstErrorCardMatch = validationErrors[0].match(/Card (\d+)/);
@@ -359,7 +417,7 @@ useEffect(() => {
 
             // Small pause to process changes
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             // Show success alert for standardization
             alert.success("Botões padronizados com sucesso!", {
               position: 'bottom-right',
@@ -380,7 +438,7 @@ useEffect(() => {
         if (typeof saveCurrentState === 'function') {
           saveCurrentState();
         }
-      
+
         // Attempt to create the template
         await handleCreateTemplate();
       } catch (err) {
@@ -453,12 +511,12 @@ useEffect(() => {
     // If isStepValid function is available, use it
     return isStepValid(2);
   }, [isStepValid, isTemplateNameValid, isBodyTextValid, validateCards]);
-  
+
   // Function to navigate directly to a card with issues
   const navigateToCard = (index) => {
     setActiveCard(index);
     setFocusedInput({ cardIndex: index, buttonIndex: null });
-    
+
     // Smooth scroll to card editor
     setTimeout(() => {
       cardEditorRef.current?.scrollIntoView({
@@ -472,12 +530,12 @@ useEffect(() => {
   const applyNameSuggestion = useCallback((suggestion) => {
     setTemplateName(suggestion);
     setShowNameSuggestions(false);
-    
+
     alert.success("Nome aplicado com sucesso!", {
       position: 'bottom-right',
       autoCloseTime: 2000
     });
-    
+
     // Track the change
     setLastFieldChanged('templateName');
     setTimeout(() => setLastFieldChanged(null), 2000);
@@ -486,7 +544,7 @@ useEffect(() => {
   // Toggle to expand/collapse preview
   const togglePreviewExpanded = useCallback(() => {
     setPreviewExpanded(!previewExpanded);
-    
+
     if (previewRef.current) {
       if (!previewExpanded) {
         // Expanding preview: save current scroll, then scroll to preview
@@ -528,7 +586,7 @@ useEffect(() => {
     const total = numCards;
     const complete = cardStatus.filter(cs => cs.complete).length;
     const incomplete = total - complete;
-    
+
     return {
       total,
       complete,
@@ -550,7 +608,7 @@ useEffect(() => {
     }
   }, [activeCard]);
 
-  // NEW: Enhanced button change handler for all cards
+  // Enhanced button change handler for all cards
   const handleButtonTypeChangeForAllCards = useCallback((buttonIndex, newType) => {
     if (window.confirm(`Esta ação alterará o tipo deste botão em TODOS os cards para "${newType}". Deseja continuar?`)) {
       // Apply to all cards
@@ -565,177 +623,156 @@ useEffect(() => {
             ...(newType === 'URL' && !newButtons[buttonIndex].url ? { url: '' } : {}),
             ...(newType === 'PHONE_NUMBER' && !newButtons[buttonIndex].phoneNumber ? { phoneNumber: '' } : {})
           };
-          
+
           // Update the card with new buttons
           updateCard(cardIdx, 'buttons', newButtons);
         }
       }
-      
+
       // Show notification
       alert.success(`Tipo de botão "${newType}" sincronizado em todos os cards!`, {
         position: 'bottom-right',
         autoCloseTime: 3000
       });
-      
+
       setButtonSyncDone(true);
     }
   }, [cards, numCards, updateCard, alert]);
 
-  // Card Checklist Modal Component
-  const CardOverviewModal = ({ onClose }) => {
-    const stats = cardCompletionStats();
-    
-    return (
-      <div className={styles.cardOverviewModal}>
-        <div className={styles.cardOverviewContent}>
-          <div className={styles.cardOverviewHeader}>
-            <h3>Visão Geral dos Cards</h3>
-            <button onClick={onClose} className={styles.closeModalButton}>
-              <FiX size={20} />
-            </button>
-          </div>
-          
-          <div className={styles.cardStats}>
-            <div className={styles.cardStatItem}>
-              <span className={styles.cardStatValue}>{stats.total}</span>
-              <span className={styles.cardStatLabel}>Total</span>
-            </div>
-            <div className={styles.cardStatItem}>
-              <span className={`${styles.cardStatValue} ${styles.complete}`}>{stats.complete}</span>
-              <span className={styles.cardStatLabel}>Completos</span>
-            </div>
-            <div className={styles.cardStatItem}>
-              <span className={`${styles.cardStatValue} ${styles.incomplete}`}>{stats.incomplete}</span>
-              <span className={styles.cardStatLabel}>Incompletos</span>
-            </div>
-          </div>
-          
-          <div className={styles.cardProgressBar}>
-            <div 
-              className={styles.cardProgressFill} 
-              style={{width: `${stats.percentage}%`}}
-            >
-              {stats.percentage > 15 && `${stats.percentage}%`}
-            </div>
-            {stats.percentage <= 15 && <span className={styles.outsidePercentage}>{stats.percentage}%</span>}
-          </div>
-          
-          <div className={styles.cardList}>
-            {cardStatus.map((status, idx) => (
-              <div 
-                key={idx} 
-                className={`${styles.cardStatusItem} ${status.complete ? styles.cardComplete : styles.cardIncomplete}`}
-                onClick={() => {
-                  navigateToCard(idx);
-                  onClose();
-                }}
-              >
-                <div className={styles.cardStatusHeader}>
-                  <span className={styles.cardNumber}>Card {idx + 1}</span>
-                  {status.complete ? (
-                    <FiCheckCircle className={styles.completeIcon} size={18} />
-                  ) : (
-                    <FiAlertTriangle className={styles.incompleteIcon} size={18} />
-                  )}
-                </div>
-                
-                {!status.complete && (
-                  <div className={styles.cardMissingFields}>
-                    <span className={styles.missingLabel}>Faltando:</span>
-                    <ul className={styles.missingList}>
-                      {status.missingFields.map((field, fieldIdx) => (
-                        <li key={fieldIdx}>{field}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // Get appropriate icon for each section
+  const getSectionIcon = useCallback((section) => {
+    switch (section) {
+      case 'basic':
+        return <FiEdit size={24} />;
+      case 'cards':
+        return <FiCreditCard size={24} />;
+      default:
+        return <FiEdit size={24} />;
+    }
+  }, []);
 
-  // NEW: Section navigation with tabs
-  const SectionTabs = () => (
-    <div className={styles.sectionTabs}>
-      <button 
-        className={`${styles.sectionTab} ${activeSection === 'basic' ? styles.activeTab : ''}`}
-        onClick={() => setActiveSection('basic')}
-      >
-        <FiEdit size={18} />
-        <span>Informações Básicas</span>
-        {(!isTemplateNameValid || !isBodyTextValid) && (
-          <span className={styles.sectionErrorBadge}>
-            <FiAlertTriangle size={14} />
-          </span>
-        )}
-      </button>
-      <button 
-        className={`${styles.sectionTab} ${activeSection === 'cards' ? styles.activeTab : ''}`}
-        onClick={() => setActiveSection('cards')}
-      >
-        <FiLayers size={18} />
-        <span>Cards do Carrossel</span>
-        {cardStatus.some(card => !card.complete) && (
-          <span className={styles.sectionErrorBadge}>
-            <span className={styles.badgeCount}>{cardStatus.filter(card => !card.complete).length}</span>
-          </span>
-        )}
-      </button>
-    </div>
-  );
+  // Calculate step progress info for the ProgressBar
+  const getStepProgress = useCallback(() => {
+    // Basic information
+    const basicInfo = {
+      label: 'Informações Básicas',
+      complete: isTemplateNameValid && isBodyTextValid,
+      percentage:
+        (isTemplateNameValid ? 50 : 0) +
+        (isBodyTextValid ? 50 : 0),
+      icon: <FiEdit size={16} />,
+      missingItems: []
+    };
+
+    if (!isTemplateNameValid) basicInfo.missingItems.push('nome do template');
+    if (!isBodyTextValid) basicInfo.missingItems.push('texto de introdução');
+
+    // Cards information
+    const cardStats = cardCompletionStats();
+    const cardsInfo = {
+      label: 'Cards do Carrossel',
+      complete: cardStats.incomplete === 0,
+      percentage: cardStats.percentage,
+      icon: <FiCreditCard size={16} />,
+      missingItems: cardStatus
+        .filter(card => !card.complete)
+        .map(card => `card ${card.index + 1}`)
+    };
+
+    // Overall progress
+    const overallPercentage = Math.round((basicInfo.percentage + cardStats.percentage) / 2);
+
+    return {
+      basic: basicInfo,
+      cards: cardsInfo,
+      overall: overallPercentage
+    };
+  }, [isTemplateNameValid, isBodyTextValid, cardCompletionStats, cardStatus]);
 
   return (
     <div className={steps.container}>
+      {/* Loading overlay for template creation */}
+      {loading && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingContainer}>
+            <div className={styles.loadingIcon}>
+              <FiRefreshCw size={32} className={styles.spinningIcon} />
+            </div>
+            <h3 className={styles.loadingTitle}>Criando seu template...</h3>
+            <div className={styles.loadingProgressContainer}>
+              <ProgressBar
+                value={templateCreationProgress}
+                variant="step"
+                size="large"
+                showLabel={true}
+                label={`${Math.round(templateCreationProgress)}%`}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={steps.introStepWrapper}>
         <h2 className={steps.stepTitle}>Criação de Template</h2>
         <p className={steps.stepDescription}>
           Configure os detalhes do seu template, adicione os textos e botões para cada cartão.
         </p>
-        
-        {/* Enhanced progress bar */}
-        <div className={steps.stepProgressContainer}>
-          <div className={styles.progressStatus}>
-            <span className={styles.progressLabel}>Progresso geral:</span>
-            <div className={styles.stepProgressBarWrapper}>
-              <div className={styles.stepProgressBar}>
-                <div 
-                  className={styles.stepProgressFill} 
-                  style={{width: `${completionPercentage}%`}}
-                  data-percentage={`${completionPercentage}%`}
-                ></div>
-              </div>
-              <span className={styles.progressPercentage}>{completionPercentage}%</span>
-            </div>
+      </div>
+
+      {/* Enhanced progress tracking with ProgressBar */}
+      <div className={styles.stepProgressSection}>
+        <div className={styles.progressRow}>
+          <div className={styles.progressItem}>
+            <span className={styles.progressLabel}>
+              <FiLayers size={16} />
+              Progresso geral
+            </span>
+            <ProgressBar
+              value={getStepProgress().overall}
+              variant="step"
+              size="medium"
+              showLabel={false}
+              statusText={getStepProgress().overall === 100 ? "Pronto para criar o template!" : null}
+              statusVariant="success"
+            />
           </div>
-          
-          {/* Card statistics */}
-          <div className={styles.cardsStatus}>
-            <span className={styles.progressLabel}>Cards:</span>
-            <div className={styles.cardStatusBadges}>
-              {cardCompletionStats().complete > 0 && (
-                <span className={styles.completeBadge}>
-                  <FiCheckCircle size={14} />
-                  {cardCompletionStats().complete} completo{cardCompletionStats().complete !== 1 ? 's' : ''}
-                </span>
-              )}
-              {cardCompletionStats().incomplete > 0 && (
-                <span className={styles.incompleteBadge}>
-                  <FiAlertTriangle size={14} />
-                  {cardCompletionStats().incomplete} incompleto{cardCompletionStats().incomplete !== 1 ? 's' : ''}
-                </span>
-              )}
-              <button
-                className={styles.viewCardOverviewButton}
-                onClick={() => setShowCardOverview(true)}
-                title="Ver visão geral dos cards"
-              >
-                <FiList size={16} />
-                Ver detalhes
-              </button>
-            </div>
+        </div>
+
+        <div className={styles.progressRow}>
+          <div className={styles.progressItem}>
+            <span className={styles.progressLabel}>
+              {getStepProgress().basic.icon}
+              {getStepProgress().basic.label}
+            </span>
+            <ProgressBar
+              value={getStepProgress().basic.percentage}
+              variant={getStepProgress().basic.complete ? "success" : "default"}
+              size="medium"
+              showLabel={false}
+              statusText={getStepProgress().basic.complete
+                ? "Completo!"
+                : `Falta: ${getStepProgress().basic.missingItems.join(', ')}`}
+              statusVariant={getStepProgress().basic.complete ? "success" : "warning"}
+            />
+          </div>
+        </div>
+
+        <div className={styles.progressRow}>
+          <div className={styles.progressItem}>
+            <span className={styles.progressLabel}>
+              {getStepProgress().cards.icon}
+              {getStepProgress().cards.label}
+            </span>
+            <ProgressBar
+              value={getStepProgress().cards.percentage}
+              variant={getStepProgress().cards.complete ? "success" : "default"}
+              size="medium"
+              showLabel={false}
+              statusText={getStepProgress().cards.complete
+                ? "Todos os cards completos!"
+                : `${cardCompletionStats().complete} de ${cardCompletionStats().total} cards completos`}
+              statusVariant={getStepProgress().cards.complete ? "success" : "warning"}
+            />
           </div>
         </div>
       </div>
@@ -765,8 +802,8 @@ useEffect(() => {
         >
           {showHints ? "Ocultar dicas" : "Mostrar dicas"}
         </Button>
-        
-        {/* NEW: Enhanced layout controls */}
+
+        {/* Layout controls */}
         {showPreview && (
           <Button
             className={styles.expandToggle}
@@ -781,21 +818,46 @@ useEffect(() => {
           </Button>
         )}
       </div>
-        
-      {/* Enhanced content wrapper with transitions */}
+
+      {/* Content wrapper with transitions */}
       <div className={`${styles.contentWrapper} ${previewExpanded ? styles.previewExpanded : ''}`}>
-        <div 
+        <div
           className={`${styles.formContainer} ${showPreview ? styles.withPreview : ''} ${isCardFormMaximized ? styles.maximized : ''}`}
           ref={formContainerRef}
         >
-          {/* NEW: Section navigation */}
-          <SectionTabs />
-          
+          {/* Section navigation */}
+          <div className={styles.sectionTabs}>
+            <button
+              className={`${styles.sectionTab} ${activeSection === 'basic' ? styles.activeTab : ''}`}
+              onClick={() => setActiveSection('basic')}
+            >
+              <FiEdit size={18} />
+              <span>Informações Básicas</span>
+              {(!isTemplateNameValid || !isBodyTextValid) && (
+                <span className={styles.sectionErrorBadge}>
+                  <FiAlertTriangle size={14} />
+                </span>
+              )}
+            </button>
+            <button
+              className={`${styles.sectionTab} ${activeSection === 'cards' ? styles.activeTab : ''}`}
+              onClick={() => setActiveSection('cards')}
+            >
+              <FiLayers size={18} />
+              <span>Cards do Carrossel</span>
+              {cardStatus.some(card => !card.complete) && (
+                <span className={styles.sectionErrorBadge}>
+                  <span className={styles.badgeCount}>{cardStatus.filter(card => !card.complete).length}</span>
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* Basic Information Section */}
           <div className={`${steps.containerCard} ${activeSection !== 'basic' ? styles.hiddenSection : ''}`}>
             <div className={steps.sectionHeader}>
               <div className={steps.sectionIconContainer}>
-                <FiEdit size={24}/>
+                <FiEdit size={24} />
               </div>
               <h3>Informações Básicas</h3>
             </div>
@@ -829,8 +891,8 @@ useEffect(() => {
                   hintIsCompact={true}
                   className={lastFieldChanged === 'templateName' ? styles.highlightedField : ''}
                 />
-                
-                {/* {showNameSuggestions && templateNameSuggestions.length > 0 && (
+
+                {showNameSuggestions && templateNameSuggestions.length > 0 && (
                   <div className={styles.nameSuggestions}>
                     <span className={styles.suggestionLabel}>Sugestões de nome:</span>
                     <div className={styles.suggestionButtons}>
@@ -848,14 +910,14 @@ useEffect(() => {
                         </Button>
                       ))}
                     </div>
-                    <button 
+                    <button
                       className={styles.dismissSuggestions}
                       onClick={() => setShowNameSuggestions(false)}
                     >
                       Dispensar sugestões
                     </button>
                   </div>
-                )} */}
+                )}
               </div>
 
               <Input
@@ -903,6 +965,16 @@ useEffect(() => {
                   hintMessage={showHints ? "Escreva de forma objetiva e cativante. Esse texto introduz o carrossel e aparece acima na conversa." : ""}
                   textFormatting
                   hintVariant="simple"
+                  hintTitle="Dicas para um bom texto:"
+                  hintList={[
+                    "Mantenha entre 60-120 caracteres para melhor legibilidade.",
+                    "Foque nos principais benefícios ou diferenciais.",
+                    "Evite repetir informações que já estão na imagem.",
+                    "Use frases diretas e insira chamadas para ação.",
+                    "Use formatação para destaque: *negrito*, _itálico_, ~tachado~, `código`.",
+                    "Para listas: * para tópicos, 1. para numeração.",
+                    "Para citações, comece a linha com >."
+                  ]}
                   size="medium"
                   fullWidth
                   showCharCounter
@@ -943,15 +1015,15 @@ useEffect(() => {
                 </div>
               </div>
             )}
-            
+
             <div className={steps.sectionHeader}>
               <div className={steps.sectionIconContainer}>
-                <FiLayers size={24}/>
+                <FiLayers size={24} />
               </div>
               <h3>Conteúdo dos Cards</h3>
-              
-              {/* NEW: Card maximize/restore control */}
-              <button 
+
+              {/* Card maximize/restore control */}
+              <button
                 className={styles.maximizeCardFormButton}
                 onClick={() => setIsCardFormMaximized(!isCardFormMaximized)}
                 title={isCardFormMaximized ? "Restaurar visualização" : "Expandir editor de cards"}
@@ -960,11 +1032,11 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* Enhanced card tabs with better navigation */}
+            {/* Card tabs with better navigation */}
             <div className={styles.cardTabsContainer}>
-              {/* NEW: Card navigation buttons */}
+              {/* Card navigation buttons */}
               <div className={styles.cardNavigation}>
-                <button 
+                <button
                   className={styles.cardNavButton}
                   onClick={goToPrevCard}
                   disabled={activeCard <= 0}
@@ -972,18 +1044,17 @@ useEffect(() => {
                 >
                   <FiArrowLeft size={16} />
                 </button>
-                
+
                 <div className={styles.cardTabs}>
                   {cards.slice(0, numCards).map((_, index) => {
                     const isComplete = cardStatus[index].complete;
                     const missingFields = cardStatus[index].missingFields;
-                    
+
                     return (
                       <Button
                         key={index}
-                        className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''} ${
-                          isComplete ? styles.completeCardTab : styles.incompleteCardTab
-                        }`}
+                        className={`${styles.cardTab} ${activeCard === index ? styles.activeCardTab : ''} ${isComplete ? styles.completeCardTab : styles.incompleteCardTab
+                          }`}
                         onClick={() => setActiveCard(index)}
                         variant={activeCard === index ? "solid" : "outline"}
                         color={activeCard === index ? (isComplete ? "success" : "primary") : "content"}
@@ -1003,8 +1074,8 @@ useEffect(() => {
                     );
                   })}
                 </div>
-                
-                <button 
+
+                <button
                   className={styles.cardNavButton}
                   onClick={goToNextCard}
                   disabled={activeCard >= numCards - 1}
@@ -1013,7 +1084,7 @@ useEffect(() => {
                   <FiArrowRight size={16} />
                 </button>
               </div>
-              
+
               {/* Card completion hint */}
               {activeCard !== null && !cardStatus[activeCard].complete && (
                 <div className={styles.cardCompletionHint}>
@@ -1026,16 +1097,16 @@ useEffect(() => {
                   </div>
                 </div>
               )}
-              
-              {/* NEW: Button synchronization info */}
+
+              {/* Button synchronization info */}
               {numCards > 1 && (
                 <div className={styles.cardSyncInfo}>
                   <div className={`${styles.syncIndicator} ${buttonSyncDone ? styles.syncDone : ''}`}>
                     {buttonSyncDone ? <FiCheckCircle size={14} /> : <FiRefreshCw size={14} className={styles.syncIcon} />}
                   </div>
                   <span>
-                    {buttonSyncDone ? 
-                      "Sincronização de botões concluída!" : 
+                    {buttonSyncDone ?
+                      "Sincronização de botões concluída!" :
                       "Alterações em botões serão sincronizadas em todos os cards."
                     }
                   </span>
@@ -1044,7 +1115,7 @@ useEffect(() => {
             </div>
 
             {/* Active card editor with transition effect */}
-            <div 
+            <div
               className={`${styles.activeCardEditor} ${transitioningCard ? styles.cardTransitioning : ''}`}
               ref={cardEditorRef}
             >
@@ -1084,7 +1155,7 @@ useEffect(() => {
               Voltar
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               color="primary"
               size="large"
@@ -1094,7 +1165,7 @@ useEffect(() => {
               className={savedBeforeUpload ? styles.savedButton : ''}
             >
               {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
-            </Button>
+            </Button> */}
 
             <Button
               className={styles.nextButton}
@@ -1111,7 +1182,7 @@ useEffect(() => {
             </Button>
           </div>
 
-          {/* Save information */}
+          {/* Auto-save information */}
           <div className={`${steps.lastSavedInfo} ${showAutoSavedNotification ? styles.showAutoSave : ''}`}>
             <FiInfo size={14} />
             <span>
@@ -1134,9 +1205,9 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Enhanced preview container */}
+        {/* Preview container */}
         {showPreview && (
-          <div 
+          <div
             className={`${styles.previewContainer} ${previewExpanded ? styles.expanded : ''}`}
             ref={previewRef}
           >
@@ -1144,7 +1215,7 @@ useEffect(() => {
               <div className={styles.previewHeader}>
                 <h3 className={styles.previewTitle}>
                   Pré-visualização do Carrossel
-                  <button 
+                  <button
                     className={styles.previewToggleButton}
                     onClick={togglePreviewExpanded}
                     title={previewExpanded ? "Minimizar" : "Expandir"}
@@ -1170,7 +1241,73 @@ useEffect(() => {
 
       {/* Card overview modal */}
       {showCardOverview && (
-        <CardOverviewModal onClose={() => setShowCardOverview(false)} />
+        <div className={styles.cardOverviewModal}>
+          <div className={styles.cardOverviewContent}>
+            <div className={styles.cardOverviewHeader}>
+              <h3>Visão Geral dos Cards</h3>
+              <button onClick={() => setShowCardOverview(false)} className={styles.closeModalButton}>
+                <FiX size={20} />
+              </button>
+            </div>
+
+            <div className={styles.cardStats}>
+              <div className={styles.cardStatItem}>
+                <span className={styles.cardStatValue}>{cardCompletionStats().total}</span>
+                <span className={styles.cardStatLabel}>Total</span>
+              </div>
+              <div className={styles.cardStatItem}>
+                <span className={`${styles.cardStatValue} ${styles.complete}`}>{cardCompletionStats().complete}</span>
+                <span className={styles.cardStatLabel}>Completos</span>
+              </div>
+              <div className={styles.cardStatItem}>
+                <span className={`${styles.cardStatValue} ${styles.incomplete}`}>{cardCompletionStats().incomplete}</span>
+                <span className={styles.cardStatLabel}>Incompletos</span>
+              </div>
+            </div>
+
+            <div className={styles.cardProgressBar}>
+              <ProgressBar
+                value={cardCompletionStats().percentage}
+                variant={cardCompletionStats().complete === cardCompletionStats().total ? "success" : "default"}
+                size="medium"
+                showLabel={true}
+              />
+            </div>
+
+            <div className={styles.cardList}>
+              {cardStatus.map((status, idx) => (
+                <div
+                  key={idx}
+                  className={`${styles.cardStatusItem} ${status.complete ? styles.cardComplete : styles.cardIncomplete}`}
+                  onClick={() => {
+                    navigateToCard(idx);
+                    setShowCardOverview(false);
+                  }}
+                >
+                  <div className={styles.cardStatusHeader}>
+                    <span className={styles.cardNumber}>Card {idx + 1}</span>
+                    {status.complete ? (
+                      <FiCheckCircle className={styles.completeIcon} size={18} />
+                    ) : (
+                      <FiAlertTriangle className={styles.incompleteIcon} size={18} />
+                    )}
+                  </div>
+
+                  {!status.complete && (
+                    <div className={styles.cardMissingFields}>
+                      <span className={styles.missingLabel}>Faltando:</span>
+                      <ul className={styles.missingList}>
+                        {status.missingFields.map((field, fieldIdx) => (
+                          <li key={fieldIdx}>{field}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

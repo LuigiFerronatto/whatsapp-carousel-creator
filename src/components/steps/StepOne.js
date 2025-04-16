@@ -1,48 +1,52 @@
-// components/steps/StepOne.js - Com correções para salvar rascunho
+// components/steps/StepOne.js - Com melhorias de UI/UX e novo componente ProgressBar
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CardUploadInput from '../editors/CardUploadInput';
 import { useAlertService } from '../../hooks/common/useAlertService';
 import Button from '../ui/Button/Button';
-import { 
-  FiUpload, 
-  FiPlus, 
-  FiMinus, 
-  FiKey, 
-  FiArrowDown, 
-  FiSave, 
-  FiInfo, 
+import ProgressBar from '../ui/ProgressBar/ProgressBar';
+import {
+  FiUpload,
+  FiPlus,
+  FiMinus,
+  FiKey,
+  FiArrowDown,
+  FiSave,
+  FiInfo,
   FiCheckCircle,
   FiDownload,
-  FiShield
+  FiShield,
+  FiLoader,
+  FiFileText,
+  FiImage,
+  FiFilter
 } from 'react-icons/fi';
 import styles from './StepOne.module.css';
 import steps from '../../styles/Steps.module.css';
 import Input from '../ui/Input/Input';
-import { saveDraft } from '../../services/storage/localStorageService'; // Importação direta para backup
+import { saveDraft } from '../../services/storage/localStorageService';
 
 /**
  * StepOne - Initial step for file configuration
- * Enhanced with better UI/UX based on the design system
- * Fixed issues with saveDraftManually and step validation
+ * Enhanced with better UI/UX and new ProgressBar component
  * 
  * @param {Object} props Component properties
  * @returns {JSX.Element} StepOne component
  */
-const StepOne = ({ 
-  authKey, 
-  setAuthKey, 
-  numCards, 
-  cards, 
-  updateCard, 
-  handleAddCard, 
-  handleRemoveCard, 
+const StepOne = ({
+  authKey,
+  setAuthKey,
+  numCards,
+  cards,
+  updateCard,
+  handleAddCard,
+  handleRemoveCard,
   handleUploadFiles,
-  loading, 
-  error, 
-  success, 
+  loading,
+  error,
+  success,
   uploadResults,
   isStepValid,
-  saveCurrentState, // Usar saveCurrentState em vez de saveDraftManually
+  saveCurrentState,
   unsavedChanges,
   lastSavedTime
 }) => {
@@ -54,13 +58,48 @@ const StepOne = ({
   const [showTips, setShowTips] = useState(false);
   const [isKeyVisible, setIsKeyVisible] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
-  // Initialize alertService instead of direct alert 
-  const alertService = useAlertService();
-  
+  const [uploadActionStarted, setUploadActionStarted] = useState(false);
+  const [keyValidationState, setKeyValidationState] = useState({ isValid: true, message: '' });
+  const [cardUploadStatus, setCardUploadStatus] = useState([]);
+
+  // Initialize alertService for better feedback
+  const alert = useAlertService();
+
   // Refs
   const uploadSectionRef = useRef(null);
-  
+
+  // Initialize card upload status
+  useEffect(() => {
+    // Create an array to track each card's status
+    const initialStatus = Array(numCards).fill().map((_, index) => ({
+      cardIndex: index,
+      hasFile: !!cards[index]?.fileUrl,
+      fileType: cards[index]?.fileType || 'image',
+      fileName: cards[index]?.fileName || '',
+      uploadComplete: !!cards[index]?.fileUrl
+    }));
+
+    setCardUploadStatus(initialStatus);
+  }, [numCards, cards]);
+
+  // Update card status when cards change
+  useEffect(() => {
+    setCardUploadStatus(prevStatus =>
+      prevStatus.map((status, index) => {
+        if (index < cards.length) {
+          return {
+            ...status,
+            hasFile: !!cards[index]?.fileUrl,
+            fileType: cards[index]?.fileType || 'image',
+            fileName: cards[index]?.fileName || '',
+            uploadComplete: !!cards[index]?.fileUrl
+          };
+        }
+        return status;
+      })
+    );
+  }, [cards]);
+
   // Handle auth key in localStorage
   useEffect(() => {
     if (rememberKey && authKey) {
@@ -71,7 +110,7 @@ const StepOne = ({
       localStorage.setItem('remember_auth_key', 'false');
     }
   }, [rememberKey, authKey]);
-  
+
   // Load auth key from localStorage
   useEffect(() => {
     if (rememberKey && !authKey) {
@@ -81,241 +120,414 @@ const StepOne = ({
       }
     }
   }, [rememberKey, authKey, setAuthKey]);
-  
+
   // Scroll to upload section
   const scrollToUploadSection = useCallback(() => {
     uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
-  
-  // CORREÇÃO: Função de fallback para salvar diretamente
+
+  // Fallback save draft function
   const fallbackSaveDraft = useCallback(() => {
     try {
-      // Criar um objeto com o estado atual
+      // Create object with current state
       const currentState = {
         authKey,
         numCards,
-        cards: cards.slice(0, numCards), // Apenas cards ativos
+        cards: cards.slice(0, numCards),
         lastSavedTime: new Date()
       };
-      
+
       const success = saveDraft(currentState);
-      
+
       if (success) {
-        console.log('Rascunho salvo com mecanismo de fallback');
+        console.log('Draft saved with fallback mechanism');
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Erro no salvamento de fallback:', error);
+      console.error('Error in fallback save:', error);
       return false;
     }
   }, [authKey, numCards, cards]);
-  
-  // Save draft before upload - CORREÇÃO: Adicionado fallback
+
+  // Enhanced save draft function with visual feedback
   const handleSaveBeforeUpload = useCallback(() => {
-    // Verificar se a função saveCurrentState existe
+    // If saveCurrentState function exists
     if (typeof saveCurrentState === 'function') {
       try {
         const success = saveCurrentState();
-        
+
         if (success) {
           setSavedBeforeUpload(true);
-          
-          // Usar AlertService em vez de alert direto
-          alertService.success('DRAFT_SAVED');
-          
+
+          // Use AlertService for better feedback
+          alert.success("DRAFT_SAVED", {
+            position: 'bottom-right',
+            autoCloseTime: 3000
+          });
+
           setTimeout(() => {
             setSavedBeforeUpload(false);
           }, 3000);
-          
+
           return true;
         } else {
-          // Tentar mecanismo de fallback
-          console.warn('saveCurrentState falhou, tentando fallback...');
+          // Try fallback mechanism
+          console.warn('saveCurrentState failed, trying fallback...');
           const fallbackSuccess = fallbackSaveDraft();
-          
+
           if (fallbackSuccess) {
             setSavedBeforeUpload(true);
-            
-            alertService.success('DRAFT_SAVED_FALLBACK');
-            
+
+            alert.success("DRAFT_SAVED_FALLBACK", {
+              position: 'bottom-right',
+              autoCloseTime: 3000
+            });
+
             setTimeout(() => {
               setSavedBeforeUpload(false);
             }, 3000);
-            
+
             return true;
           } else {
-           // Mostrar erro se o salvamento falhou
-           alertService.error('DRAFT_SAVE_ERROR');
+            // Show error if saving failed
+            alert.error("DRAFT_SAVE_ERROR", {
+              position: 'top-center',
+              autoCloseTime: 5000
+            });
             return false;
           }
         }
       } catch (error) {
-        console.error('Erro ao tentar salvar com saveCurrentState:', error);
-        
-        // Tentar mecanismo de fallback
+        console.error('Error trying to save with saveCurrentState:', error);
+
+        // Try fallback mechanism
         const fallbackSuccess = fallbackSaveDraft();
-        
+
         if (fallbackSuccess) {
           setSavedBeforeUpload(true);
-          alertService.success('DRAFT_SAVED_FALLBACK');
+          alert.success("DRAFT_SAVED_FALLBACK", {
+            position: 'bottom-right',
+            autoCloseTime: 3000
+          });
           setTimeout(() => {
             setSavedBeforeUpload(false);
           }, 3000);
           return true;
         }
-        
-        alertService.error(`Erro ao salvar rascunho: ${error.message}`);
+
+        alert.error(`Error saving draft: ${error.message}`, {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
         return false;
       }
     } else {
-      // Usar mecanismo de fallback se saveCurrentState não existir
-      console.warn('saveCurrentState não disponível, usando fallback direto');
+      // Use fallback mechanism if saveCurrentState doesn't exist
+      console.warn('saveCurrentState not available, using direct fallback');
       const fallbackSuccess = fallbackSaveDraft();
-      
+
       if (fallbackSuccess) {
         setSavedBeforeUpload(true);
-        alertService.success('DRAFT_SAVED_FALLBACK');
+        alert.success("DRAFT_SAVED_FALLBACK", {
+          position: 'bottom-right',
+          autoCloseTime: 3000
+        });
         setTimeout(() => {
           setSavedBeforeUpload(false);
         }, 3000);
         return true;
       }
-      
-      // Mostrar erro se a função não estiver disponível
-      console.error("Função saveCurrentState não está disponível e fallback falhou");
-      alertService.error('DRAFT_SAVE_ERROR');
+
+      // Show error if function isn't available
+      console.error("saveCurrentState function is not available and fallback failed");
+      alert.error('DRAFT_SAVE_ERROR', {
+        position: 'top-center',
+        autoCloseTime: 5000
+      });
       return false;
     }
-  }, [saveCurrentState, alertService, fallbackSaveDraft]);
-  
+  }, [saveCurrentState, alert, fallbackSaveDraft]);
+
   // Check if all cards have valid URLs
   const allCardsHaveUrls = useCallback(() => {
     return cards.slice(0, numCards).every(card => card.fileUrl?.trim());
   }, [cards, numCards]);
 
-  // Simulação de progresso de upload
+  // Upload progress simulation with better visual feedback
   const simulateUploadProgress = useCallback(() => {
     setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        const newValue = prev + (Math.random() * 10);
-        if (newValue >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return newValue;
-      });
-    }, 300);
-    
-    return () => clearInterval(interval);
-  }, []);
+    setUploadActionStarted(true);
 
-  // Wrapper para verificar e mostrar alertas antes do upload
+    // More realistic progress simulation with pauses
+    const intervals = [
+      { target: 15, time: 300 },
+      { target: 35, time: 400 },
+      { target: 65, time: 500 },
+      { target: 85, time: 600 },
+      { target: 95, time: 800 }
+    ];
+
+    let currentInterval = 0;
+
+    const updateProgress = () => {
+      if (currentInterval >= intervals.length) {
+        return;
+      }
+
+      const { target, time } = intervals[currentInterval];
+
+      const smallStep = (target - uploadProgress) / (time / 50);
+      const interval = setInterval(() => {
+        setUploadProgress(prev => {
+          const newValue = prev + smallStep;
+          if (newValue >= target) {
+            clearInterval(interval);
+            currentInterval++;
+
+            if (currentInterval < intervals.length) {
+              setTimeout(updateProgress, 200); // Small pause between phases
+            }
+
+            return target;
+          }
+          return newValue;
+        });
+      }, 50);
+
+      return () => clearInterval(interval);
+    };
+
+    updateProgress();
+
+    return () => {
+      setUploadActionStarted(false);
+      setUploadProgress(0);
+    };
+  }, [uploadProgress]);
+
+  // Enhanced upload handler with better error handling and feedback
   const wrappedHandleUploadFiles = useCallback(async () => {
     try {
-      // Verificar se temos a chave de autenticação
+      // Validate auth key first
       if (!authKey) {
-        alertService.error('AUTH_KEY_REQUIRED');
+        setKeyValidationState({
+          isValid: false,
+          message: 'A chave de autorização é obrigatória'
+        });
+
+        alert.error('AUTH_KEY_REQUIRED', {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
         return;
       }
-      
-      // Verificar se todos os cards têm URLs
+
+      // Reset any previous validation errors
+      setKeyValidationState({ isValid: true, message: '' });
+
+      // Check if all cards have URLs
       if (!allCardsHaveUrls()) {
-        alertService.warning('CARD_URLS_REQUIRED');
+        alert.warning('CARD_URLS_REQUIRED', {
+          position: 'top-center',
+          autoCloseTime: 5000
+        });
         return;
       }
-      
-      // Iniciar simulação de progresso
+
+      // Start progress simulation
       const stopProgress = simulateUploadProgress();
-      
-      // CORREÇÃO: Salvar rascunho com múltiplas estratégias antes de upload
+
+      // Show upload started alert
+      alert.info("UPLOAD_STARTED", {
+        position: 'bottom-right',
+        autoCloseTime: false,
+        id: 'upload-progress'
+      });
+
+      // Try to save draft before upload
       try {
         let saveSuccess = false;
-        
-        // Tentar com saveCurrentState primeiro
+
+        // Try with saveCurrentState first
         if (typeof saveCurrentState === 'function') {
           saveSuccess = saveCurrentState();
         }
-        
-        // Se falhar, tentar com fallback
+
+        // Try with fallback if needed
         if (!saveSuccess) {
           saveSuccess = fallbackSaveDraft();
         }
-        
+
         if (saveSuccess) {
-          console.log('Estado salvado antes do upload');
+          console.log('State saved before upload');
         } else {
-          console.warn('Não foi possível salvar o estado antes do upload');
+          console.warn('Could not save state before upload');
         }
       } catch (error) {
-        console.error('Erro ao tentar salvar estado antes do upload:', error);
+        console.error('Error trying to save state before upload:', error);
       }
-      
-      // Chamar a função original de upload
-      await handleUploadFiles();
-      
-      // Garantir que o progresso termine em 100%
-      setUploadProgress(100);
-      
-      // Parar simulação de progresso
-      stopProgress();
-      
-      // Mostrar alerta de sucesso se não ocorreu erro
-      alertService.success('UPLOAD_SUCCESS');
-    } catch (err) {
-      // Zerar progresso em caso de erro
-      setUploadProgress(0);
-      
-      // Capturar e mostrar erros como alertas
-      alertService.error('UPLOAD_ERROR', {}, err.message || 'Erro desconhecido');
-    }
-  }, [authKey, allCardsHaveUrls, handleUploadFiles, alertService, saveCurrentState, simulateUploadProgress, fallbackSaveDraft]);
 
-  // Mostrar alertas para erros e sucessos existentes
+      // Call original upload function
+      await handleUploadFiles();
+
+      // Set progress to 100% after successful upload
+      setUploadProgress(100);
+
+      // Stop progress simulation
+      stopProgress();
+
+      // Show success alert
+      alert.success('UPLOAD_SUCCESS', {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
+
+      // Update each card's upload status
+      setCardUploadStatus(prevStatus =>
+        prevStatus.map((status, index) => {
+          if (index < numCards) {
+            return {
+              ...status,
+              uploadComplete: !!cards[index]?.fileUrl
+            };
+          }
+          return status;
+        })
+      );
+
+    } catch (err) {
+      // Reset progress in case of error
+      setUploadProgress(0);
+      setUploadActionStarted(false);
+
+      // Show error alert with more details
+      alert.error('UPLOAD_ERROR', {
+        position: 'top-center',
+        autoCloseTime: 7000
+      }, err.message || 'Unknown error');
+    }
+  }, [authKey, allCardsHaveUrls, handleUploadFiles, alert, saveCurrentState, simulateUploadProgress, fallbackSaveDraft, cards, numCards]);
+
+  // Show alerts for existing errors and successes
   useEffect(() => {
     if (error) {
-      alertService.error(error);
+      alert.error(error, {
+        position: 'top-center',
+        autoCloseTime: 7000
+      });
     }
-    
+
     if (success) {
-      alertService.success(success);
+      alert.success(success, {
+        position: 'bottom-right',
+        autoCloseTime: 3000
+      });
     }
-  }, [error, success, alertService]);
+  }, [error, success, alert]);
 
-
-  // Verifica se o passo é válido
+  // Enhanced step validation
   const checkStepValidity = useCallback(() => {
-    // Se a função isStepValid não estiver disponível, fazer validação local
+    // If isStepValid function isn't available, do local validation
     if (typeof isStepValid !== 'function') {
-      // Verificar se temos a chave de autenticação
+      // Check for auth key
       if (!authKey) {
         return false;
       }
-      
-      // Verificar se todos os cards têm URLs
+
+      // Check if all cards have URLs
       return allCardsHaveUrls();
     }
-    
-    // Se a função isStepValid estiver disponível, usar ela
+
+    // Use provided isStepValid function if available
     return isStepValid(1);
   }, [isStepValid, authKey, allCardsHaveUrls]);
 
-  // Calcular porcentagem de progresso para esta etapa
-  const calculateProgress = () => {
+  // Auth key validation
+  const validateAuthKey = useCallback((key) => {
+    if (!key) {
+      setKeyValidationState({
+        isValid: false,
+        message: 'A chave de autorização é obrigatória'
+      });
+      return false;
+    }
+
+    // Basic format validation - check if it starts with "Key " followed by alphanumeric characters
+    if (!/^Key\s+[A-Za-z0-9]+$/.test(key)) {
+      setKeyValidationState({
+        isValid: false,
+        message: 'Formato de chave inválido. Use o formato: Key XXXXX'
+      });
+      return false;
+    }
+
+    setKeyValidationState({ isValid: true, message: '' });
+    return true;
+  }, []);
+
+  // Handle auth key change with validation
+  const handleAuthKeyChange = useCallback((e) => {
+    const newKey = e.target.value;
+    setAuthKey(newKey);
+    validateAuthKey(newKey);
+  }, [setAuthKey, validateAuthKey]);
+
+  // Calculate overall step progress
+  const calculateStepProgress = useCallback(() => {
     let points = 0;
-    let total = 2; // Auth key + pelo menos um card deve ter URL
-    
-    if (authKey) points++;
-    if (allCardsHaveUrls()) points++;
-    
-    return Math.floor((points / total) * 100);
-  };
-  
-  const progressPercentage = calculateProgress();
+    let totalPoints = 2; // Auth key + at least one card with file
+
+    // Check auth key
+    if (authKey && keyValidationState.isValid) {
+      points++;
+    }
+
+    // Check cards with files
+    const cardsWithFiles = cards.slice(0, numCards).filter(card => card.fileUrl).length;
+    if (cardsWithFiles > 0) {
+      points += (cardsWithFiles / numCards); // Partial points based on completion
+    }
+
+    return Math.min(100, Math.floor((points / totalPoints) * 100));
+  }, [authKey, keyValidationState.isValid, cards, numCards]);
+
+  // Calculate card upload progress
+  const calculateCardUploadProgress = useCallback(() => {
+    const uploadedCards = cardUploadStatus.filter(status => status.uploadComplete).length;
+    return Math.floor((uploadedCards / numCards) * 100);
+  }, [cardUploadStatus, numCards]);
+
+  // The card status text
+  const getCardStatusText = useCallback(() => {
+    const uploadedCards = cardUploadStatus.filter(status => status.uploadComplete).length;
+
+    if (uploadedCards === numCards) {
+      return "Todos os cards estão prontos!";
+    }
+
+    return `${uploadedCards} de ${numCards} cards prontos`;
+  }, [cardUploadStatus, numCards]);
 
   return (
     <div className={steps.container}>
+      {/* Upload progress indicator - only shown when upload is in progress */}
+      {uploadActionStarted && (
+        <div className={styles.progressOverlay}>
+          <div className={styles.progressIndicator}>
+            <ProgressBar
+              value={uploadProgress}
+              variant="upload"
+              size="large"
+              showLabel={true}
+              label={uploadProgress < 100 ? `Enviando arquivos... ${Math.round(uploadProgress)}%` : "Upload concluído!"}
+              showStatus={uploadProgress === 100}
+              statusVariant="success"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Introduction section */}
       <div className={steps.introStepWrapper}>
         <h2 className={steps.stepTitle}>Configuração de Arquivos</h2>
@@ -323,168 +535,202 @@ const StepOne = ({
           Nesta etapa, você configurará as imagens ou vídeos que serão exibidos no seu carrossel do WhatsApp
           e fornecerá a chave de autorização necessária para fazer o upload dos arquivos.
         </p>
-        
-        {/* Barra de progresso da etapa */}
-        <div className={steps.stepProgressContainer}>
-          <div className={steps.stepProgressBar}>
-            <div 
-              className={steps.stepProgressFill} 
-              style={{width: `${progressPercentage}%`}}
-            ></div>
+      </div>
+
+      {/* New Step Progress UI with ProgressBar component */}
+      <div className={styles.stepProgressSection}>
+        <div className={styles.progressRow}>
+          <div className={styles.progressItem}>
+            <span className={styles.progressLabel}>
+              <FiFileText size={16} />
+              Progresso geral
+            </span>
+            <ProgressBar
+              value={calculateStepProgress()}
+              variant="step"
+              size="medium"
+              showLabel={false}
+              statusText={calculateStepProgress() === 100 ? "Pronto para continuar!" : null}
+              statusVariant="success"
+            />
           </div>
-          <span className={steps.stepProgressText}>
-            {progressPercentage === 100 ? 'Pronto para continuar!' : `${progressPercentage}% completo`}
-          </span>
+        </div>
+
+        <div className={styles.progressRow}>
+          <div className={styles.progressItem}>
+            <span className={styles.progressLabel}>
+              <FiImage size={16} />
+              Cards
+            </span>
+            <ProgressBar
+              value={calculateCardUploadProgress()}
+              variant={calculateCardUploadProgress() === 100 ? "success" : "default"}
+              size="medium"
+              showLabel={false}
+              statusText={getCardStatusText()}
+              statusVariant={calculateCardUploadProgress() === 100 ? "success" : "warning"}
+            />
+          </div>
         </div>
       </div>
 
-      
-          <div className={steps.containerCard}>
-            <div className={steps.sectionHeader}>
-              <div className={steps.sectionIconContainer}>
-                <FiKey size={24} />
-              </div>
-              <h3>Autenticação</h3>
-            </div>
-            
-            <div className={styles.authInputWrapper}>
-              <Input 
-                id="authKey"
-                name="authKey"
-                label="Chave de Autorização (Router Key)"
-                type={isKeyVisible ? "text" : "password"}
-                value={authKey}
-                onBlur={(e) => setAuthKey(e.target.value)}
-                placeholder="Digite sua chave de autorização, exemplo: 'Key XXXXXX'"
-                hintMessage="Esta chave é necessária para enviar arquivos e criar templates. Você pode encontrá-la no portal Blip no seu roteador conectado ao Canal WhatsApp."
-                hintVariant="simple"
-                hintIsCompact={true}
-                required
-                error=""
-              />
-            </div>
-
-            <div className={styles.authOptions}>
-              <label className={styles.rememberKeyLabel}>
-                <input 
-                  type="checkbox" 
-                  className={styles.rememberKeyCheckbox}
-                  checked={rememberKey}
-                  onChange={(e) => setRememberKey(e.target.checked)}
-                />
-                Lembrar minha chave
-              </label>
-              
-              <div className={styles.securityNote}>
-                <FiShield size={14} />
-                <span>Sua chave é armazenada apenas no seu navegador</span>
-              </div>
-            </div>
+      {/* Authentication section */}
+      <div className={steps.containerCard}>
+        <div className={steps.sectionHeader}>
+          <div className={steps.sectionIconContainer}>
+            <FiKey size={24} />
           </div>
+          <h3>Autenticação</h3>
 
-          {/* Card controls section */}
-          <div className={styles.cardsControlSection}>
-            <div className={steps.sectionHeader}>
-              <div className={steps.sectionIconContainer}>
-                <FiKey size={24} />
-              </div>
-              <h3>Quantidade de Cards</h3>
+          {/* Authentication status indicator */}
+          {authKey && keyValidationState.isValid && (
+            <div className={styles.keyStatusBadge}>
+              <FiCheckCircle size={16} className={styles.validKeyIcon} />
+              <span>Chave válida</span>
             </div>
-            <div className={styles.cardCounter}>
-              <span className={styles.cardCountLabel}>Número de cards:</span>
-              <div className={styles.buttonGroup}>
-                <Button 
-                  onClick={handleRemoveCard}
-                  disabled={numCards <= 2}
-                  className={styles.controlButton}
-                  aria-label="Remover card"
-                  variant="outline"
-                  color="content"
-                  size="small"
-                  iconLeft={<FiMinus size={18} />}
-                />
-                <span className={styles.cardCount}>{numCards}</span>
-                <Button 
-                  onClick={handleAddCard}
-                  disabled={numCards >= 10}
-                  className={styles.controlButton}
-                  aria-label="Adicionar card"
-                  variant="outline"
-                  color="content"
-                  size="small"
-                  iconLeft={<FiPlus size={18} />}
-                />
-              </div>
-            </div>
-            
-            <div className={styles.cardControlOptions}>
-              <p className={styles.cardControlHelp}>
-                Um carrossel precisa de pelo menos 2 e no máximo 10 cards. Cada card terá uma imagem ou vídeo e botões interativos.
-              </p>
-              
-              <div className={styles.cardTipsContainer}>
-                <Button 
-                  className={styles.tipsToggle}
-                  onClick={() => setShowTips(!showTips)}
-                  variant="text"
-                  color="content"
-                  size="small"
-                >
-                  {showTips ? "Ocultar dicas" : "Mostrar dicas"}
-                </Button>
-                
-                {showTips && (
-                  <div className={styles.cardTips}>
-                    <h4>Melhores práticas para imagens de carrossel:</h4>
-                    <ul>
-                      <li>Tamanho recomendado: 800×418 pixels</li>
-                      <li>Use as mesmas dimensões para todas as imagens para uma exibição consistente</li>
-                      <li>Mantenha os arquivos abaixo de 5MB para carregamento rápido</li>
-                      <li>Para vídeos, mantenha a duração abaixo de 60 segundos</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <Button 
+          )}
+        </div>
+
+        <div className={styles.authInputWrapper}>
+          <Input
+            id="authKey"
+            name="authKey"
+            label="Chave de Autorização (Router Key)"
+            type={isKeyVisible ? "text" : "password"}
+            value={authKey}
+            onChange={handleAuthKeyChange}
+            onBlur={(e) => validateAuthKey(e.target.value)}
+            placeholder="Digite sua chave de autorização, exemplo: 'Key XXXXXX'"
+            hintMessage="Esta chave é necessária para enviar arquivos e criar templates. Você pode encontrá-la no portal Blip no seu roteador conectado ao Canal WhatsApp. Exemplo: Key cm90ZKDJWNSWyHJ72KK928DknMMnHksdwiOBnzhH=="
+            hintVariant="simple"
+            hintIsCompact={true}
+            required
+            error={!keyValidationState.isValid ? keyValidationState.message : ""}
+          />
+        </div>
+
+        <div className={styles.authOptions}>
+          <label className={styles.rememberKeyLabel}>
+            <input
+              type="checkbox"
+              className={styles.rememberKeyCheckbox}
+              checked={rememberKey}
+              onChange={(e) => setRememberKey(e.target.checked)}
+            />
+            Lembrar minha chave
+          </label>
+
+          <div className={styles.securityNote}>
+            <FiShield size={14} />
+            <span>Sua chave é armazenada apenas no seu navegador</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Card controls section */}
+      <div className={styles.cardsControlSection}>
+        <div className={steps.sectionHeader}>
+          <div className={steps.sectionIconContainer}>
+            <FiFilter size={24} />
+          </div>
+          <h3>Quantidade de Cards</h3>
+        </div>
+        <div className={styles.cardCounter}>
+          <span className={styles.cardCountLabel}>Número de cards:</span>
+          <div className={styles.buttonGroup}>
+            <Button
+              onClick={handleRemoveCard}
+              disabled={numCards <= 2}
+              className={styles.controlButton}
+              aria-label="Remover card"
               variant="outline"
-              color="primary"
-              onClick={scrollToUploadSection}
-              iconRight={<FiArrowDown size={14} />}
-              className={styles.jumpToCardsButton}
-            >
-              Ver todos os cards
-            </Button>
+              color="content"
+              size="small"
+              iconLeft={<FiMinus size={18} />}
+            />
+            <span className={styles.cardCount}>{numCards}</span>
+            <Button
+              onClick={handleAddCard}
+              disabled={numCards >= 10}
+              className={styles.controlButton}
+              aria-label="Adicionar card"
+              variant="outline"
+              color="content"
+              size="small"
+              iconLeft={<FiPlus size={18} />}
+            />
           </div>
-      
-      {/* Card upload grid */}
+        </div>
+
+        <div className={styles.cardControlOptions}>
+          <p className={styles.cardControlHelp}>
+            Um carrossel precisa de pelo menos 2 e no máximo 10 cards. Cada card terá uma imagem ou vídeo e botões interativos.
+          </p>
+
+          <div className={styles.cardTipsContainer}>
+            <Button
+              className={styles.tipsToggle}
+              onClick={() => setShowTips(!showTips)}
+              variant="text"
+              color="content"
+              size="small"
+            >
+              {showTips ? "Ocultar dicas" : "Mostrar dicas"}
+            </Button>
+
+            {showTips && (
+              <div className={styles.cardTips}>
+                <h4>Melhores práticas para imagens de carrossel:</h4>
+                <ul>
+                  <li>Tamanho recomendado: 800×418 pixels</li>
+                  <li>Use as mesmas dimensões para todas as imagens para uma exibição consistente</li>
+                  <li>Mantenha os arquivos abaixo de 5MB para carregamento rápido</li>
+                  <li>Para vídeos, mantenha a duração abaixo de 60 segundos</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <Button
+          variant="outline"
+          color="primary"
+          onClick={scrollToUploadSection}
+          iconRight={<FiArrowDown size={14} />}
+          className={styles.jumpToCardsButton}
+        >
+          Ver todos os cards
+        </Button>
+      </div>
+
+      {/* Card upload grid with enhanced status tracking */}
       <div className={styles.cardsGrid} ref={uploadSectionRef}>
         {cards.slice(0, numCards).map((card, index) => (
-          <CardUploadInput 
-            key={index} 
-            index={index} 
-            card={card} 
+          <CardUploadInput
+            key={index}
+            index={index}
+            card={card}
             updateCard={updateCard}
             totalCards={numCards}
           />
         ))}
       </div>
-      
-      {/* Action buttons */}
+
+      {/* Action buttons with enhanced visual feedback */}
       <div className={styles.actionSection}>
         <div className={steps.actionSection}>
-          <Button 
+          {/* <Button 
             variant="outline"
             color="primary"
             size="large"
             onClick={handleSaveBeforeUpload}
             iconLeft={savedBeforeUpload ? <FiCheckCircle size={18} /> : <FiSave size={18} />}
+            className={savedBeforeUpload ? styles.savedButton : ''}
           >
             {savedBeforeUpload ? 'Salvo!' : 'Salvar Rascunho'}
-          </Button>
-          
-          <Button 
+          </Button> */}
+
+          <Button
             variant="solid"
             color="primary"
             size="large"
@@ -492,27 +738,13 @@ const StepOne = ({
             disabled={!checkStepValidity() || loading}
             iconLeft={loading ? null : <FiUpload size={18} />}
             onClick={wrappedHandleUploadFiles}
+            className={styles.uploadButton}
           >
             {loading ? 'Processando uploads...' : 'Enviar Arquivos & Continuar'}
           </Button>
         </div>
-        
-        {/* Barra de progresso de upload */}
-        {loading && (
-          <div className={styles.uploadProgressContainer}>
-            <div className={styles.uploadProgressBar}>
-              <div 
-                className={styles.uploadProgressFill} 
-                style={{width: `${uploadProgress}%`}}
-              ></div>
-            </div>
-            <span className={styles.uploadProgressText}>
-              {uploadProgress < 100 ? `Enviando arquivos... ${Math.floor(uploadProgress)}%` : 'Upload concluído!'}
-            </span>
-          </div>
-        )}
-        
-        {/* Mostrar informação de último salvamento */}
+
+        {/* Status messages */}
         {lastSavedTime && !savedBeforeUpload && (
           <div className={steps.lastSavedInfo}>
             <FiInfo size={14} />
@@ -525,23 +757,26 @@ const StepOne = ({
           </div>
         )}
       </div>
-      
-      {/* Upload summary */}
+
+      {/* Upload summary with enhanced UI */}
       {uploadResults.length > 0 && (
         <div className={styles.uploadSummary}>
-          <div className={styles.summaryTitle}>Resumo do upload:</div>
+          <div className={styles.summaryTitle}>
+            <FiCheckCircle size={18} className={styles.summaryTitleIcon} />
+            Resumo do upload:
+          </div>
           <ul className={styles.summaryList}>
             {uploadResults.map((result, idx) => (
               <li key={idx} className={styles.summaryItem}>
-                Card {result.cardIndex !== undefined ? result.cardIndex + 1 : idx + 1}: 
+                Card {result.cardIndex !== undefined ? result.cardIndex + 1 : idx + 1}:
                 <span className={
-                  result.status === 'success' ? styles.successStatus : 
-                  result.status === 'cached' ? styles.cachedStatus : 
-                  styles.simulatedStatus
+                  result.status === 'success' ? styles.successStatus :
+                    result.status === 'cached' ? styles.cachedStatus :
+                      styles.simulatedStatus
                 }>
-                  {result.status === 'success' ? ' Upload bem-sucedido' : 
-                  result.status === 'cached' ? ' Carregado do cache' : 
-                  ' Simulado para teste'}
+                  {result.status === 'success' ? ' Upload bem-sucedido' :
+                    result.status === 'cached' ? ' Carregado do cache' :
+                      ' Simulado para teste'}
                 </span>
               </li>
             ))}

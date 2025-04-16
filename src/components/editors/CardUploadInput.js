@@ -702,6 +702,53 @@ const handleVideoLoad = useCallback(() => {
     }
   }, [card.fileUrl, card.uploadMethod, card.fileSize]);
 
+  // Modificação para o CardUploadInput.js ou outro componente relevante
+
+// Adicionar verificação de URL ao carregar
+const verifyImageUrl = async (url, fileHandle) => {
+  // Se não temos URL ou fileHandle, não há o que verificar
+  if (!url) return false;
+  
+  try {
+    // Tentar carregar a imagem para verificar se a URL ainda é válida
+    const response = await fetch(url, { method: 'HEAD' });
+    
+    if (!response.ok) {
+      // URL inválida, marcar para reenvio
+      console.warn(`URL expirada ou inválida: ${url}`);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Erro ao verificar URL: ${url}`, error);
+    return false;
+  }
+};
+
+
+useEffect(() => {
+  // Verificar URLs dos cards
+  const checkCardUrls = async () => {
+    if (!card.fileUrl || !card.fileHandle) return;
+    
+    const isValid = await verifyImageUrl(card.fileUrl, card.fileHandle);
+    
+    if (!isValid) {
+      // Limpar fileHandle para forçar novo upload
+      updateCard(index, 'fileHandle', '');
+      
+      // Alertar usuário
+      alert.warning(`A URL da imagem do Card ${index + 1} parece ter expirado. Por favor, faça o upload novamente.`, {
+        position: 'top-center',
+        autoCloseTime: 5000
+      });
+    }
+  };
+  
+  checkCardUrls();
+}, [card.fileUrl, card.fileHandle]);
+
   return (
     <div className={cardClass}>
       {/* Progresso de upload animado */}
@@ -1005,6 +1052,8 @@ const handleVideoLoad = useCallback(() => {
       )}
     </div>
   );
+
+  
 };
 
 // Utilizar React.memo para otimizar performance e evitar renderizações desnecessárias

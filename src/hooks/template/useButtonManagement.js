@@ -64,17 +64,17 @@ export const useButtonManagement = (state, cardManagement) => {
     // Determine overall status
     const isConsistent = allSameCount && allSameTypes;
     
-    // Simplified message
+    // Mensagem simplificada
     let message = isConsistent 
-      ? "Consistent: All cards have the same button configuration."
-      : "Inconsistent: ";
+      ? "Consistente: Todos os cartões têm a mesma configuração de botões."
+      : "Inconsistente: ";
       
     if (!allSameCount) {
-      message += "Some cards have different numbers of buttons. ";
+      message += "Alguns cartões têm quantidades diferentes de botões. ";
     }
     
     if (!allSameTypes) {
-      message += "Some cards have different types of buttons. ";
+      message += "Alguns cartões têm tipos diferentes de botões. ";
     }
     
     return {
