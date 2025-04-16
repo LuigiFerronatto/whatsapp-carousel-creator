@@ -558,15 +558,6 @@ const StepTwo = ({
     }
   }, [previewExpanded]);
 
-  // Calculate completion percentage based on progress
-  const completionPercentage = [
-    isTemplateNameValid,
-    isBodyTextValid,
-    cards.slice(0, numCards).every(card => card.bodyText),
-    cards.slice(0, numCards).every(card => card.buttons.every(button => button.text)),
-    cards.slice(0, numCards).every(isCardComplete),
-  ].filter(Boolean).length * 20;
-
   // Language options for dropdown
   const languageOptions = [
     { code: "pt_BR", name: "Português (Brasil)" },
