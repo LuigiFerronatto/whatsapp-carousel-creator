@@ -295,7 +295,7 @@ const ButtonEditor = ({
           type="text"
           name="OptinalPayload"
           label="Payload"
-          hintMessage="Texto que será enviado ao sistema quando o botão for clicado."
+          hintMessage= {showHints ? "Texto que será enviado ao sistema quando o botão for clicado." : ""}
           hintVariant="simple"
           value={button.payload || ''}
           onChange={(e) => updateButtonField(buttonIndex, 'payload', e.target.value)}
