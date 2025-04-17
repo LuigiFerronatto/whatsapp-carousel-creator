@@ -116,7 +116,7 @@ const StepTwo = ({
           }
           // Clear reference after auto-save completes
           autoSaveTimerId = null;
-        }, 30000); // Auto-save after 30 seconds of inactivity
+        }, 30000); // Auto-save after 30 seconds of inactivity.
       }
     };
 
