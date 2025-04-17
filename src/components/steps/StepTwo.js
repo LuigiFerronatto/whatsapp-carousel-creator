@@ -4,12 +4,9 @@ import CardTemplateEditor from '../editors/CardTemplateEditor';
 import CarouselPreview from '../previews/CarouselPreview';
 import { useAlertService } from '../../hooks/common/useAlertService';
 import Input from '../ui/Input/Input';
-import Hints, { HintsGroup } from '../ui/Hints/Hints';
 import Button from '../ui/Button/Button';
 import ProgressBar from '../ui/ProgressBar/ProgressBar';
 import {
-  FiSave,
-  FiCheck,
   FiChevronRight,
   FiChevronLeft,
   FiEye,
@@ -17,22 +14,16 @@ import {
   FiInfo,
   FiCheckCircle,
   FiAlertTriangle,
-  FiCopy,
   FiCornerRightDown,
   FiRefreshCw,
   FiEdit,
-  FiSmile,
   FiX,
-  FiList,
-  FiClipboard,
   FiArrowLeft,
   FiArrowRight,
   FiZap,
   FiLayers,
   FiMaximize,
   FiMinimize,
-  FiFilter,
-  FiMessageSquare,
   FiCreditCard
 } from 'react-icons/fi';
 import styles from './StepTwo.module.css';
@@ -66,7 +57,6 @@ const StepTwo = ({
   const [showPreview, setShowPreview] = useState(true);
   const [validationMessages, setValidationMessages] = useState({});
   const [activeCard, setActiveCard] = useState(0);
-  const [savedBeforeUpload, setSavedBeforeUpload] = useState(false);
   const [buttonConsistencyStatus, setButtonConsistencyStatus] = useState({ isConsistent: true, message: "" });
   const [focusedInput, setFocusedInput] = useState({ cardIndex: null, buttonIndex: null });
   const [previewExpanded, setPreviewExpanded] = useState(false);
@@ -255,7 +245,7 @@ const StepTwo = ({
       // Reset progress when loading is done
       setTemplateCreationProgress(0);
     }
-  }, [loading]);
+  }, [loading, templateCreationProgress]);
 
   // Validation statuses
   const isTemplateNameValid = templateName && templateName.length >= 3;
@@ -461,40 +451,6 @@ const StepTwo = ({
     applyButtonStandardization
   ]);
 
-  // Enhanced save draft function
-  const handleSaveBeforeUpload = useCallback(() => {
-    // Check if saveCurrentState function exists
-    if (typeof saveCurrentState === 'function') {
-      const success = saveCurrentState();
-
-      if (success) {
-        setSavedBeforeUpload(true);
-
-        // Add success alert
-        alert.success("Rascunho salvo com sucesso!", {
-          position: 'bottom-right',
-          autoCloseTime: 3000
-        });
-
-        setTimeout(() => {
-          setSavedBeforeUpload(false);
-        }, 5000);
-      } else {
-        // Show error if saving failed
-        alert.error("Não foi possível salvar o rascunho", {
-          position: 'top-center',
-          autoCloseTime: 5000
-        });
-      }
-    } else {
-      // Show error if function is not available
-      console.error("saveCurrentState function is not available");
-      alert.error("Função de salvamento não disponível", {
-        position: 'top-center'
-      });
-    }
-  }, [saveCurrentState, alert]);
-
   // Check if step is complete
   const checkStepValidity = useCallback(() => {
     // If isStepValid function is not available, do local validation
@@ -629,18 +585,6 @@ const StepTwo = ({
       setButtonSyncDone(true);
     }
   }, [cards, numCards, updateCard, alert]);
-
-  // Get appropriate icon for each section
-  const getSectionIcon = useCallback((section) => {
-    switch (section) {
-      case 'basic':
-        return <FiEdit size={24} />;
-      case 'cards':
-        return <FiCreditCard size={24} />;
-      default:
-        return <FiEdit size={24} />;
-    }
-  }, []);
 
   // Calculate step progress info for the ProgressBar
   const getStepProgress = useCallback(() => {

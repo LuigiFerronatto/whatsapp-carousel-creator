@@ -10,12 +10,9 @@ import {
   FiMinus,
   FiKey,
   FiArrowDown,
-  FiSave,
   FiInfo,
   FiCheckCircle,
-  FiDownload,
   FiShield,
-  FiLoader,
   FiFileText,
   FiImage,
   FiFilter
@@ -51,12 +48,12 @@ const StepOne = ({
   lastSavedTime
 }) => {
   // Local state
-  const [savedBeforeUpload, setSavedBeforeUpload] = useState(false);
+  const [savedBeforeUpload] = useState(false);
   const [rememberKey, setRememberKey] = useState(() => {
     return localStorage.getItem('remember_auth_key') === 'true';
   });
   const [showTips, setShowTips] = useState(false);
-  const [isKeyVisible, setIsKeyVisible] = useState(false);
+  const [isKeyVisible] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadActionStarted, setUploadActionStarted] = useState(false);
   const [keyValidationState, setKeyValidationState] = useState({ isValid: true, message: '' });
@@ -149,105 +146,6 @@ const StepOne = ({
       return false;
     }
   }, [authKey, numCards, cards]);
-
-  // Enhanced save draft function with visual feedback
-  const handleSaveBeforeUpload = useCallback(() => {
-    // If saveCurrentState function exists
-    if (typeof saveCurrentState === 'function') {
-      try {
-        const success = saveCurrentState();
-
-        if (success) {
-          setSavedBeforeUpload(true);
-
-          // Use AlertService for better feedback
-          alert.success("DRAFT_SAVED", {
-            position: 'bottom-right',
-            autoCloseTime: 3000
-          });
-
-          setTimeout(() => {
-            setSavedBeforeUpload(false);
-          }, 3000);
-
-          return true;
-        } else {
-          // Try fallback mechanism
-          console.warn('saveCurrentState failed, trying fallback...');
-          const fallbackSuccess = fallbackSaveDraft();
-
-          if (fallbackSuccess) {
-            setSavedBeforeUpload(true);
-
-            alert.success("DRAFT_SAVED_FALLBACK", {
-              position: 'bottom-right',
-              autoCloseTime: 3000
-            });
-
-            setTimeout(() => {
-              setSavedBeforeUpload(false);
-            }, 3000);
-
-            return true;
-          } else {
-            // Show error if saving failed
-            alert.error("DRAFT_SAVE_ERROR", {
-              position: 'top-center',
-              autoCloseTime: 5000
-            });
-            return false;
-          }
-        }
-      } catch (error) {
-        console.error('Error trying to save with saveCurrentState:', error);
-
-        // Try fallback mechanism
-        const fallbackSuccess = fallbackSaveDraft();
-
-        if (fallbackSuccess) {
-          setSavedBeforeUpload(true);
-          alert.success("DRAFT_SAVED_FALLBACK", {
-            position: 'bottom-right',
-            autoCloseTime: 3000
-          });
-          setTimeout(() => {
-            setSavedBeforeUpload(false);
-          }, 3000);
-          return true;
-        }
-
-        alert.error(`Error saving draft: ${error.message}`, {
-          position: 'top-center',
-          autoCloseTime: 5000
-        });
-        return false;
-      }
-    } else {
-      // Use fallback mechanism if saveCurrentState doesn't exist
-      console.warn('saveCurrentState not available, using direct fallback');
-      const fallbackSuccess = fallbackSaveDraft();
-
-      if (fallbackSuccess) {
-        setSavedBeforeUpload(true);
-        alert.success("DRAFT_SAVED_FALLBACK", {
-          position: 'bottom-right',
-          autoCloseTime: 3000
-        });
-        setTimeout(() => {
-          setSavedBeforeUpload(false);
-        }, 3000);
-        return true;
-      }
-
-      // Show error if function isn't available
-      console.error("saveCurrentState function is not available and fallback failed");
-      alert.error('DRAFT_SAVE_ERROR', {
-        position: 'top-center',
-        autoCloseTime: 5000
-      });
-      return false;
-    }
-  }, [saveCurrentState, alert, fallbackSaveDraft]);
 
   // Check if all cards have valid URLs
   const allCardsHaveUrls = useCallback(() => {
