@@ -7,6 +7,7 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 import Loading from './components/ui/Loading/Loading';
 import { createAzureBlobService } from './services/storage/azureBlobService';
 import './styles/design-system.css';
+import { BrowserRouter } from 'react-router-dom';
 
 // Lazy load the main component to improve initial load performance
 const WhatsAppCarouselCreator = lazy(() => import('./components/WhatsAppCarouselCreator'));
@@ -37,11 +38,9 @@ function App() {
   }, []);
 
   return (
+    <BrowserRouter basename="/apps/whatsapp-carousel-creator">
       <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-        {/* O AlertProvider DEVE vir antes dos outros providers 
-            para que o useAlert esteja disponível */}
         <AlertProvider>
-          {/* Adicionar AlertServiceProvider para disponibilizar o serviço centralizado */}
           <AlertServiceProvider>
             <WhatsAppTemplateProvider>
               <div className="app-container">
@@ -69,6 +68,7 @@ function App() {
           </AlertServiceProvider>
         </AlertProvider>
       </ErrorBoundary>
+    </BrowserRouter>
   );
 }
 

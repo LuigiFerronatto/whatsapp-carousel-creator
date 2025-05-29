@@ -1,0 +1,17 @@
+{
+    "routes": [
+      {
+        "route": "/apps/whatsapp-carousel-creator",
+        "rewrite": "/apps/whatsapp-carousel-creator/index.html"
+      },
+      {
+        "route": "/apps/whatsapp-carousel-creator/*",
+        "rewrite": "/apps/whatsapp-carousel-creator/index.html"
+      }
+    ],
+    "navigationFallback": {
+      "rewrite": "/apps/whatsapp-carousel-creator/index.html",
+      "exclude": ["/static/*", "/favicon.ico"]
+    }
+  }
+  

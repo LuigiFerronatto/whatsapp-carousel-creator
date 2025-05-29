@@ -1,6 +1,7 @@
 {
   "name": "whatsapp-carousel-creator",
   "version": "0.1.0",
+  "homepage": "/apps/whatsapp-carousel-creator",
   "private": true,
   "dependencies": {
     "@azure/storage-blob": "^12.26.0",
